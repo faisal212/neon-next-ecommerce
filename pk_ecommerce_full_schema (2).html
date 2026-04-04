@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK E-Commerce — Full Database Design</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e28;
+    --border: #252a38;
+    --border2: #2f3548;
+    --text: #e2e5f0;
+    --muted: #6b7491;
+    --dim: #3d4461;
+
+    --users:   #4f8ef7;
+    --catalog: #2ecfa0;
+    --orders:  #f0a04b;
+    --seo:     #d672e8;
+    --analytics: #f05a7e;
+    --marketing: #f7c948;
+    --support:   #5bcefa;
+
+    --users-bg:     rgba(79,142,247,.10);
+    --catalog-bg:   rgba(46,207,160,.10);
+    --orders-bg:    rgba(240,160,75,.10);
+    --seo-bg:       rgba(214,114,232,.10);
+    --analytics-bg: rgba(240,90,126,.10);
+    --marketing-bg: rgba(247,201,72,.10);
+    --support-bg:   rgba(91,206,250,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 36px 40px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .title-block h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+  }
+  .title-block p {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: right;
+  }
+  .stat-num {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 2px;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    padding: 20px 40px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(13,15,20,0.96);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 320px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: .4;
+  }
+  input[type=search] {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    outline: none;
+  }
+  input[type=search]:focus { border-color: var(--dim); }
+  input[type=search]::placeholder { color: var(--muted); }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all .15s;
+    background: var(--bg3);
+    color: var(--muted);
+    border-color: var(--border2);
+  }
+  .pill:hover { color: var(--text); border-color: var(--dim); }
+  .pill.active { color: #fff; }
+  .pill[data-domain="all"].active     { background: var(--bg3); border-color: var(--text); color: #fff; }
+  .pill[data-domain="users"].active   { background: var(--users-bg); border-color: var(--users); color: var(--users); }
+  .pill[data-domain="catalog"].active { background: var(--catalog-bg); border-color: var(--catalog); color: var(--catalog); }
+  .pill[data-domain="orders"].active  { background: var(--orders-bg); border-color: var(--orders); color: var(--orders); }
+  .pill[data-domain="seo"].active     { background: var(--seo-bg); border-color: var(--seo); color: var(--seo); }
+  .pill[data-domain="analytics"].active { background: var(--analytics-bg); border-color: var(--analytics); color: var(--analytics); }
+  .pill[data-domain="marketing"].active { background: var(--marketing-bg); border-color: var(--marketing); color: var(--marketing); }
+  .pill[data-domain="support"].active   { background: var(--support-bg);   border-color: var(--support);   color: var(--support); }
+
+  .expand-all {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    background: none;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: color .15s;
+  }
+  .expand-all:hover { color: var(--text); }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    padding: 0;
+  }
+
+  /* ── Table Card ── */
+  .table-card {
+    background: var(--bg);
+    transition: background .15s;
+  }
+  .table-card.hidden { display: none; }
+  .table-card:hover { background: var(--bg2); }
+
+  .card-header {
+    padding: 18px 20px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .domain-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .card-header-text { flex: 1; min-width: 0; }
+  .table-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: .3px;
+  }
+  .table-meta {
+    margin-top: 4px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .domain-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .col-count {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .chevron {
+    color: var(--dim);
+    transition: transform .2s;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .table-card.open .chevron { transform: rotate(90deg); }
+
+  /* ── Columns ── */
+  .columns {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .table-card.open .columns { display: block; }
+
+  .col-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 20px 7px 40px;
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+  }
+  .col-row:last-child { border-bottom: none; }
+  .col-row:hover { background: var(--bg3); }
+  .col-row.highlight { background: rgba(255,220,50,.04); }
+
+  .col-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .col-name.pk-col { color: #f0c040; }
+  .col-name.fk-col { color: #7ab8f5; }
+
+  .col-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .badges { display: flex; gap: 4px; justify-content: flex-end; }
+  .badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  .badge-pk { background: rgba(240,192,64,.15); color: #f0c040; }
+  .badge-fk { background: rgba(122,184,245,.12); color: #7ab8f5; }
+  .badge-uk { background: rgba(46,207,160,.12); color: #2ecfa0; }
+  .badge-nn { background: rgba(107,116,145,.12); color: var(--muted); }
+
+  .col-note {
+    grid-column: 1 / -1;
+    font-size: 10.5px;
+    color: var(--dim);
+    font-family: 'IBM Plex Mono', monospace;
+    padding-bottom: 2px;
+    padding-left: 0;
+  }
+
+  /* domain colors on dot & badge */
+  [data-domain="users"]     .domain-dot { background: var(--users); }
+  [data-domain="catalog"]   .domain-dot { background: var(--catalog); }
+  [data-domain="orders"]    .domain-dot { background: var(--orders); }
+  [data-domain="seo"]       .domain-dot { background: var(--seo); }
+  [data-domain="analytics"] .domain-dot { background: var(--analytics); }
+  [data-domain="marketing"] .domain-dot { background: var(--marketing); }
+  [data-domain="support"]   .domain-dot { background: var(--support); }
+
+  [data-domain="users"]     .domain-badge { background: var(--users-bg); color: var(--users); }
+  [data-domain="catalog"]   .domain-badge { background: var(--catalog-bg); color: var(--catalog); }
+  [data-domain="orders"]    .domain-badge { background: var(--orders-bg); color: var(--orders); }
+  [data-domain="seo"]       .domain-badge { background: var(--seo-bg); color: var(--seo); }
+  [data-domain="analytics"] .domain-badge { background: var(--analytics-bg); color: var(--analytics); }
+  [data-domain="marketing"] .domain-badge { background: var(--marketing-bg); color: var(--marketing); }
+  [data-domain="support"]   .domain-badge { background: var(--support-bg); color: var(--support); }
+
+  /* empty state */
+  #empty {
+    display: none;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    background: var(--bg);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>PK E-Commerce — Database Design</h1>
+    <p>PostgreSQL · Cash on Delivery · Pakistan-specific · v1.0</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">46</div><div class="stat-label">tables</div></div>
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">domains</div></div>
+    <div class="stat"><div class="stat-num" id="col-count-stat">263</div><div class="stat-label">columns</div></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <circle cx="6.5" cy="6.5" r="5" stroke="white" stroke-width="1.5"/>
+      <path d="M10.5 10.5L14 14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <input type="search" id="search" placeholder="Search tables or columns…">
+  </div>
+  <div class="filters">
+    <div class="pill active" data-domain="all">All</div>
+    <div class="pill" data-domain="users">Users</div>
+    <div class="pill" data-domain="catalog">Catalog</div>
+    <div class="pill" data-domain="orders">Orders</div>
+    <div class="pill" data-domain="seo">SEO</div>
+    <div class="pill" data-domain="analytics">Analytics</div>
+    <div class="pill" data-domain="marketing">Marketing</div>
+    <div class="pill" data-domain="support">Support & Ops</div>
+  </div>
+  <button class="expand-all" id="expand-all-btn">expand all</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<div id="empty">no tables match your search</div>
+
+<script>
+const TABLES = [
+  // ── USERS ──────────────────────────────────────────────────────
+  { name: 'neon_auth.users_sync', domain: 'users', note: 'Managed by Neon Auth — do not write directly', cols: [
+    { name: 'id',          type: 'text',        tags: ['PK'],  note: 'Neon Auth user ID (external)' },
+    { name: 'name',        type: 'text',        tags: [] },
+    { name: 'email',       type: 'text',        tags: [] },
+    { name: 'created_at',  type: 'timestamptz', tags: [] },
+    { name: 'updated_at',  type: 'timestamptz', tags: [] },
+    { name: 'deleted_at',  type: 'timestamptz', tags: [],  note: 'Soft delete by Neon Auth' },
+  ]},
+  { name: 'users', domain: 'users', note: 'Profile extension of Neon Auth — one row per registered user', cols: [
+    { name: 'id',           type: 'uuid',        tags: ['PK'] },
+    { name: 'auth_user_id', type: 'text',        tags: ['FK','UK'],  note: 'References neon_auth.users_sync(id)' },
+    { name: 'name',         type: 'varchar(120)',tags: [] },
+    { name: 'email',        type: 'varchar(255)',tags: ['UK'] },
+    { name: 'phone_pk',     type: 'varchar(20)', tags: ['UK'],  note: 'Format: 03XX-XXXXXXX' },
+    { name: 'is_phone_verified', type: 'boolean', tags: [] },
+    { name: 'is_active',    type: 'boolean',     tags: [] },
+    { name: 'created_at',   type: 'timestamptz', tags: [] },
+    { name: 'updated_at',   type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'addresses', domain: 'users', note: 'Delivery addresses — saved for users, inline for guests', cols: [
+    { name: 'id',            type: 'uuid',         tags: ['PK'] },
+    { name: 'user_id',       type: 'uuid',         tags: ['FK'],  note: 'Nullable — guest addresses have no user' },
+    { name: 'full_name',     type: 'varchar(120)', tags: [] },
+    { name: 'phone_pk',      type: 'varchar(20)',  tags: [] },
+    { name: 'address_line1', type: 'text',         tags: [] },
+    { name: 'address_line2', type: 'text',         tags: [] },
+    { name: 'city',          type: 'varchar(80)',  tags: [] },
+    { name: 'province',      type: 'varchar(30)',  tags: [],  note: 'Punjab / Sindh / KPK / Balochistan / ICT / GB / AJK' },
+    { name: 'postal_code',   type: 'varchar(10)',  tags: [] },
+    { name: 'is_default',    type: 'boolean',      tags: [] },
+    { name: 'is_guest',      type: 'boolean',      tags: [],  note: 'True for guest checkout addresses' },
+  ]},
+  { name: 'admin_users', domain: 'users', note: 'Internal staff — auth via Neon Auth, role managed here', cols: [
+    { name: 'id',           type: 'uuid',         tags: ['PK'] },
+    { name: 'auth_user_id', type: 'text',         tags: ['FK','UK'],  note: 'References neon_auth.users_sync(id)' },
+    { name: 'name',         type: 'varchar(120)', tags: [] },
+    { name: 'email',        type: 'varchar(255)', tags: ['UK'] },
+    { name: 'role',         type: 'varchar(30)',  tags: [],  note: 'super_admin / manager / support / warehouse' },
+    { name: 'is_active',    type: 'boolean',      tags: [] },
+    { name: 'last_login_at',type: 'timestamptz',  tags: [] },
+    { name: 'created_at',   type: 'timestamptz',  tags: [] },
+  ]},
+
+  // ── CATALOG ────────────────────────────────────────────────────
+  { name: 'categories', domain: 'catalog', note: 'Nested category tree', cols: [
+    { name: 'id',          type: 'uuid',         tags: ['PK'] },
+    { name: 'parent_id',   type: 'uuid',         tags: ['FK'],  note: 'Self-reference for subcategories' },
+    { name: 'name_en',     type: 'varchar(120)', tags: [] },
+    { name: 'name_ur',     type: 'varchar(120)', tags: [],      note: 'Urdu label' },
+    { name: 'slug',        type: 'varchar(160)', tags: ['UK'] },
+    { name: 'image_url',   type: 'text',         tags: [] },
+    { name: 'is_active',   type: 'boolean',      tags: [] },
+    { name: 'sort_order',  type: 'integer',      tags: [] },
+  ]},
+  { name: 'products', domain: 'catalog', note: 'Core product catalog', cols: [
+    { name: 'id',              type: 'uuid',         tags: ['PK'] },
+    { name: 'category_id',     type: 'uuid',         tags: ['FK'] },
+    { name: 'name_en',         type: 'varchar(200)', tags: [] },
+    { name: 'name_ur',         type: 'varchar(200)', tags: [],      note: 'Urdu name' },
+    { name: 'slug',            type: 'varchar(220)', tags: ['UK'] },
+    { name: 'description_en',  type: 'text',         tags: [] },
+    { name: 'description_ur',  type: 'text',         tags: [],      note: 'Urdu description' },
+    { name: 'base_price_pkr',  type: 'numeric(12,2)',tags: [] },
+    { name: 'is_active',       type: 'boolean',      tags: [] },
+    { name: 'is_featured',     type: 'boolean',      tags: [] },
+    { name: 'created_at',      type: 'timestamptz',  tags: [] },
+    { name: 'updated_at',      type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'product_variants', domain: 'catalog', note: 'Size, color, SKU combinations', cols: [
+    { name: 'id',              type: 'uuid',         tags: ['PK'] },
+    { name: 'product_id',      type: 'uuid',         tags: ['FK'] },
+    { name: 'sku',             type: 'varchar(80)',   tags: ['UK'] },
+    { name: 'color',           type: 'varchar(60)',   tags: [] },
+    { name: 'size',            type: 'varchar(30)',   tags: [] },
+    { name: 'extra_price_pkr', type: 'numeric(10,2)', tags: [],      note: 'Added to base_price_pkr' },
+    { name: 'is_active',       type: 'boolean',       tags: [] },
+  ]},
+  { name: 'product_images', domain: 'catalog', note: 'Product & variant photos', cols: [
+    { name: 'id',         type: 'uuid',    tags: ['PK'] },
+    { name: 'product_id', type: 'uuid',    tags: ['FK'] },
+    { name: 'variant_id', type: 'uuid',    tags: ['FK'],  note: 'Nullable — product-level or variant-level' },
+    { name: 'url',        type: 'text',    tags: [] },
+    { name: 'alt_text',   type: 'varchar(200)', tags: [] },
+    { name: 'is_primary', type: 'boolean', tags: [] },
+    { name: 'sort_order', type: 'integer', tags: [] },
+  ]},
+  { name: 'inventory', domain: 'catalog', note: 'Stock tracking per variant', cols: [
+    { name: 'id',                  type: 'uuid',    tags: ['PK'] },
+    { name: 'variant_id',          type: 'uuid',    tags: ['FK','UK'] },
+    { name: 'quantity_on_hand',    type: 'integer', tags: [] },
+    { name: 'quantity_reserved',   type: 'integer', tags: [],  note: 'Held by pending/confirmed orders' },
+    { name: 'low_stock_threshold', type: 'integer', tags: [],  note: 'Trigger alert below this' },
+    { name: 'updated_at',          type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'product_tags', domain: 'catalog', note: 'Keyword tags for search & SEO', cols: [
+    { name: 'id',         type: 'uuid',         tags: ['PK'] },
+    { name: 'product_id', type: 'uuid',         tags: ['FK'] },
+    { name: 'tag',        type: 'varchar(80)',   tags: [] },
+  ]},
+  { name: 'reviews', domain: 'catalog', note: 'Purchase-verified customer reviews', cols: [
+    { name: 'id',            type: 'uuid',      tags: ['PK'] },
+    { name: 'user_id',       type: 'uuid',      tags: ['FK'] },
+    { name: 'product_id',    type: 'uuid',      tags: ['FK'] },
+    { name: 'order_item_id', type: 'uuid',      tags: ['FK'],  note: 'Ensures reviewer actually bought it' },
+    { name: 'rating',        type: 'smallint',  tags: [],       note: '1–5' },
+    { name: 'comment',       type: 'text',      tags: [] },
+    { name: 'is_published',  type: 'boolean',   tags: [] },
+    { name: 'created_at',    type: 'timestamptz', tags: [] },
+  ]},
+
+  // ── ORDERS ─────────────────────────────────────────────────────
+  { name: 'orders', domain: 'orders', note: 'Customer order header — works for both guests and registered users', cols: [
+    { name: 'id',                  type: 'uuid',           tags: ['PK'] },
+    { name: 'order_number',        type: 'varchar(30)',     tags: ['UK'],  note: 'ORD-YYYYMMDD-XXXX' },
+    { name: 'user_id',             type: 'uuid',           tags: ['FK'],  note: 'Nullable — guest orders have no user_id' },
+    { name: 'guest_phone',         type: 'varchar(20)',     tags: [],       note: 'Required when user_id is null' },
+    { name: 'guest_email',         type: 'varchar(255)',    tags: [],       note: 'Optional for guest — used for order updates' },
+    { name: 'address_id',          type: 'uuid',           tags: ['FK'] },
+    { name: 'coupon_id',           type: 'uuid',           tags: ['FK'],  note: 'Nullable' },
+    { name: 'status',              type: 'varchar(30)',     tags: [],       note: 'pending/confirmed/packed/shipped/delivered/cancelled/returned' },
+    { name: 'subtotal_pkr',        type: 'numeric(12,2)',   tags: [] },
+    { name: 'shipping_charge_pkr', type: 'numeric(8,2)',    tags: [] },
+    { name: 'cod_charge_pkr',      type: 'numeric(8,2)',    tags: [],       note: 'COD handling fee (typically Rs. 50–100)' },
+    { name: 'discount_pkr',        type: 'numeric(10,2)',   tags: [] },
+    { name: 'total_pkr',           type: 'numeric(12,2)',   tags: [] },
+    { name: 'customer_notes',      type: 'text',            tags: [] },
+    { name: 'created_at',          type: 'timestamptz',     tags: [] },
+    { name: 'updated_at',          type: 'timestamptz',     tags: [] },
+  ]},
+  { name: 'order_items', domain: 'orders', note: 'Line items within an order', cols: [
+    { name: 'id',            type: 'uuid',          tags: ['PK'] },
+    { name: 'order_id',      type: 'uuid',          tags: ['FK'] },
+    { name: 'variant_id',    type: 'uuid',          tags: ['FK'] },
+    { name: 'quantity',      type: 'integer',       tags: [] },
+    { name: 'unit_price_pkr',type: 'numeric(12,2)', tags: [],  note: 'Snapshot at time of order' },
+    { name: 'total_pkr',     type: 'numeric(12,2)', tags: [] },
+  ]},
+  { name: 'order_status_history', domain: 'orders', note: 'Full audit trail of status changes', cols: [
+    { name: 'id',          type: 'uuid',         tags: ['PK'] },
+    { name: 'order_id',    type: 'uuid',         tags: ['FK'] },
+    { name: 'status',      type: 'varchar(30)',   tags: [] },
+    { name: 'notes',       type: 'text',          tags: [] },
+    { name: 'changed_by',  type: 'uuid',          tags: ['FK'],  note: 'admin_users.id' },
+    { name: 'created_at',  type: 'timestamptz',   tags: [] },
+  ]},
+  { name: 'cod_collections', domain: 'orders', note: 'COD payment tracking per order', cols: [
+    { name: 'id',                    type: 'uuid',          tags: ['PK'] },
+    { name: 'order_id',              type: 'uuid',          tags: ['FK','UK'] },
+    { name: 'amount_expected_pkr',   type: 'numeric(12,2)', tags: [] },
+    { name: 'amount_collected_pkr',  type: 'numeric(12,2)', tags: [],  note: 'Nullable until delivery' },
+    { name: 'status',                type: 'varchar(20)',   tags: [],  note: 'pending / collected / short_paid / returned' },
+    { name: 'collected_by',          type: 'uuid',          tags: ['FK'],  note: 'admin_users.id (rider/agent)' },
+    { name: 'collected_at',          type: 'timestamptz',   tags: [] },
+    { name: 'remarks',               type: 'text',          tags: [] },
+  ]},
+  { name: 'courier_assignments', domain: 'orders', note: 'Courier & tracking per order', cols: [
+    { name: 'id',                 type: 'uuid',         tags: ['PK'] },
+    { name: 'order_id',           type: 'uuid',         tags: ['FK'] },
+    { name: 'courier_name',       type: 'varchar(50)',   tags: [],  note: 'TCS / Leopards / BlueEx / Trax / PostEx' },
+    { name: 'tracking_number',    type: 'varchar(80)',   tags: [] },
+    { name: 'rider_name',         type: 'varchar(120)',  tags: [] },
+    { name: 'rider_phone',        type: 'varchar(20)',   tags: [] },
+    { name: 'assigned_at',        type: 'timestamptz',   tags: [] },
+    { name: 'estimated_delivery', type: 'date',          tags: [] },
+    { name: 'actual_delivery',    type: 'timestamptz',   tags: [] },
+  ]},
+  { name: 'delivery_zones', domain: 'orders', note: 'Per-city COD availability & charges', cols: [
+    { name: 'id',                  type: 'uuid',          tags: ['PK'] },
+    { name: 'city',                type: 'varchar(80)',   tags: [] },
+    { name: 'province',            type: 'varchar(30)',   tags: [] },
+    { name: 'shipping_charge_pkr', type: 'numeric(8,2)',  tags: [] },
+    { name: 'estimated_days',      type: 'integer',       tags: [] },
+    { name: 'is_cod_available',    type: 'boolean',       tags: [],  note: 'Disable for high-return-rate areas' },
+    { name: 'is_active',           type: 'boolean',       tags: [] },
+  ]},
+  { name: 'coupons', domain: 'orders', note: 'Discount codes', cols: [
+    { name: 'id',                type: 'uuid',          tags: ['PK'] },
+    { name: 'code',              type: 'varchar(40)',    tags: ['UK'] },
+    { name: 'discount_type',     type: 'varchar(15)',    tags: [],  note: 'flat_pkr / percentage' },
+    { name: 'discount_value',    type: 'numeric(10,2)',  tags: [] },
+    { name: 'min_order_pkr',     type: 'numeric(10,2)',  tags: [] },
+    { name: 'max_discount_pkr',  type: 'numeric(10,2)',  tags: [],  note: 'Cap for percentage type' },
+    { name: 'max_uses',          type: 'integer',        tags: [] },
+    { name: 'uses_count',        type: 'integer',        tags: [] },
+    { name: 'expires_at',        type: 'timestamptz',    tags: [] },
+    { name: 'is_active',         type: 'boolean',        tags: [] },
+  ]},
+
+  // ── SEO ────────────────────────────────────────────────────────
+  { name: 'product_seo', domain: 'seo', note: 'SEO meta per product', cols: [
+    { name: 'id',            type: 'uuid',  tags: ['PK'] },
+    { name: 'product_id',    type: 'uuid',  tags: ['FK','UK'] },
+    { name: 'meta_title',    type: 'varchar(70)',  tags: [],  note: 'Max 60 chars recommended' },
+    { name: 'meta_description', type: 'varchar(180)', tags: [], note: 'Max 160 chars' },
+    { name: 'og_title',      type: 'text',  tags: [] },
+    { name: 'og_description',type: 'text',  tags: [] },
+    { name: 'og_image_url',  type: 'text',  tags: [] },
+    { name: 'canonical_url', type: 'text',  tags: [] },
+    { name: 'schema_markup', type: 'jsonb', tags: [],  note: 'JSON-LD Product schema' },
+    { name: 'robots',        type: 'varchar(30)', tags: [], note: 'index,follow / noindex' },
+    { name: 'updated_at',    type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'category_seo', domain: 'seo', note: 'SEO meta + editorial content per category', cols: [
+    { name: 'id',              type: 'uuid',  tags: ['PK'] },
+    { name: 'category_id',     type: 'uuid',  tags: ['FK','UK'] },
+    { name: 'meta_title',      type: 'varchar(70)',   tags: [] },
+    { name: 'meta_description',type: 'varchar(180)',  tags: [] },
+    { name: 'og_image_url',    type: 'text',          tags: [] },
+    { name: 'canonical_url',   type: 'text',          tags: [] },
+    { name: 'h1_override',     type: 'varchar(200)',  tags: [],  note: 'Custom H1 if different from name' },
+    { name: 'top_content',     type: 'text',          tags: [],  note: 'Editorial text above products grid' },
+    { name: 'bottom_content',  type: 'text',          tags: [],  note: 'Editorial text below products grid' },
+    { name: 'robots',          type: 'varchar(30)',   tags: [] },
+    { name: 'updated_at',      type: 'timestamptz',   tags: [] },
+  ]},
+  { name: 'static_page_seo', domain: 'seo', note: 'SEO for home, about, contact, FAQ', cols: [
+    { name: 'id',              type: 'uuid',         tags: ['PK'] },
+    { name: 'page_key',        type: 'varchar(50)',   tags: ['UK'],  note: 'home / about / contact / faq' },
+    { name: 'meta_title',      type: 'varchar(70)',   tags: [] },
+    { name: 'meta_description',type: 'varchar(180)',  tags: [] },
+    { name: 'og_image_url',    type: 'text',          tags: [] },
+    { name: 'canonical_url',   type: 'text',          tags: [] },
+    { name: 'robots',          type: 'varchar(30)',   tags: [] },
+    { name: 'updated_at',      type: 'timestamptz',   tags: [] },
+  ]},
+  { name: 'url_redirects', domain: 'seo', note: '301/302 redirects for slug changes', cols: [
+    { name: 'id',            type: 'uuid',       tags: ['PK'] },
+    { name: 'from_path',     type: 'text',       tags: ['UK'],  note: 'Old URL path' },
+    { name: 'to_path',       type: 'text',       tags: [],       note: 'New URL path' },
+    { name: 'redirect_type', type: 'smallint',   tags: [],       note: '301 (permanent) or 302 (temporary)' },
+    { name: 'hit_count',     type: 'integer',    tags: [] },
+    { name: 'is_active',     type: 'boolean',    tags: [] },
+    { name: 'created_at',    type: 'timestamptz',tags: [] },
+  ]},
+  { name: 'sitemap_entries', domain: 'seo', note: 'XML sitemap management', cols: [
+    { name: 'id',            type: 'uuid',        tags: ['PK'] },
+    { name: 'url',           type: 'text',        tags: ['UK'] },
+    { name: 'entity_type',   type: 'varchar(20)',  tags: [],  note: 'product / category / page' },
+    { name: 'entity_id',     type: 'uuid',        tags: [] },
+    { name: 'change_freq',   type: 'varchar(15)',  tags: [],  note: 'daily / weekly / monthly' },
+    { name: 'priority',      type: 'numeric(2,1)', tags: [],  note: '0.1 to 1.0' },
+    { name: 'last_modified', type: 'timestamptz', tags: [] },
+    { name: 'is_excluded',   type: 'boolean',     tags: [] },
+  ]},
+
+  // ── CART ───────────────────────────────────────────────────────
+  { name: 'carts', domain: 'orders', note: 'Persistent cart for guests and logged-in users', cols: [
+    { name: 'id',            type: 'uuid',         tags: ['PK'] },
+    { name: 'user_id',       type: 'uuid',         tags: ['FK'],  note: 'Nullable — guest carts have no user' },
+    { name: 'session_token', type: 'varchar(120)',  tags: ['UK'],  note: 'Links guest cart to browser session' },
+    { name: 'status',        type: 'varchar(20)',   tags: [],       note: 'active / merged / converted / abandoned' },
+    { name: 'created_at',    type: 'timestamptz',   tags: [] },
+    { name: 'updated_at',    type: 'timestamptz',   tags: [] },
+    { name: 'expires_at',    type: 'timestamptz',   tags: [],       note: '30 days for guests, 90 days for logged-in users' },
+  ]},
+  { name: 'cart_items', domain: 'orders', note: 'Line items within a cart', cols: [
+    { name: 'id',              type: 'uuid',          tags: ['PK'] },
+    { name: 'cart_id',         type: 'uuid',          tags: ['FK'] },
+    { name: 'variant_id',      type: 'uuid',          tags: ['FK'] },
+    { name: 'quantity',        type: 'integer',        tags: [] },
+    { name: 'unit_price_pkr',  type: 'numeric(12,2)',  tags: [],  note: 'Snapshot at time of adding to cart' },
+    { name: 'added_at',        type: 'timestamptz',    tags: [] },
+    { name: 'updated_at',      type: 'timestamptz',    tags: [] },
+  ]},
+  { name: 'cart_merge_log', domain: 'orders', note: 'Audit log when guest cart merges into user cart on login', cols: [
+    { name: 'id',             type: 'uuid',        tags: ['PK'] },
+    { name: 'guest_cart_id',  type: 'uuid',        tags: ['FK'],  note: 'The guest cart being merged from' },
+    { name: 'user_cart_id',   type: 'uuid',        tags: ['FK'],  note: 'The logged-in user cart merged into' },
+    { name: 'items_merged',   type: 'integer',     tags: [] },
+    { name: 'strategy',       type: 'varchar(30)', tags: [],       note: 'keep_higher_qty / keep_user_cart / merge_all' },
+    { name: 'merged_at',      type: 'timestamptz', tags: [] },
+  ]},
+
+  // ── ANALYTICS ──────────────────────────────────────────────────
+  { name: 'sessions', domain: 'analytics', note: 'Every visitor session with UTM attribution', cols: [
+    { name: 'id',             type: 'uuid',         tags: ['PK'] },
+    { name: 'user_id',        type: 'uuid',         tags: ['FK'],  note: 'Nullable — guest sessions' },
+    { name: 'session_token',  type: 'varchar(120)',  tags: ['UK'] },
+    { name: 'ip_address',     type: 'inet',          tags: [] },
+    { name: 'city',           type: 'varchar(80)',   tags: [],  note: 'Geo-resolved from IP' },
+    { name: 'province',       type: 'varchar(30)',   tags: [],  note: 'Pakistan province' },
+    { name: 'device_type',    type: 'varchar(15)',   tags: [],  note: 'mobile / desktop / tablet' },
+    { name: 'os',             type: 'varchar(30)',   tags: [],  note: 'Android / iOS / Windows' },
+    { name: 'browser',        type: 'varchar(40)',   tags: [] },
+    { name: 'utm_source',     type: 'varchar(80)',   tags: [],  note: 'google / facebook / tiktok / organic' },
+    { name: 'utm_medium',     type: 'varchar(80)',   tags: [],  note: 'cpc / social / email' },
+    { name: 'utm_campaign',   type: 'varchar(120)',  tags: [] },
+    { name: 'utm_content',    type: 'varchar(120)',  tags: [] },
+    { name: 'referrer_url',   type: 'text',          tags: [] },
+    { name: 'landing_page',   type: 'text',          tags: [] },
+    { name: 'started_at',     type: 'timestamptz',   tags: [] },
+    { name: 'last_active_at', type: 'timestamptz',   tags: [] },
+  ]},
+  { name: 'page_views', domain: 'analytics', note: 'Every page visited in a session', cols: [
+    { name: 'id',               type: 'uuid',       tags: ['PK'] },
+    { name: 'session_id',       type: 'uuid',       tags: ['FK'] },
+    { name: 'page_url',         type: 'text',       tags: [] },
+    { name: 'page_type',        type: 'varchar(20)',tags: [],  note: 'home / product / category / cart / checkout' },
+    { name: 'entity_id',        type: 'uuid',       tags: [],  note: 'product_id or category_id if applicable' },
+    { name: 'time_on_page_sec', type: 'integer',    tags: [] },
+    { name: 'viewed_at',        type: 'timestamptz',tags: [] },
+  ]},
+  { name: 'product_views', domain: 'analytics', note: 'Product detail page impressions', cols: [
+    { name: 'id',               type: 'uuid',       tags: ['PK'] },
+    { name: 'session_id',       type: 'uuid',       tags: ['FK'] },
+    { name: 'product_id',       type: 'uuid',       tags: ['FK'] },
+    { name: 'variant_id',       type: 'uuid',       tags: ['FK'],  note: 'Nullable' },
+    { name: 'view_duration_sec',type: 'integer',    tags: [] },
+    { name: 'viewed_at',        type: 'timestamptz',tags: [] },
+  ]},
+  { name: 'cart_events', domain: 'analytics', note: 'Add/remove/abandon cart actions', cols: [
+    { name: 'id',          type: 'uuid',          tags: ['PK'] },
+    { name: 'session_id',  type: 'uuid',          tags: ['FK'] },
+    { name: 'user_id',     type: 'uuid',          tags: ['FK'],  note: 'Nullable — guest' },
+    { name: 'variant_id',  type: 'uuid',          tags: ['FK'] },
+    { name: 'event_type',  type: 'varchar(20)',    tags: [],  note: 'add / remove / quantity_change / abandon' },
+    { name: 'quantity',    type: 'integer',        tags: [] },
+    { name: 'price_pkr',   type: 'numeric(12,2)',  tags: [] },
+    { name: 'created_at',  type: 'timestamptz',    tags: [] },
+  ]},
+  { name: 'checkout_funnel', domain: 'analytics', note: 'Tracks where users drop off in checkout', cols: [
+    { name: 'id',          type: 'uuid',        tags: ['PK'] },
+    { name: 'session_id',  type: 'uuid',        tags: ['FK'] },
+    { name: 'order_id',    type: 'uuid',        tags: ['FK'],  note: 'Nullable — set if order placed' },
+    { name: 'step',        type: 'varchar(20)', tags: [],  note: 'cart / address / confirm / placed' },
+    { name: 'completed',   type: 'boolean',     tags: [] },
+    { name: 'drop_reason', type: 'varchar(60)', tags: [],  note: 'timeout / address_unavailable / changed_mind' },
+    { name: 'entered_at',  type: 'timestamptz', tags: [] },
+    { name: 'exited_at',   type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'site_searches', domain: 'analytics', note: 'On-site search queries', cols: [
+    { name: 'id',                 type: 'uuid',       tags: ['PK'] },
+    { name: 'session_id',         type: 'uuid',       tags: ['FK'] },
+    { name: 'query',              type: 'text',       tags: [] },
+    { name: 'results_count',      type: 'integer',    tags: [] },
+    { name: 'clicked_product_id', type: 'uuid',       tags: ['FK'],  note: 'Nullable' },
+    { name: 'led_to_order',       type: 'boolean',    tags: [] },
+    { name: 'searched_at',        type: 'timestamptz',tags: [] },
+  ]},
+  { name: 'daily_product_stats', domain: 'analytics', note: 'Nightly aggregates per product', cols: [
+    { name: 'id',              type: 'uuid',          tags: ['PK'] },
+    { name: 'stat_date',       type: 'date',          tags: [] },
+    { name: 'product_id',      type: 'uuid',          tags: ['FK'] },
+    { name: 'views',           type: 'integer',       tags: [] },
+    { name: 'add_to_cart_count',type: 'integer',      tags: [] },
+    { name: 'orders_count',    type: 'integer',       tags: [] },
+    { name: 'revenue_pkr',     type: 'numeric(14,2)', tags: [] },
+    { name: 'returns_count',   type: 'integer',       tags: [] },
+  ]},
+  { name: 'daily_traffic_stats', domain: 'analytics', note: 'Nightly aggregates per UTM source + province', cols: [
+    { name: 'id',               type: 'uuid',          tags: ['PK'] },
+    { name: 'stat_date',        type: 'date',          tags: [] },
+    { name: 'utm_source',       type: 'varchar(80)',   tags: [] },
+    { name: 'utm_medium',       type: 'varchar(80)',   tags: [] },
+    { name: 'province',         type: 'varchar(30)',   tags: [] },
+    { name: 'sessions_count',   type: 'integer',       tags: [] },
+    { name: 'orders_count',     type: 'integer',       tags: [] },
+    { name: 'revenue_pkr',      type: 'numeric(14,2)', tags: [] },
+    { name: 'conversion_rate',  type: 'numeric(6,4)',  tags: [] },
+  ]},
+
+  // ── MARKETING ──────────────────────────────────────────────────
+  { name: 'wishlists', domain: 'marketing', note: 'Saved product lists per user', cols: [
+    { name: 'id',         type: 'uuid',         tags: ['PK'] },
+    { name: 'user_id',    type: 'uuid',         tags: ['FK'] },
+    { name: 'name',       type: 'varchar(120)', tags: [],  note: 'Default: "My Wishlist"' },
+    { name: 'is_public',  type: 'boolean',      tags: [] },
+    { name: 'created_at', type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'wishlist_items', domain: 'marketing', note: 'Products saved in a wishlist', cols: [
+    { name: 'id',           type: 'uuid',        tags: ['PK'] },
+    { name: 'wishlist_id',  type: 'uuid',        tags: ['FK'] },
+    { name: 'variant_id',   type: 'uuid',        tags: ['FK'] },
+    { name: 'added_at',     type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'banners', domain: 'marketing', note: 'Homepage, category, and promotional banners', cols: [
+    { name: 'id',           type: 'uuid',         tags: ['PK'] },
+    { name: 'title',        type: 'varchar(200)', tags: [] },
+    { name: 'image_url',    type: 'text',         tags: [] },
+    { name: 'link_url',     type: 'text',         tags: [],  note: 'Where clicking the banner goes' },
+    { name: 'placement',    type: 'varchar(40)',  tags: [],  note: 'hero / category_top / sidebar / popup' },
+    { name: 'target_province', type: 'varchar(30)', tags: [], note: 'Nullable — show only to specific province' },
+    { name: 'sort_order',   type: 'integer',      tags: [] },
+    { name: 'is_active',    type: 'boolean',      tags: [] },
+    { name: 'starts_at',    type: 'timestamptz',  tags: [] },
+    { name: 'ends_at',      type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'flash_sales', domain: 'marketing', note: 'Time-limited sales events (Eid, 11.11, etc.)', cols: [
+    { name: 'id',           type: 'uuid',         tags: ['PK'] },
+    { name: 'name',         type: 'varchar(120)', tags: [],  note: 'e.g. Eid Mega Sale' },
+    { name: 'discount_type',type: 'varchar(15)',  tags: [],  note: 'flat_pkr / percentage' },
+    { name: 'discount_value',type: 'numeric(10,2)',tags: [] },
+    { name: 'starts_at',    type: 'timestamptz',  tags: [] },
+    { name: 'ends_at',      type: 'timestamptz',  tags: [] },
+    { name: 'is_active',    type: 'boolean',      tags: [] },
+  ]},
+  { name: 'flash_sale_products', domain: 'marketing', note: 'Products included in a flash sale', cols: [
+    { name: 'id',             type: 'uuid',          tags: ['PK'] },
+    { name: 'flash_sale_id',  type: 'uuid',          tags: ['FK'] },
+    { name: 'product_id',     type: 'uuid',          tags: ['FK'] },
+    { name: 'override_price_pkr', type: 'numeric(12,2)', tags: [], note: 'Nullable — use sale discount if null' },
+    { name: 'stock_limit',    type: 'integer',       tags: [],  note: 'Max units to sell in this flash sale' },
+    { name: 'units_sold',     type: 'integer',       tags: [] },
+  ]},
+  { name: 'loyalty_points', domain: 'marketing', note: 'Points balance per customer', cols: [
+    { name: 'id',             type: 'uuid',    tags: ['PK'] },
+    { name: 'user_id',        type: 'uuid',    tags: ['FK','UK'] },
+    { name: 'total_earned',   type: 'integer', tags: [] },
+    { name: 'total_redeemed', type: 'integer', tags: [] },
+    { name: 'balance',        type: 'integer', tags: [],  note: 'total_earned - total_redeemed' },
+    { name: 'updated_at',     type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'points_transactions', domain: 'marketing', note: 'Earn/redeem history for loyalty points', cols: [
+    { name: 'id',          type: 'uuid',        tags: ['PK'] },
+    { name: 'user_id',     type: 'uuid',        tags: ['FK'] },
+    { name: 'order_id',    type: 'uuid',        tags: ['FK'],  note: 'Nullable' },
+    { name: 'type',        type: 'varchar(15)', tags: [],       note: 'earn / redeem / expire / adjust' },
+    { name: 'points',      type: 'integer',     tags: [],       note: 'Positive for earn, negative for redeem' },
+    { name: 'description', type: 'varchar(200)',tags: [] },
+    { name: 'created_at',  type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'referrals', domain: 'marketing', note: 'Word-of-mouth referral tracking', cols: [
+    { name: 'id',               type: 'uuid',        tags: ['PK'] },
+    { name: 'referrer_user_id', type: 'uuid',        tags: ['FK'],  note: 'User who shared the referral' },
+    { name: 'referred_user_id', type: 'uuid',        tags: ['FK'],  note: 'User who signed up via referral' },
+    { name: 'referral_code',    type: 'varchar(20)', tags: ['UK'] },
+    { name: 'reward_given',     type: 'boolean',     tags: [],  note: 'Reward given after referred user first order' },
+    { name: 'reward_points',    type: 'integer',     tags: [] },
+    { name: 'created_at',       type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'recently_viewed', domain: 'marketing', note: 'Per-user recently viewed products for personalisation', cols: [
+    { name: 'id',          type: 'uuid',        tags: ['PK'] },
+    { name: 'user_id',     type: 'uuid',        tags: ['FK'],  note: 'Nullable — guests tracked by session' },
+    { name: 'session_id',  type: 'uuid',        tags: ['FK'] },
+    { name: 'product_id',  type: 'uuid',        tags: ['FK'] },
+    { name: 'viewed_at',   type: 'timestamptz', tags: [] },
+  ]},
+
+  // ── SUPPORT & OPS ──────────────────────────────────────────────
+  { name: 'return_requests', domain: 'support', note: 'COD return and refund requests (high volume in PK)', cols: [
+    { name: 'id',            type: 'uuid',        tags: ['PK'] },
+    { name: 'order_id',      type: 'uuid',        tags: ['FK'] },
+    { name: 'user_id',       type: 'uuid',        tags: ['FK'] },
+    { name: 'reason',        type: 'varchar(60)', tags: [],  note: 'wrong_item / damaged / not_as_described / changed_mind' },
+    { name: 'description',   type: 'text',        tags: [] },
+    { name: 'status',        type: 'varchar(20)', tags: [],  note: 'pending / approved / rejected / picked_up / completed' },
+    { name: 'resolution',    type: 'varchar(20)', tags: [],  note: 'replacement / store_credit / refund_cod' },
+    { name: 'handled_by',    type: 'uuid',        tags: ['FK'],  note: 'admin_users.id' },
+    { name: 'created_at',    type: 'timestamptz', tags: [] },
+    { name: 'resolved_at',   type: 'timestamptz', tags: [] },
+  ]},
+  { name: 'return_items', domain: 'support', note: 'Individual items in a return request', cols: [
+    { name: 'id',               type: 'uuid',    tags: ['PK'] },
+    { name: 'return_request_id',type: 'uuid',    tags: ['FK'] },
+    { name: 'order_item_id',    type: 'uuid',    tags: ['FK'] },
+    { name: 'quantity',         type: 'integer', tags: [] },
+    { name: 'condition',        type: 'varchar(20)', tags: [], note: 'unopened / opened / damaged' },
+  ]},
+  { name: 'otp_verifications', domain: 'support', note: 'Phone OTP for guest checkout and phone number verification only — login is handled by Neon Auth', cols: [
+    { name: 'id',          type: 'uuid',       tags: ['PK'] },
+    { name: 'phone_pk',    type: 'varchar(20)',tags: [],  note: 'Target phone number' },
+    { name: 'otp_code',    type: 'varchar(8)', tags: [],  note: 'Hashed, not plain text' },
+    { name: 'purpose',     type: 'varchar(20)',tags: [],  note: 'guest_checkout / phone_verify' },
+    { name: 'is_used',     type: 'boolean',    tags: [] },
+    { name: 'attempts',    type: 'smallint',   tags: [],  note: 'Max 3 before lockout' },
+    { name: 'expires_at',  type: 'timestamptz',tags: [] },
+    { name: 'created_at',  type: 'timestamptz',tags: [] },
+  ]},
+  { name: 'notification_templates', domain: 'support', note: 'Reusable SMS/WhatsApp/email templates', cols: [
+    { name: 'id',          type: 'uuid',         tags: ['PK'] },
+    { name: 'key',         type: 'varchar(80)',  tags: ['UK'],  note: 'order_placed / order_shipped / otp_login' },
+    { name: 'channel',     type: 'varchar(15)',  tags: [],       note: 'sms / whatsapp / email / push' },
+    { name: 'subject',     type: 'varchar(200)', tags: [],       note: 'Email subject (nullable for SMS/WA)' },
+    { name: 'body',        type: 'text',         tags: [],       note: 'Supports {{order_number}}, {{name}} vars' },
+    { name: 'is_active',   type: 'boolean',      tags: [] },
+    { name: 'updated_at',  type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'notification_logs', domain: 'support', note: 'Every SMS, WhatsApp, email, push sent', cols: [
+    { name: 'id',           type: 'uuid',         tags: ['PK'] },
+    { name: 'user_id',      type: 'uuid',         tags: ['FK'],  note: 'Nullable for transactional' },
+    { name: 'template_id',  type: 'uuid',         tags: ['FK'] },
+    { name: 'channel',      type: 'varchar(15)',  tags: [],  note: 'sms / whatsapp / email / push' },
+    { name: 'recipient',    type: 'varchar(255)', tags: [],  note: 'Phone or email address' },
+    { name: 'status',       type: 'varchar(15)',  tags: [],  note: 'queued / sent / delivered / failed' },
+    { name: 'provider',     type: 'varchar(40)',  tags: [],  note: 'Jazz/Zong SMS gateway, Meta WhatsApp API' },
+    { name: 'provider_ref', type: 'varchar(120)', tags: [],  note: 'Provider message ID for tracking' },
+    { name: 'sent_at',      type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'support_tickets', domain: 'support', note: 'Customer service requests', cols: [
+    { name: 'id',           type: 'uuid',         tags: ['PK'] },
+    { name: 'ticket_number',type: 'varchar(20)',  tags: ['UK'],  note: 'TKT-XXXXXXXX' },
+    { name: 'user_id',      type: 'uuid',         tags: ['FK'] },
+    { name: 'order_id',     type: 'uuid',         tags: ['FK'],  note: 'Nullable' },
+    { name: 'category',     type: 'varchar(40)',  tags: [],  note: 'order_issue / payment / return / product / other' },
+    { name: 'subject',      type: 'varchar(200)', tags: [] },
+    { name: 'status',       type: 'varchar(20)',  tags: [],  note: 'open / in_progress / resolved / closed' },
+    { name: 'priority',     type: 'varchar(10)',  tags: [],  note: 'low / medium / high / urgent' },
+    { name: 'assigned_to',  type: 'uuid',         tags: ['FK'],  note: 'admin_users.id' },
+    { name: 'created_at',   type: 'timestamptz',  tags: [] },
+    { name: 'resolved_at',  type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'ticket_messages', domain: 'support', note: 'Conversation thread inside a support ticket', cols: [
+    { name: 'id',          type: 'uuid',         tags: ['PK'] },
+    { name: 'ticket_id',   type: 'uuid',         tags: ['FK'] },
+    { name: 'sender_type', type: 'varchar(10)',  tags: [],  note: 'customer / admin' },
+    { name: 'sender_id',   type: 'uuid',         tags: ['FK'],  note: 'users.id or admin_users.id' },
+    { name: 'message',     type: 'text',         tags: [] },
+    { name: 'attachments', type: 'jsonb',        tags: [],  note: 'Array of image/file URLs' },
+    { name: 'created_at',  type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'admin_activity_logs', domain: 'support', note: 'Security audit trail — every admin action recorded', cols: [
+    { name: 'id',           type: 'uuid',         tags: ['PK'] },
+    { name: 'admin_id',     type: 'uuid',         tags: ['FK'] },
+    { name: 'action',       type: 'varchar(80)',  tags: [],  note: 'order.status_changed / product.price_updated / coupon.created' },
+    { name: 'entity_type',  type: 'varchar(40)',  tags: [] },
+    { name: 'entity_id',    type: 'uuid',         tags: [] },
+    { name: 'old_value',    type: 'jsonb',        tags: [],  note: 'State before change' },
+    { name: 'new_value',    type: 'jsonb',        tags: [],  note: 'State after change' },
+    { name: 'ip_address',   type: 'inet',         tags: [] },
+    { name: 'created_at',   type: 'timestamptz',  tags: [] },
+  ]},
+  { name: 'app_settings', domain: 'support', note: 'Key-value store for site config and feature flags', cols: [
+    { name: 'id',          type: 'uuid',         tags: ['PK'] },
+    { name: 'key',         type: 'varchar(100)', tags: ['UK'],  note: 'cod_enabled / min_order_pkr / maintenance_mode' },
+    { name: 'value',       type: 'jsonb',        tags: [],       note: 'Any type: boolean, number, string, object' },
+    { name: 'description', type: 'text',         tags: [] },
+    { name: 'updated_by',  type: 'uuid',         tags: ['FK'],  note: 'admin_users.id' },
+    { name: 'updated_at',  type: 'timestamptz',  tags: [] },
+  ]},
+];
+
+const DOMAIN_LABELS = { users:'Users & Auth', catalog:'Catalog', orders:'Orders & COD', seo:'SEO', analytics:'Analytics', marketing:'Marketing', support:'Support & Ops' };
+
+function buildCard(tbl) {
+  const card = document.createElement('div');
+  card.className = 'table-card';
+  card.dataset.domain = tbl.domain;
+  card.dataset.name = tbl.name.toLowerCase();
+  card.dataset.cols = tbl.cols.map(c=>c.name).join(' ');
+
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  header.innerHTML = `
+    <div class="domain-dot"></div>
+    <div class="card-header-text">
+      <div class="table-name">${tbl.name}</div>
+      <div class="table-meta">
+        <span class="domain-badge">${DOMAIN_LABELS[tbl.domain]}</span>
+        <span class="col-count">${tbl.cols.length} cols · ${tbl.note}</span>
+      </div>
+    </div>
+    <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M5 3L9 7L5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+
+  const cols = document.createElement('div');
+  cols.className = 'columns';
+
+  tbl.cols.forEach(col => {
+    const row = document.createElement('div');
+    row.className = 'col-row';
+    if (col.tags.includes('PK') || col.tags.includes('FK')) row.classList.add('highlight');
+    const nameClass = col.tags.includes('PK') ? 'col-name pk-col' : col.tags.includes('FK') ? 'col-name fk-col' : 'col-name';
+    const badgesHTML = col.tags.map(t => `<span class="badge badge-${t.toLowerCase()}">${t}</span>`).join('');
+    row.innerHTML = `<div class="${nameClass}">${col.name}</div><div class="col-type">${col.type}</div><div class="badges">${badgesHTML}</div>`;
+    if (col.note) {
+      const noteRow = document.createElement('div');
+      noteRow.className = 'col-row';
+      noteRow.style.paddingTop = '0';
+      noteRow.style.paddingBottom = '6px';
+      noteRow.style.borderBottom = 'none';
+      noteRow.innerHTML = `<div class="col-note">↳ ${col.note}</div>`;
+      cols.appendChild(row);
+      cols.appendChild(noteRow);
+    } else {
+      cols.appendChild(row);
+    }
+  });
+
+  header.addEventListener('click', () => {
+    card.classList.toggle('open');
+  });
+
+  card.appendChild(header);
+  card.appendChild(cols);
+  return card;
+}
+
+const grid = document.getElementById('grid');
+TABLES.forEach(t => grid.appendChild(buildCard(t)));
+
+// Filter & Search
+let activeDomain = 'all';
+let query = '';
+
+function applyFilters() {
+  let visible = 0;
+  document.querySelectorAll('.table-card').forEach(card => {
+    const domainMatch = activeDomain === 'all' || card.dataset.domain === activeDomain;
+    const q = query.trim().toLowerCase();
+    const searchMatch = !q || card.dataset.name.includes(q) || card.dataset.cols.includes(q);
+    const show = domainMatch && searchMatch;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('empty').style.display = visible === 0 ? 'block' : 'none';
+}
+
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    activeDomain = pill.dataset.domain;
+    applyFilters();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  query = e.target.value;
+  applyFilters();
+  if (query) {
+    document.querySelectorAll('.table-card:not(.hidden)').forEach(c => c.classList.add('open'));
+  }
+});
+
+let allOpen = false;
+document.getElementById('expand-all-btn').addEventListener('click', () => {
+  allOpen = !allOpen;
+  document.querySelectorAll('.table-card:not(.hidden)').forEach(c => c.classList.toggle('open', allOpen));
+  document.getElementById('expand-all-btn').textContent = allOpen ? 'collapse all' : 'expand all';
+});
+</script>
+</body>
+</html>

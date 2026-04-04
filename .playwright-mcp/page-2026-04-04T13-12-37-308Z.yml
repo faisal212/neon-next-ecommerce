@@ -1,0 +1,136 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - generic [ref=e3]: PK Admin
+    - navigation [ref=e5]:
+      - generic [ref=e6]: Overview
+      - generic [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+        - text: Dashboard
+      - generic [ref=e11]: Catalog
+      - generic [ref=e12] [cursor=pointer]:
+        - img [ref=e13]
+        - text: Products
+      - generic [ref=e17] [cursor=pointer]:
+        - img [ref=e18]
+        - text: Add Product
+      - generic [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+        - text: Categories
+      - generic [ref=e25] [cursor=pointer]:
+        - img [ref=e26]
+        - text: Inventory
+      - generic [ref=e29]: Orders
+      - generic [ref=e30] [cursor=pointer]:
+        - img [ref=e31]
+        - text: Orders
+      - generic [ref=e35]: Marketing
+      - generic [ref=e36] [cursor=pointer]:
+        - img [ref=e37]
+        - text: Flash Sales
+      - generic [ref=e39]: System
+      - generic [ref=e40] [cursor=pointer]:
+        - img [ref=e41]
+        - text: Settings
+      - generic [ref=e44] [cursor=pointer]:
+        - img [ref=e45]
+        - text: Analytics
+    - generic [ref=e47]:
+      - generic [ref=e48]: FA
+      - generic [ref=e49]:
+        - generic [ref=e50]: Faisal A.
+        - generic [ref=e51]: Super Admin
+  - main [ref=e52]:
+    - generic [ref=e53]:
+      - heading "Dashboard" [level=1] [ref=e55]
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - img [ref=e59]
+          - generic [ref=e62]: 1,247
+          - generic [ref=e63]: Total Orders
+          - generic [ref=e64]: ↑ 12.5%
+        - generic [ref=e65]:
+          - img [ref=e67]
+          - generic [ref=e70]: Rs. 3,842,500
+          - generic [ref=e71]: Revenue
+          - generic [ref=e72]: ↑ 8.3%
+        - generic [ref=e73]:
+          - img [ref=e75]
+          - generic [ref=e79]: "186"
+          - generic [ref=e80]: Products
+          - generic [ref=e81]: —
+        - generic [ref=e82]:
+          - img [ref=e84]
+          - generic [ref=e89]: 4,521
+          - generic [ref=e90]: Active Users
+          - generic [ref=e91]: ↑ 15.2%
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]: Recent Orders
+          - table [ref=e96]:
+            - rowgroup [ref=e97]:
+              - 'row "Order # Customer Items Total Status Date" [ref=e98]':
+                - 'columnheader "Order #" [ref=e99]'
+                - columnheader "Customer" [ref=e100]
+                - columnheader "Items" [ref=e101]
+                - columnheader "Total" [ref=e102]
+                - columnheader "Status" [ref=e103]
+                - columnheader "Date" [ref=e104]
+            - rowgroup [ref=e105]:
+              - row "ORD-20260315-A3F2B1 Ahmed Khan 3 Rs. 7,500 delivered Mar 15" [ref=e106]:
+                - cell "ORD-20260315-A3F2B1" [ref=e107]
+                - cell "Ahmed Khan" [ref=e108]
+                - cell "3" [ref=e109]
+                - cell "Rs. 7,500" [ref=e110]
+                - cell "delivered" [ref=e111]:
+                  - generic [ref=e112]: delivered
+                - cell "Mar 15" [ref=e113]
+              - row "ORD-20260314-B7C4D2 Fatima Ali 1 Rs. 4,500 shipped Mar 14" [ref=e114]:
+                - cell "ORD-20260314-B7C4D2" [ref=e115]
+                - cell "Fatima Ali" [ref=e116]
+                - cell "1" [ref=e117]
+                - cell "Rs. 4,500" [ref=e118]
+                - cell "shipped" [ref=e119]:
+                  - generic [ref=e120]: shipped
+                - cell "Mar 14" [ref=e121]
+              - row "ORD-20260314-E1F3G4 Hassan Raza 2 Rs. 2,800 packed Mar 14" [ref=e122]:
+                - cell "ORD-20260314-E1F3G4" [ref=e123]
+                - cell "Hassan Raza" [ref=e124]
+                - cell "2" [ref=e125]
+                - cell "Rs. 2,800" [ref=e126]
+                - cell "packed" [ref=e127]:
+                  - generic [ref=e128]: packed
+                - cell "Mar 14" [ref=e129]
+              - row "ORD-20260313-H5I6J7 Ayesha Malik 4 Rs. 12,200 pending Mar 13" [ref=e130]:
+                - cell "ORD-20260313-H5I6J7" [ref=e131]
+                - cell "Ayesha Malik" [ref=e132]
+                - cell "4" [ref=e133]
+                - cell "Rs. 12,200" [ref=e134]
+                - cell "pending" [ref=e135]:
+                  - generic [ref=e136]: pending
+                - cell "Mar 13" [ref=e137]
+              - row "ORD-20260313-K8L9M0 Usman Tariq 1 Rs. 1,200 cancelled Mar 13" [ref=e138]:
+                - cell "ORD-20260313-K8L9M0" [ref=e139]
+                - cell "Usman Tariq" [ref=e140]
+                - cell "1" [ref=e141]
+                - cell "Rs. 1,200" [ref=e142]
+                - cell "cancelled" [ref=e143]:
+                  - generic [ref=e144]: cancelled
+                - cell "Mar 13" [ref=e145]
+        - generic [ref=e146]:
+          - generic [ref=e147]: Low Stock Alerts
+          - generic [ref=e148]:
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - generic [ref=e151]: Embroidered Lawn Suit
+                - generic [ref=e152]: White / M
+              - generic [ref=e153]: 2 left
+            - generic [ref=e154]:
+              - generic [ref=e155]:
+                - generic [ref=e156]: Premium Khussa
+                - generic [ref=e157]: Brown / 42
+              - generic [ref=e158]: 3 left
+            - generic [ref=e159]:
+              - generic [ref=e160]:
+                - generic [ref=e161]: Cotton Kurta Set
+                - generic [ref=e162]: Blue / L
+              - generic [ref=e163]: 1 left
