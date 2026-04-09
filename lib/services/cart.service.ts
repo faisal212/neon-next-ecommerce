@@ -1,7 +1,7 @@
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { carts, cartItems, cartMergeLog } from '@/lib/db/schema/cart';
-import { productVariants, inventory, products } from '@/lib/db/schema/catalog';
+import { productVariants, inventory, products, productImages } from '@/lib/db/schema/catalog';
 import { NotFoundError, ConflictError } from '@/lib/errors/api-error';
 import type { AddCartItemInput, MergeCartInput } from '@/lib/validators/cart.validators';
 
@@ -48,7 +48,7 @@ export async function getCartWithItems(cartId: string) {
   const [cart] = await db.select().from(carts).where(eq(carts.id, cartId)).limit(1);
   if (!cart) throw new NotFoundError('Cart not found');
 
-  const items = await db
+  const rawItems = await db
     .select({
       id: cartItems.id,
       cartId: cartItems.cartId,
@@ -60,10 +60,26 @@ export async function getCartWithItems(cartId: string) {
       color: productVariants.color,
       size: productVariants.size,
       productId: productVariants.productId,
+      productName: products.nameEn,
+      productSlug: products.slug,
     })
     .from(cartItems)
     .innerJoin(productVariants, eq(cartItems.variantId, productVariants.id))
+    .innerJoin(products, eq(productVariants.productId, products.id))
     .where(eq(cartItems.cartId, cartId));
+
+  // Fetch primary image for each product
+  const items = await Promise.all(
+    rawItems.map(async (item) => {
+      const [img] = await db
+        .select({ url: productImages.url, altText: productImages.altText })
+        .from(productImages)
+        .where(eq(productImages.productId, item.productId))
+        .orderBy(productImages.sortOrder)
+        .limit(1);
+      return { ...item, imageUrl: img?.url ?? null };
+    }),
+  );
 
   return { ...cart, items };
 }

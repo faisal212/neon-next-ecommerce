@@ -1,6 +1,7 @@
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { supportTickets, ticketMessages } from '@/lib/db/schema/support';
+import { users } from '@/lib/db/schema/users';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { generateTicketNumber } from '@/lib/utils/order-number';
 import type { PaginationParams } from '@/lib/utils/pagination';
@@ -57,6 +58,50 @@ export async function addMessage(ticketId: string, senderId: string, senderType:
   }).returning();
 
   return msg;
+}
+
+export async function listAllTickets(pagination: PaginationParams, statusFilter?: string, priorityFilter?: string) {
+  const conditions = [];
+
+  if (statusFilter) {
+    conditions.push(eq(supportTickets.status, statusFilter));
+  }
+
+  if (priorityFilter) {
+    conditions.push(eq(supportTickets.priority, priorityFilter));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(supportTickets)
+    .where(where);
+
+  const data = await db
+    .select({
+      id: supportTickets.id,
+      ticketNumber: supportTickets.ticketNumber,
+      userId: supportTickets.userId,
+      orderId: supportTickets.orderId,
+      category: supportTickets.category,
+      subject: supportTickets.subject,
+      status: supportTickets.status,
+      priority: supportTickets.priority,
+      assignedTo: supportTickets.assignedTo,
+      createdAt: supportTickets.createdAt,
+      resolvedAt: supportTickets.resolvedAt,
+      customerName: users.name,
+      customerEmail: users.email,
+    })
+    .from(supportTickets)
+    .leftJoin(users, eq(supportTickets.userId, users.id))
+    .where(where)
+    .orderBy(desc(supportTickets.createdAt))
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+
+  return { data, total: countResult?.count ?? 0 };
 }
 
 export async function updateTicketStatus(ticketId: string, status: string, assignedTo?: string) {

@@ -402,8 +402,8 @@ export const openApiSpec = {
         properties: { name: { type: 'string', maxLength: 120 }, phonePk: { type: 'string', pattern: '^03\\d{2}-?\\d{7}$' } },
       },
       AddressInput: {
-        type: 'object', required: ['fullName', 'phonePk', 'addressLine1', 'city', 'province'],
-        properties: { fullName: { type: 'string' }, phonePk: { type: 'string' }, addressLine1: { type: 'string' }, addressLine2: { type: 'string' }, city: { type: 'string' }, province: { type: 'string', enum: ['Punjab', 'Sindh', 'KPK', 'Balochistan', 'ICT', 'GB', 'AJK'] }, postalCode: { type: 'string' }, isDefault: { type: 'boolean' } },
+        type: 'object', required: ['firstName', 'lastName', 'phonePk', 'addressLine1', 'city', 'province'],
+        properties: { firstName: { type: 'string' }, lastName: { type: 'string' }, phonePk: { type: 'string' }, addressLine1: { type: 'string' }, addressLine2: { type: 'string' }, city: { type: 'string' }, province: { type: 'string', enum: ['Punjab', 'Sindh', 'KPK', 'Balochistan', 'ICT', 'GB', 'AJK'] }, postalCode: { type: 'string' }, isDefault: { type: 'boolean' } },
       },
       CreateCategoryInput: {
         type: 'object', required: ['nameEn'],

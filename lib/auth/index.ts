@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import { eq } from 'drizzle-orm';
 import { auth } from './better-auth';
 import { db } from '@/lib/db';
@@ -25,13 +24,11 @@ export interface AdminUser {
 }
 
 /**
- * Get current user from Better Auth session.
- * Better Auth validates the session cookie/token automatically.
+ * Get current user from Neon Auth session.
+ * Neon Auth reads the session cookie automatically in Next.js server context.
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const { data: session } = await auth.getSession();
 
   if (!session?.user) return null;
 
@@ -62,9 +59,7 @@ export async function requireAuth(): Promise<AuthUser> {
 }
 
 export async function requireAdmin(allowedRoles?: string[]): Promise<AdminUser> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const { data: session } = await auth.getSession();
 
   if (!session?.user) throw new AuthenticationError();
 

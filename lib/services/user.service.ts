@@ -1,8 +1,10 @@
-import { eq } from 'drizzle-orm';
+import { eq, and, or, ilike, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema/users';
+import { orders } from '@/lib/db/schema/orders';
 import { ConflictError, NotFoundError } from '@/lib/errors/api-error';
 import type { RegisterInput, UpdateProfileInput } from '@/lib/validators/user.validators';
+import type { PaginationParams } from '@/lib/utils/pagination';
 
 export async function createUser(authUserId: string, input: RegisterInput) {
   // Check for existing user with same auth_user_id
@@ -85,4 +87,49 @@ export async function deactivateUser(id: string) {
 
   if (!user) throw new NotFoundError('User not found');
   return user;
+}
+
+export async function listUsers(pagination: PaginationParams, search?: string) {
+  const conditions = [];
+
+  if (search) {
+    conditions.push(
+      or(
+        ilike(users.name, `%${search}%`),
+        ilike(users.email, `%${search}%`),
+        ilike(users.phonePk, `%${search}%`),
+      ),
+    );
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(users)
+    .where(where);
+
+  const data = await db
+    .select({
+      id: users.id,
+      authUserId: users.authUserId,
+      name: users.name,
+      email: users.email,
+      phonePk: users.phonePk,
+      isPhoneVerified: users.isPhoneVerified,
+      isActive: users.isActive,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+      orderCount: sql<number>`count(${orders.id})::int`,
+      totalSpend: sql<string>`coalesce(sum(${orders.totalPkr}), '0')`,
+    })
+    .from(users)
+    .leftJoin(orders, eq(users.id, orders.userId))
+    .where(where)
+    .groupBy(users.id)
+    .orderBy(desc(users.createdAt))
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+
+  return { data, total: countResult?.count ?? 0 };
 }

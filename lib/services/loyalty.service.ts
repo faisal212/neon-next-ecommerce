@@ -1,6 +1,7 @@
 import { eq, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { loyaltyPoints, pointsTransactions } from '@/lib/db/schema/marketing';
+import { users } from '@/lib/db/schema/users';
 import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import type { PaginationParams } from '@/lib/utils/pagination';
 
@@ -61,4 +62,61 @@ export async function getPointsHistory(userId: string, pagination: PaginationPar
   const [countResult] = await db.select({ count: sql<number>`count(*)::int` }).from(pointsTransactions).where(eq(pointsTransactions.userId, userId));
   const data = await db.select().from(pointsTransactions).where(eq(pointsTransactions.userId, userId)).orderBy(desc(pointsTransactions.createdAt)).limit(pagination.limit).offset(pagination.offset);
   return { data, total: countResult?.count ?? 0 };
+}
+
+export async function listAllPointsBalances(pagination: PaginationParams) {
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(loyaltyPoints);
+
+  const data = await db
+    .select({
+      id: loyaltyPoints.id,
+      userId: loyaltyPoints.userId,
+      totalEarned: loyaltyPoints.totalEarned,
+      totalRedeemed: loyaltyPoints.totalRedeemed,
+      balance: loyaltyPoints.balance,
+      updatedAt: loyaltyPoints.updatedAt,
+      userName: users.name,
+      userEmail: users.email,
+    })
+    .from(loyaltyPoints)
+    .leftJoin(users, eq(loyaltyPoints.userId, users.id))
+    .orderBy(desc(loyaltyPoints.updatedAt))
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+
+  return { data, total: countResult?.count ?? 0 };
+}
+
+export async function adjustPoints(userId: string, points: number, description: string) {
+  await getBalance(userId); // ensure record exists
+
+  if (points > 0) {
+    // Credit
+    await db.update(loyaltyPoints).set({
+      totalEarned: sql`${loyaltyPoints.totalEarned} + ${points}`,
+      balance: sql`${loyaltyPoints.balance} + ${points}`,
+      updatedAt: new Date(),
+    }).where(eq(loyaltyPoints.userId, userId));
+  } else if (points < 0) {
+    // Debit — verify sufficient balance
+    const balance = await getBalance(userId);
+    if (balance.balance < Math.abs(points)) {
+      throw new ValidationError(`Insufficient points. Balance: ${balance.balance}`);
+    }
+
+    await db.update(loyaltyPoints).set({
+      totalRedeemed: sql`${loyaltyPoints.totalRedeemed} + ${Math.abs(points)}`,
+      balance: sql`${loyaltyPoints.balance} - ${Math.abs(points)}`,
+      updatedAt: new Date(),
+    }).where(eq(loyaltyPoints.userId, userId));
+  }
+
+  await db.insert(pointsTransactions).values({
+    userId,
+    type: points > 0 ? 'adjust_credit' : 'adjust_debit',
+    points,
+    description,
+  });
 }

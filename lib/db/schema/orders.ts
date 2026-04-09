@@ -99,7 +99,7 @@ export const courierAssignments = pgTable('courier_assignments', {
 // ── Delivery Zones ───────────────────────────────────────────────
 export const deliveryZones = pgTable('delivery_zones', {
   id: uuid('id').defaultRandom().primaryKey(),
-  city: varchar('city', { length: 80 }).notNull(),
+  city: varchar('city', { length: 80 }),
   province: varchar('province', { length: 30 }).notNull(),
   shippingChargePkr: numeric('shipping_charge_pkr', { precision: 8, scale: 2 }).notNull(),
   estimatedDays: integer('estimated_days').notNull(),

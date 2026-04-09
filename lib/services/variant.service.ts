@@ -67,3 +67,16 @@ export async function updateVariant(id: string, input: Partial<CreateVariantInpu
   if (!variant) throw new NotFoundError('Variant not found');
   return variant;
 }
+
+export async function deleteVariant(id: string) {
+  // Delete related inventory record first (FK constraint)
+  await db.delete(inventory).where(eq(inventory.variantId, id));
+
+  const [variant] = await db
+    .delete(productVariants)
+    .where(eq(productVariants.id, id))
+    .returning();
+
+  if (!variant) throw new NotFoundError('Variant not found');
+  return variant;
+}

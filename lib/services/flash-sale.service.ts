@@ -38,3 +38,18 @@ export async function addFlashSaleProduct(flashSaleId: string, input: { productI
 export async function getFlashSaleProducts(flashSaleId: string) {
   return db.select().from(flashSaleProducts).where(eq(flashSaleProducts.flashSaleId, flashSaleId));
 }
+
+export async function getFlashSaleById(id: string) {
+  const [sale] = await db
+    .select()
+    .from(flashSales)
+    .where(eq(flashSales.id, id))
+    .limit(1);
+
+  if (!sale) throw new NotFoundError('Flash sale not found');
+  return sale;
+}
+
+export async function removeFlashSaleProduct(id: string) {
+  await db.delete(flashSaleProducts).where(eq(flashSaleProducts.id, id));
+}

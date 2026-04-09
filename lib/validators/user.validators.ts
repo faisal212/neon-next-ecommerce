@@ -37,7 +37,8 @@ export const updateProfileSchema = z.object({
 });
 
 export const addressSchema = z.object({
-  fullName: z.string().min(1).max(120),
+  firstName: z.string().min(1).max(60),
+  lastName: z.string().min(1).max(60),
   phonePk: z.string().regex(phonePkRegex, 'Invalid Pakistan phone number'),
   addressLine1: z.string().min(1),
   addressLine2: z.string().optional(),

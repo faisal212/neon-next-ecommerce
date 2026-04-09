@@ -1,17 +1,9 @@
-import { betterAuth } from 'better-auth';
-import { Pool } from '@neondatabase/serverless';
-import { nextCookies } from 'better-auth/next-js';
+import { createNeonAuth } from '@neondatabase/auth/next/server';
 
-export const auth = betterAuth({
-  database: new Pool({ connectionString: process.env.DATABASE_URL! }),
-  plugins: [nextCookies()],
-  emailAndPassword: {
-    enabled: true,
-  },
-  session: {
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60, // 5 minutes
-    },
+export const auth = createNeonAuth({
+  baseUrl: process.env.NEON_AUTH_BASE_URL!,
+  cookies: {
+    secret: process.env.NEON_AUTH_COOKIE_SECRET!,
+    sessionDataTtl: 300,
   },
 });

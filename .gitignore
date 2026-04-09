@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright tool session output (logs, page snapshots, traces)
+.playwright/
+.playwright-cli/
+.playwright-mcp/
+
+# one-off dev probe scripts at repo root
+/measure-cards.*
+/_*.ts
+
+# HTML prototypes / schema exports that are not app source
+/adminpanelprototype.html
+/pk_ecommerce_full_schema*.html

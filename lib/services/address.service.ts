@@ -24,7 +24,8 @@ export async function createAddress(userId: string, input: AddressInput) {
     .insert(addresses)
     .values({
       userId,
-      fullName: input.fullName,
+      firstName: input.firstName,
+      lastName: input.lastName,
       phonePk: input.phonePk,
       addressLine1: input.addressLine1,
       addressLine2: input.addressLine2 ?? null,
@@ -44,7 +45,8 @@ export async function createGuestAddress(input: AddressInput) {
     .insert(addresses)
     .values({
       userId: null,
-      fullName: input.fullName,
+      firstName: input.firstName,
+      lastName: input.lastName,
       phonePk: input.phonePk,
       addressLine1: input.addressLine1,
       addressLine2: input.addressLine2 ?? null,

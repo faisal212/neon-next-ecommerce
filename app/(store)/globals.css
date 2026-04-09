@@ -1,0 +1,295 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Kinetic Monolith Design System ──────────────────────── */
+/* Store is always dark - no light mode */
+
+:root {
+  --background: #0e0e0e;
+  --foreground: #ffffff;
+  --card: #1a1919;
+  --card-foreground: #ffffff;
+  --popover: #1a1919;
+  --popover-foreground: #ffffff;
+  --primary: #ff915c;
+  --primary-foreground: #000000;
+  --secondary: #1a1919;
+  --secondary-foreground: #ffffff;
+  --muted: #131313;
+  --muted-foreground: #adaaaa;
+  --accent: #201f1f;
+  --accent-foreground: #ffffff;
+  --destructive: #ff716c;
+  --border: #262626;
+  --input: #262626;
+  --ring: #ff915c;
+  --radius: 0.125rem;
+
+  /* Charts */
+  --chart-1: #ff915c;
+  --chart-2: #fc8f3c;
+  --chart-3: #ffc15c;
+  --chart-4: #eaa30c;
+  --chart-5: #ff716c;
+
+  /* Sidebar (for potential account sidebar) */
+  --sidebar: #0e0e0e;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ff915c;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: rgba(255, 145, 92, 0.06);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1a1919;
+  --sidebar-ring: #ff915c;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Fonts */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+
+  /* Border Radius - Tight, machined precision */
+  --radius-sm: 0.0625rem;
+  --radius-md: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.625rem;
+  --radius-3xl: 0.75rem;
+  --radius-4xl: 1rem;
+
+  /* ── Kinetic Monolith Extended Palette ──────────────────── */
+  /* Surface hierarchy */
+  --color-surface: #0e0e0e;
+  --color-surface-dim: #0e0e0e;
+  --color-surface-bright: #2c2c2c;
+  --color-surface-container-lowest: #000000;
+  --color-surface-container-low: #131313;
+  --color-surface-container: #1a1919;
+  --color-surface-container-high: #201f1f;
+  --color-surface-container-highest: #262626;
+  --color-surface-variant: #262626;
+  --color-surface-tint: #ff915c;
+
+  /* On-surface */
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #adaaaa;
+  --color-on-background: #ffffff;
+
+  /* Primary extended */
+  --color-primary-dim: #ff752b;
+  --color-primary-fixed: #ff7a35;
+  --color-primary-fixed-dim: #f96400;
+  --color-primary-container: #ff7a35;
+  --color-on-primary: #541d00;
+  --color-on-primary-fixed: #000000;
+  --color-on-primary-container: #411500;
+  --color-on-primary-fixed-variant: #501b00;
+
+  /* Secondary */
+  --color-secondary-ext: #fc8f3c;
+  --color-secondary-dim: #ec8230;
+  --color-secondary-fixed: #ffc6a1;
+  --color-secondary-fixed-dim: #ffb380;
+  --color-secondary-container: #964900;
+  --color-on-secondary: #4a2100;
+  --color-on-secondary-container: #fff6f2;
+  --color-on-secondary-fixed: #562700;
+  --color-on-secondary-fixed-variant: #813e00;
+
+  /* Tertiary */
+  --color-tertiary: #ffc15c;
+  --color-tertiary-dim: #eaa30c;
+  --color-tertiary-fixed: #fab021;
+  --color-tertiary-fixed-dim: #eaa30c;
+  --color-tertiary-container: #fab021;
+  --color-on-tertiary: #5d3e00;
+  --color-on-tertiary-container: #513500;
+  --color-on-tertiary-fixed: #352200;
+  --color-on-tertiary-fixed-variant: #5c3d00;
+
+  /* Error */
+  --color-error: #ff716c;
+  --color-error-dim: #d7383b;
+  --color-error-container: #9f0519;
+  --color-on-error: #490006;
+  --color-on-error-container: #ffa8a3;
+
+  /* Outline */
+  --color-outline: #767575;
+  --color-outline-variant: #484847;
+
+  /* Inverse */
+  --color-inverse-surface: #fcf9f8;
+  --color-inverse-on-surface: #565555;
+  --color-inverse-primary: #a33f00;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+    scrollbar-width: thin;
+    scrollbar-color: #262626 #0e0e0e;
+  }
+}
+
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #262626; border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: #484847; }
+
+/* ── Selection ─────────────────────────────────────────── */
+::selection {
+  background: #ff915c;
+  color: #000000;
+}
+
+/* ── Glass Panel ───────────────────────────────────────── */
+.glass-panel {
+  background: rgba(26, 25, 25, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ── Gradient Button ───────────────────────────────────── */
+.gradient-button {
+  background: linear-gradient(135deg, #ff915c 0%, #ff7a35 100%);
+}
+.gradient-button:hover {
+  transform: scale(1.02);
+}
+.gradient-button:active {
+  transform: scale(0.98);
+}
+
+/* ── Status Glow ───────────────────────────────────────── */
+.status-glow {
+  box-shadow: 0 0 8px #ff915c;
+}
+
+/* ── Kinetic Gradient (for larger surfaces) ────────────── */
+.kinetic-gradient {
+  background: linear-gradient(135deg, #ff915c 0%, #ff7a35 100%);
+}
+
+/* ── Ambient Shadow ────────────────────────────────────── */
+.ambient-shadow {
+  box-shadow: 0 0 40px rgba(255, 145, 92, 0.08);
+}
+
+/* ── Page Transitions ──────────────────────────────────── */
+@keyframes store-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+main > * {
+  animation: store-fade-in 0.35s ease-out both;
+}
+
+/* ── Card Hover ────────────────────────────────────────── */
+.store-card {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.store-card:hover {
+  background-color: #201f1f;
+  box-shadow: 0 8px 32px rgba(255, 103, 0, 0.05);
+}
+
+/* ── Input Focus Indicator ─────────────────────────────── */
+.input-indicator {
+  position: relative;
+}
+.input-indicator::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: #ff915c;
+  transition: width 0.3s ease;
+}
+.input-indicator:focus-within::after {
+  width: 100%;
+}
+
+/* ── Skeleton Loading ──────────────────────────────────── */
+@keyframes store-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Button Press ──────────────────────────────────────── */
+button:active:not(:disabled) {
+  transition: transform 0.1s ease;
+}
+
+/* ── Confetti celebration (checkout confirmation) ──────── */
+@keyframes confetti-fall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Pulse for status indicators ───────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px #ff915c; }
+  50% { opacity: 0.6; box-shadow: 0 0 4px #ff915c; }
+}
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ── Custom scrollbar for horizontal scroll areas ──────── */
+.scroll-orange::-webkit-scrollbar { height: 4px; }
+.scroll-orange::-webkit-scrollbar-track { background: #131313; border-radius: 10px; }
+.scroll-orange::-webkit-scrollbar-thumb { background: #ff915c; border-radius: 10px; }
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

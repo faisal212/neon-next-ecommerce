@@ -16,11 +16,19 @@ export const STATUS_TRANSITIONS: Record<string, string[]> = {
 };
 
 export const placeOrderSchema = z.object({
-  addressId: z.string().uuid(),
+  shippingAddress: z.object({
+    firstName: z.string().min(1).max(60),
+    lastName: z.string().min(1).max(60),
+    phone: z.string().regex(/^03\d{2}-?\d{7}$/),
+    streetAddress: z.string().min(1).max(500),
+    city: z.string().min(1).max(80),
+    province: z.string().min(1).max(30),
+    postalCode: z.string().max(10).optional(),
+  }),
+  deliveryZoneId: z.string().uuid(),
+  paymentMethod: z.enum(['cod']),
   couponCode: z.string().max(40).optional(),
   customerNotes: z.string().max(500).optional(),
-  // Guest fields (required when not authenticated)
-  guestPhone: z.string().regex(/^03\d{2}-?\d{7}$/).optional(),
   guestEmail: z.string().email().optional(),
 });
 
