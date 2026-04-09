@@ -49,7 +49,8 @@ export const users = pgTable('users', {
 export const addresses = pgTable('addresses', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').references(() => users.id),
-  fullName: varchar('full_name', { length: 120 }).notNull(),
+  firstName: varchar('first_name', { length: 60 }).notNull(),
+  lastName: varchar('last_name', { length: 60 }).notNull(),
   phonePk: varchar('phone_pk', { length: 20 }).notNull(),
   addressLine1: text('address_line1').notNull(),
   addressLine2: text('address_line2'),

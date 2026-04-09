@@ -1,4 +1,4 @@
-import { eq, and, ilike, gte, lte, sql, desc } from 'drizzle-orm';
+import { eq, and, ilike, gte, lte, sql, desc, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { products, productTags, productVariants, productImages, inventory } from '@/lib/db/schema/catalog';
 import { categories } from '@/lib/db/schema/catalog';
@@ -61,8 +61,143 @@ export async function listProducts(
     .limit(pagination.limit)
     .offset(pagination.offset);
 
+  // Fetch categories and primary images for each product
+  const enriched = await Promise.all(
+    data.map(async (product) => {
+      const [[category], images] = await Promise.all([
+        db
+          .select({ id: categories.id, nameEn: categories.nameEn, slug: categories.slug })
+          .from(categories)
+          .where(eq(categories.id, product.categoryId))
+          .limit(1),
+        db
+          .select({ id: productImages.id, url: productImages.url, altText: productImages.altText, isPrimary: productImages.isPrimary })
+          .from(productImages)
+          .where(eq(productImages.productId, product.id))
+          .orderBy(productImages.sortOrder)
+          .limit(5),
+      ]);
+      return { ...product, category: category ?? undefined, images };
+    }),
+  );
+
   return {
-    data,
+    data: enriched,
+    total: countResult?.count ?? 0,
+  };
+}
+
+export async function listProductVariants(
+  filters: {
+    categorySlug?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    q?: string;
+    featured?: boolean;
+  },
+  pagination: PaginationParams,
+) {
+  const conditions = [eq(products.isActive, true), eq(productVariants.isActive, true)];
+
+  if (filters.categorySlug) {
+    const [cat] = await db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.slug, filters.categorySlug))
+      .limit(1);
+    if (cat) {
+      conditions.push(eq(products.categoryId, cat.id));
+    }
+  }
+
+  if (filters.minPrice) {
+    conditions.push(gte(products.basePricePkr, filters.minPrice));
+  }
+
+  if (filters.maxPrice) {
+    conditions.push(lte(products.basePricePkr, filters.maxPrice));
+  }
+
+  if (filters.q) {
+    conditions.push(ilike(products.nameEn, `%${filters.q}%`));
+  }
+
+  if (filters.featured) {
+    conditions.push(eq(products.isFeatured, true));
+  }
+
+  const where = and(...conditions);
+
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(products)
+    .innerJoin(productVariants, eq(productVariants.productId, products.id))
+    .where(where);
+
+  const rows = await db
+    .select({
+      productId: products.id,
+      nameEn: products.nameEn,
+      slug: products.slug,
+      basePricePkr: products.basePricePkr,
+      categoryId: products.categoryId,
+      variantId: productVariants.id,
+      color: productVariants.color,
+      size: productVariants.size,
+      sku: productVariants.sku,
+      extraPricePkr: productVariants.extraPricePkr,
+    })
+    .from(products)
+    .innerJoin(productVariants, eq(productVariants.productId, products.id))
+    .where(where)
+    .orderBy(desc(products.createdAt), productVariants.color)
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+
+  const enriched = await Promise.all(
+    rows.map(async (row) => {
+      // Fetch category, variant-specific image, and product primary image in parallel
+      const [[category], variantImages, productImgs] = await Promise.all([
+        db.select({ id: categories.id, nameEn: categories.nameEn, slug: categories.slug })
+          .from(categories).where(eq(categories.id, row.categoryId)).limit(1),
+        db.select({ url: productImages.url, altText: productImages.altText })
+          .from(productImages)
+          .where(and(eq(productImages.productId, row.productId), eq(productImages.variantId, row.variantId)))
+          .orderBy(productImages.sortOrder).limit(1),
+        db.select({ url: productImages.url, altText: productImages.altText, isPrimary: productImages.isPrimary })
+          .from(productImages)
+          .where(and(eq(productImages.productId, row.productId)))
+          .orderBy(productImages.sortOrder).limit(1),
+      ]);
+
+      const image = variantImages[0]
+        ?? productImgs.find((img) => img.isPrimary)
+        ?? productImgs[0]
+        ?? null;
+
+      const base = parseFloat(row.basePricePkr);
+      const extra = parseFloat(row.extraPricePkr ?? '0');
+      const totalPrice = (base + extra).toFixed(2);
+
+      const variantParts = [row.color, row.size].filter(Boolean);
+      const variantLabel = variantParts.length > 0 ? variantParts.join(' / ') : null;
+
+      return {
+        productId: row.productId,
+        variantId: row.variantId,
+        nameEn: row.nameEn,
+        slug: row.slug,
+        basePricePkr: row.basePricePkr,
+        totalPricePkr: totalPrice,
+        variantLabel,
+        category: category ?? undefined,
+        image,
+      };
+    }),
+  );
+
+  return {
+    data: enriched,
     total: countResult?.count ?? 0,
   };
 }
@@ -83,22 +218,22 @@ export async function getProductBySlug(slug: string) {
     db.select().from(productTags).where(eq(productTags.productId, product.id)),
   ]);
 
-  // Fetch inventory for each variant
-  const variantsWithStock = await Promise.all(
-    variants.map(async (v) => {
-      const [inv] = await db
-        .select()
-        .from(inventory)
-        .where(eq(inventory.variantId, v.id))
-        .limit(1);
-      return {
-        ...v,
-        stock: inv
-          ? { onHand: inv.quantityOnHand, reserved: inv.quantityReserved, available: inv.quantityOnHand - inv.quantityReserved }
-          : null,
-      };
-    }),
-  );
+  // Fetch inventory for all variants in one query
+  const variantIds = variants.map((v) => v.id);
+  const inventoryRows = variantIds.length > 0
+    ? await db.select().from(inventory).where(inArray(inventory.variantId, variantIds))
+    : [];
+  const inventoryMap = new Map(inventoryRows.map((inv) => [inv.variantId, inv]));
+
+  const variantsWithStock = variants.map((v) => {
+    const inv = inventoryMap.get(v.id);
+    return {
+      ...v,
+      stock: inv
+        ? { onHand: inv.quantityOnHand, reserved: inv.quantityReserved, available: inv.quantityOnHand - inv.quantityReserved }
+        : null,
+    };
+  });
 
   return {
     ...product,

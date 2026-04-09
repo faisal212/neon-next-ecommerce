@@ -8,6 +8,8 @@ export const createCategorySchema = z.object({
   imageUrl: z.string().url().optional(),
   isActive: z.boolean().optional(),
   sortOrder: z.number().int().min(0).optional(),
+  isEcosystemFeatured: z.boolean().optional(),
+  ecosystemOrder: z.number().int().min(0).optional(),
 });
 
 export const updateCategorySchema = createCategorySchema.partial();

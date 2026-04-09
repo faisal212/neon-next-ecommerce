@@ -1,7 +1,8 @@
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { reviews } from '@/lib/db/schema/catalog';
+import { reviews, products } from '@/lib/db/schema/catalog';
 import { orderItems } from '@/lib/db/schema/orders';
+import { users } from '@/lib/db/schema/users';
 import { ForbiddenError, ConflictError, NotFoundError } from '@/lib/errors/api-error';
 import type { CreateReviewInput } from '@/lib/validators/product.validators';
 import type { PaginationParams } from '@/lib/utils/pagination';
@@ -68,6 +69,44 @@ export async function createReview(userId: string, productId: string, input: Cre
     .returning();
 
   return review;
+}
+
+export async function listAllReviews(pagination: PaginationParams, publishedFilter?: boolean) {
+  const conditions = [];
+
+  if (publishedFilter !== undefined) {
+    conditions.push(eq(reviews.isPublished, publishedFilter));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(reviews)
+    .where(where);
+
+  const data = await db
+    .select({
+      id: reviews.id,
+      userId: reviews.userId,
+      productId: reviews.productId,
+      orderItemId: reviews.orderItemId,
+      rating: reviews.rating,
+      comment: reviews.comment,
+      isPublished: reviews.isPublished,
+      createdAt: reviews.createdAt,
+      productName: products.nameEn,
+      userName: users.name,
+    })
+    .from(reviews)
+    .leftJoin(products, eq(reviews.productId, products.id))
+    .leftJoin(users, eq(reviews.userId, users.id))
+    .where(where)
+    .orderBy(desc(reviews.createdAt))
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+
+  return { data, total: countResult?.count ?? 0 };
 }
 
 export async function moderateReview(reviewId: string, isPublished: boolean) {

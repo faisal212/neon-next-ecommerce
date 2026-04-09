@@ -1,7 +1,8 @@
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { returnRequests, returnItems } from '@/lib/db/schema/support';
 import { orders } from '@/lib/db/schema/orders';
+import { users } from '@/lib/db/schema/users';
 import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import type { PaginationParams } from '@/lib/utils/pagination';
 
@@ -51,6 +52,47 @@ export async function listUserReturns(userId: string, pagination: PaginationPara
   const where = eq(returnRequests.userId, userId);
   const [countResult] = await db.select({ count: sql<number>`count(*)::int` }).from(returnRequests).where(where);
   const data = await db.select().from(returnRequests).where(where).orderBy(desc(returnRequests.createdAt)).limit(pagination.limit).offset(pagination.offset);
+  return { data, total: countResult?.count ?? 0 };
+}
+
+export async function listAllReturns(pagination: PaginationParams, statusFilter?: string) {
+  const conditions = [];
+
+  if (statusFilter) {
+    conditions.push(eq(returnRequests.status, statusFilter));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(returnRequests)
+    .where(where);
+
+  const data = await db
+    .select({
+      id: returnRequests.id,
+      orderId: returnRequests.orderId,
+      userId: returnRequests.userId,
+      reason: returnRequests.reason,
+      description: returnRequests.description,
+      status: returnRequests.status,
+      resolution: returnRequests.resolution,
+      handledBy: returnRequests.handledBy,
+      createdAt: returnRequests.createdAt,
+      resolvedAt: returnRequests.resolvedAt,
+      customerName: users.name,
+      customerEmail: users.email,
+      orderNumber: orders.orderNumber,
+    })
+    .from(returnRequests)
+    .leftJoin(users, eq(returnRequests.userId, users.id))
+    .leftJoin(orders, eq(returnRequests.orderId, orders.id))
+    .where(where)
+    .orderBy(desc(returnRequests.createdAt))
+    .limit(pagination.limit)
+    .offset(pagination.offset);
+
   return { data, total: countResult?.count ?? 0 };
 }
 

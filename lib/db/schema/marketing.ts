@@ -10,7 +10,7 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { users } from './users';
-import { products, productVariants } from './catalog';
+import { categories, products, productVariants } from './catalog';
 import { orders } from './orders';
 import { sessions } from './analytics';
 
@@ -41,6 +41,9 @@ export const wishlistItems = pgTable('wishlist_items', {
 export const banners = pgTable('banners', {
   id: uuid('id').defaultRandom().primaryKey(),
   title: varchar('title', { length: 200 }).notNull(),
+  titleHighlight: varchar('title_highlight', { length: 200 }),
+  subtitle: varchar('subtitle', { length: 200 }),
+  description: text('description'),
   imageUrl: text('image_url').notNull(),
   linkUrl: text('link_url'),
   placement: varchar('placement', { length: 40 }).notNull(),
@@ -120,6 +123,18 @@ export const referrals = pgTable('referrals', {
 }, (table) => [
   uniqueIndex('referrals_referral_code_idx').on(table.referralCode),
 ]);
+
+// ── Nav Menu Items ──────────────────────────────────────────────
+export const navMenuItems = pgTable('nav_menu_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  label: varchar('label', { length: 120 }).notNull(),
+  type: varchar('type', { length: 20 }).notNull(), // 'category' | 'custom'
+  categoryId: uuid('category_id').references(() => categories.id),
+  href: text('href').notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  openInNewTab: boolean('open_in_new_tab').default(false).notNull(),
+});
 
 // ── Recently Viewed ──────────────────────────────────────────────
 export const recentlyViewed = pgTable('recently_viewed', {

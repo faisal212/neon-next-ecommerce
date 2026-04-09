@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       .from(deliveryZones)
       .where(and(...conditions));
 
-    return success(zones);
+    return success({ zones });
   } catch (error) {
     return handleApiError(error);
   }

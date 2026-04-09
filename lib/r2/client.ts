@@ -39,7 +39,6 @@ export async function generatePresignedUploadUrl(
     Bucket: BUCKET,
     Key: key,
     ContentType: contentType,
-    ContentLength: MAX_SIZE,
   });
 
   const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 600 });

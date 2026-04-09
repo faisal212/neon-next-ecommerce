@@ -27,3 +27,22 @@ export async function updateBanner(id: string, input: Record<string, unknown>) {
   if (!banner) throw new NotFoundError('Banner not found');
   return banner;
 }
+
+export async function listAllBanners() {
+  return db.select().from(banners).orderBy(banners.sortOrder);
+}
+
+export async function getBannerById(id: string) {
+  const [banner] = await db
+    .select()
+    .from(banners)
+    .where(eq(banners.id, id))
+    .limit(1);
+
+  if (!banner) throw new NotFoundError('Banner not found');
+  return banner;
+}
+
+export async function deleteBanner(id: string) {
+  await db.delete(banners).where(eq(banners.id, id));
+}

@@ -16,11 +16,6 @@ export async function placeOrder(
   sessionToken: string,
   input: PlaceOrderInput,
 ) {
-  // Validate guest checkout
-  if (!userId && !input.guestPhone) {
-    throw new ValidationError('Phone number required for guest checkout');
-  }
-
   // Find active cart
   const cartCondition = userId
     ? and(eq(carts.userId, userId), eq(carts.status, 'active'))
@@ -33,19 +28,28 @@ export async function placeOrder(
   const items = await db.select().from(cartItems).where(eq(cartItems.cartId, cart.id));
   if (items.length === 0) throw new ValidationError('Cart is empty');
 
-  // Verify address
-  const [address] = await db.select().from(addresses).where(eq(addresses.id, input.addressId)).limit(1);
-  if (!address) throw new NotFoundError('Address not found');
+  // Create address from inline shipping data
+  const addr = input.shippingAddress;
+  const [address] = await db.insert(addresses).values({
+    userId: userId ?? undefined,
+    firstName: addr.firstName,
+    lastName: addr.lastName,
+    phonePk: addr.phone,
+    addressLine1: addr.streetAddress,
+    city: addr.city,
+    province: addr.province,
+    postalCode: addr.postalCode ?? null,
+    isGuest: !userId,
+  }).returning();
 
-  // Get delivery zone for shipping charge
+  // Verify delivery zone
   const [zone] = await db
     .select()
     .from(deliveryZones)
-    .where(and(eq(deliveryZones.city, address.city), eq(deliveryZones.isActive, true)))
+    .where(and(eq(deliveryZones.id, input.deliveryZoneId), eq(deliveryZones.isActive, true)))
     .limit(1);
 
   const shippingCharge = zone ? parseFloat(zone.shippingChargePkr) : 0;
-  const codCharge = zone?.isCodAvailable ? 50 : 0; // Default COD fee
 
   // Calculate subtotal from items (re-verify prices)
   let subtotal = 0;
@@ -77,7 +81,7 @@ export async function placeOrder(
     couponId = couponResult.couponId;
   }
 
-  const total = subtotal + shippingCharge + codCharge - discount;
+  const total = subtotal + shippingCharge - discount;
   const orderNumber = generateOrderNumber();
 
   // Use pool for transaction
@@ -106,14 +110,14 @@ export async function placeOrder(
       .values({
         orderNumber,
         userId: userId ?? null,
-        guestPhone: input.guestPhone ?? null,
+        guestPhone: !userId ? addr.phone : null,
         guestEmail: input.guestEmail ?? null,
-        addressId: input.addressId,
+        addressId: address.id,
         couponId,
         status: 'pending',
         subtotalPkr: subtotal.toFixed(2),
         shippingChargePkr: shippingCharge.toFixed(2),
-        codChargePkr: codCharge.toFixed(2),
+        codChargePkr: '0.00',
         discountPkr: discount.toFixed(2),
         totalPkr: total.toFixed(2),
         customerNotes: input.customerNotes ?? null,

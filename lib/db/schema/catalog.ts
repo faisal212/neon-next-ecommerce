@@ -22,6 +22,8 @@ export const categories = pgTable('categories', {
   imageUrl: text('image_url'),
   isActive: boolean('is_active').default(true).notNull(),
   sortOrder: integer('sort_order').default(0).notNull(),
+  isEcosystemFeatured: boolean('is_ecosystem_featured').default(false).notNull(),
+  ecosystemOrder: integer('ecosystem_order').default(0).notNull(),
 }, (table) => [
   uniqueIndex('categories_slug_idx').on(table.slug),
 ]);
