@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 import { ContactForm } from "./_components/contact-form";
@@ -27,7 +28,11 @@ const contactInfo = [
   },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  "use cache";
+  cacheLife("max");
+  cacheTag("static-contact");
+
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-8">
       <Breadcrumbs

@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { HeroSection } from "@/components/store/home/hero-section";
 import { EcosystemGrid } from "@/components/store/home/ecosystem-grid";
 import { NewArrivalsCarousel } from "@/components/store/home/new-arrivals-carousel";
@@ -7,6 +8,10 @@ import { listProductVariants } from "@/lib/services/product.service";
 import { ProductCard } from "@/components/store/product-card";
 
 export default async function HomePage() {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("homepage");
+
   const [banners, ecosystemCategories, products] = await Promise.all([
     getActiveBanners("homepage").catch(() => []),
     listEcosystemCategories().catch(() => []),

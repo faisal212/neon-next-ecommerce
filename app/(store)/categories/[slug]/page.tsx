@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { getCategoryBySlug, listCategoriesWithProductCount } from "@/lib/services/category.service";
 import { listProductVariants } from "@/lib/services/product.service";
 import { ProductCard } from "@/components/store/product-card";
@@ -19,6 +20,13 @@ export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
+  return getCategoryMetadata(slug);
+}
+
+async function getCategoryMetadata(slug: string): Promise<Metadata> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(`collection-${slug}`);
 
   try {
     const category = await getCategoryBySlug(slug);
@@ -50,6 +58,31 @@ export default async function CategoryPage({
     typeof sp.minPrice === "string" ? sp.minPrice : undefined;
   const maxPrice =
     typeof sp.maxPrice === "string" ? sp.maxPrice : undefined;
+
+  return (
+    <CategoryContent
+      slug={slug}
+      page={page}
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+    />
+  );
+}
+
+async function CategoryContent({
+  slug,
+  page,
+  minPrice,
+  maxPrice,
+}: {
+  slug: string;
+  page: number;
+  minPrice: string | undefined;
+  maxPrice: string | undefined;
+}) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(`collection-${slug}`);
 
   const pagination = {
     page,

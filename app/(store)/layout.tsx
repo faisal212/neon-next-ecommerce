@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { cacheLife, cacheTag } from "next/cache";
 import "./globals.css";
 import { StoreHeader } from "@/components/store/header/store-header";
 import { StoreFooter } from "@/components/store/footer/store-footer";
@@ -23,11 +24,15 @@ export const metadata: Metadata = {
     "Pakistan's premium tech store. Shop smartphones, wearables, smart home, audio & lifestyle products with free delivery and cash on delivery.",
 };
 
-export default function StoreLayout({
+export default async function StoreLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("store-layout");
+
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-on-surface font-sans selection:bg-primary selection:text-on-primary-fixed">

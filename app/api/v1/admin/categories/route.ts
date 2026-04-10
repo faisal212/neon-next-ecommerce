@@ -2,6 +2,11 @@ import { type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { createCategorySchema } from '@/lib/validators/product.validators';
 import { listCategories, createCategory } from '@/lib/services/category.service';
+import {
+  invalidateCategoryList,
+  invalidateHomepage,
+  invalidateStoreLayout,
+} from '@/lib/cache/revalidate';
 import { success, created } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 
@@ -21,6 +26,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createCategorySchema.parse(body);
     const category = await createCategory(data);
+    invalidateCategoryList();
+    invalidateHomepage();
+    invalidateStoreLayout();
     return created(category);
   } catch (error) {
     return handleApiError(error);

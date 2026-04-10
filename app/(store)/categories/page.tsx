@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { listCategories } from "@/lib/services/category.service";
 import { SectionHeader } from "@/components/store/section-header";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
@@ -21,6 +22,10 @@ const FALLBACK_CATEGORIES = [
 ];
 
 export default async function CategoriesPage() {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("collection-all");
+
   let categories: { nameEn: string; slug: string }[];
 
   try {

@@ -1,13 +1,15 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, connection } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { createProductSchema } from '@/lib/validators/product.validators';
 import { listProducts, createProduct } from '@/lib/services/product.service';
+import { invalidateProductList, invalidateHomepage } from '@/lib/cache/revalidate';
 import { paginated, created } from '@/lib/utils/api-response';
 import { parsePagination } from '@/lib/utils/pagination';
 import { handleApiError } from '@/lib/errors/handler';
 
 export async function GET(request: NextRequest) {
   try {
+    await connection();
     await requireAdmin();
     const pagination = parsePagination(request.nextUrl.searchParams);
     const { data, total } = await listProducts({ includeDrafts: true }, pagination);
@@ -29,6 +31,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createProductSchema.parse(body);
     const product = await createProduct(data);
+    invalidateProductList();
+    invalidateHomepage();
     return created(product);
   } catch (error) {
     return handleApiError(error);
