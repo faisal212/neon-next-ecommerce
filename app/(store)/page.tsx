@@ -10,7 +10,7 @@ export default async function HomePage() {
   const [banners, ecosystemCategories, products] = await Promise.all([
     getActiveBanners("homepage").catch(() => []),
     listEcosystemCategories().catch(() => []),
-    listProductVariants({}, { limit: 8, offset: 0 }).catch(() => ({ data: [], total: 0 })),
+    listProductVariants({}, { page: 1, limit: 8, offset: 0 }).catch(() => ({ data: [], total: 0 })),
   ]);
 
   const heroBanner = banners[0] ?? null;
