@@ -28,6 +28,7 @@ interface ProductData {
   basePricePkr: string;
   isActive: boolean;
   isFeatured: boolean;
+  isPublished: boolean;
   tags: string[];
 }
 
@@ -51,11 +52,13 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
       basePricePkr: "",
       isActive: true,
       isFeatured: false,
+      isPublished: false,
       tags: [],
     }
   );
   const [tagInput, setTagInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [savingIntent, setSavingIntent] = useState<"save" | "publish" | "unpublish" | null>(null);
   const [error, setError] = useState("");
 
   function updateField<K extends keyof ProductData>(key: K, value: ProductData[K]) {
@@ -77,10 +80,29 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
     );
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(
+    e: React.FormEvent,
+    intent: "save" | "publish" | "unpublish",
+  ) {
     e.preventDefault();
+
+    if (intent === "unpublish") {
+      if (!confirm(`Unpublish "${form.nameEn}"? It will be hidden from the store and moved back to drafts.`)) {
+        return;
+      }
+    }
+
     setSaving(true);
+    setSavingIntent(intent);
     setError("");
+
+    // Resolve the published state from the intent
+    const nextPublished =
+      intent === "publish"
+        ? true
+        : intent === "unpublish"
+          ? false
+          : form.isPublished;
 
     const url = isEditing
       ? `/api/v1/admin/products/${initialData!.id}`
@@ -99,6 +121,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
           basePricePkr: form.basePricePkr,
           isActive: form.isActive,
           isFeatured: form.isFeatured,
+          isPublished: nextPublished,
           tags: form.tags.length ? form.tags : undefined,
         }),
       });
@@ -107,6 +130,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
         const json = await res.json();
         setError(json.error?.message || "Failed to save product");
         setSaving(false);
+        setSavingIntent(null);
         return;
       }
 
@@ -121,6 +145,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
     } catch {
       setError("Something went wrong");
       setSaving(false);
+      setSavingIntent(null);
     }
   }
 
@@ -128,7 +153,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
     "w-full rounded-md border border-border bg-background px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary/20";
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => handleSubmit(e, "save")}>
       {error && (
         <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
@@ -236,13 +261,15 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
 
         {/* Toggles */}
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2.5">
-            <Switch
-              checked={form.isActive}
-              onCheckedChange={(checked) => updateField("isActive", checked)}
-            />
-            <Label className="text-[13px]">Active</Label>
-          </div>
+          {form.isPublished && (
+            <div className="flex items-center gap-2.5">
+              <Switch
+                checked={form.isActive}
+                onCheckedChange={(checked) => updateField("isActive", checked)}
+              />
+              <Label className="text-[13px]">Active</Label>
+            </div>
+          )}
           <div className="flex items-center gap-2.5">
             <Switch
               checked={form.isFeatured}
@@ -336,17 +363,51 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={saving}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-        >
-          {saving
-            ? "Saving..."
-            : isEditing
-              ? "Update Product"
-              : "Create & Continue to Edit"}
-        </button>
+        {form.isPublished ? (
+          <>
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              {saving && savingIntent === "save" ? "Saving..." : "Save changes"}
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => handleSubmit(e, "unpublish")}
+              className="rounded-md border border-amber-500/40 bg-amber-500/5 px-4 py-2 text-[13px] font-medium text-amber-400 transition-colors hover:border-amber-500/60 hover:bg-amber-500/10 disabled:opacity-50"
+            >
+              {saving && savingIntent === "unpublish" ? "Unpublishing..." : "Unpublish"}
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-4 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-zinc-600 disabled:opacity-50"
+            >
+              {saving && savingIntent === "save"
+                ? "Saving..."
+                : isEditing
+                  ? "Save draft"
+                  : "Save draft & continue"}
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => handleSubmit(e, "publish")}
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all duration-200 hover:bg-emerald-400 hover:shadow-emerald-500/30 disabled:opacity-50"
+            >
+              {saving && savingIntent === "publish"
+                ? "Publishing..."
+                : isEditing
+                  ? "Save & publish"
+                  : "Create & publish"}
+            </button>
+          </>
+        )}
         <button
           type="button"
           onClick={() => router.push("/admin/products")}

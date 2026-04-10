@@ -22,6 +22,7 @@ export default async function ProductsPage() {
       basePricePkr: products.basePricePkr,
       isActive: products.isActive,
       isFeatured: products.isFeatured,
+      isPublished: products.isPublished,
       categoryId: products.categoryId,
       createdAt: products.createdAt,
       categoryName: categories.nameEn,

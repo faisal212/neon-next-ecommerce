@@ -53,7 +53,7 @@ export async function listCategoriesWithProductCount() {
       productCount: sql<number>`count(${products.id})::int`,
     })
     .from(categories)
-    .leftJoin(products, and(eq(products.categoryId, categories.id), eq(products.isActive, true)))
+    .leftJoin(products, and(eq(products.categoryId, categories.id), eq(products.isActive, true), eq(products.isPublished, true)))
     .where(eq(categories.isActive, true))
     .groupBy(categories.id)
     .orderBy(desc(sql`count(${products.id})`), categories.sortOrder);
@@ -77,7 +77,7 @@ export async function listEcosystemCategories() {
       productCount: sql<number>`count(${products.id})::int`,
     })
     .from(categories)
-    .leftJoin(products, and(eq(products.categoryId, categories.id), eq(products.isActive, true)))
+    .leftJoin(products, and(eq(products.categoryId, categories.id), eq(products.isActive, true), eq(products.isPublished, true)))
     .where(and(eq(categories.isActive, true), eq(categories.isEcosystemFeatured, true)))
     .groupBy(categories.id)
     .orderBy(categories.ecosystemOrder)

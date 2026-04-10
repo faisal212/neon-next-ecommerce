@@ -74,6 +74,7 @@ export async function seedProduct(categoryId: string, overrides?: Partial<typeof
     nameEn: 'Test Product',
     slug,
     basePricePkr: '1000.00',
+    isPublished: true,
     ...overrides,
   }).returning();
   return product;

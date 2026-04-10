@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     await requireAdmin();
     const pagination = parsePagination(request.nextUrl.searchParams);
-    const { data, total } = await listProducts({}, pagination);
+    const { data, total } = await listProducts({ includeDrafts: true }, pagination);
 
     return paginated(data, {
       page: pagination.page,

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   createCategorySchema,
   createProductSchema,
+  updateProductSchema,
   createVariantSchema,
   updateInventorySchema,
   createReviewSchema,
@@ -64,6 +65,31 @@ describe('createProductSchema', () => {
   it('accepts tags array', () => {
     const result = createProductSchema.safeParse({ ...valid, tags: ['summer', 'cotton', 'new'] });
     expect(result.success).toBe(true);
+  });
+
+  it('accepts isPublished: true', () => {
+    expect(createProductSchema.safeParse({ ...valid, isPublished: true }).success).toBe(true);
+  });
+
+  it('accepts isPublished: false', () => {
+    expect(createProductSchema.safeParse({ ...valid, isPublished: false }).success).toBe(true);
+  });
+
+  it('accepts omitted isPublished (optional)', () => {
+    // `valid` has no isPublished — create should still succeed.
+    expect(createProductSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('rejects non-boolean isPublished', () => {
+    expect(
+      createProductSchema.safeParse({ ...valid, isPublished: 'yes' as unknown as boolean }).success,
+    ).toBe(false);
+  });
+});
+
+describe('updateProductSchema', () => {
+  it('accepts { isPublished: true } alone (partial)', () => {
+    expect(updateProductSchema.safeParse({ isPublished: true }).success).toBe(true);
   });
 });
 

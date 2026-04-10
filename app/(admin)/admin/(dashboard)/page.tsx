@@ -1,4 +1,4 @@
-import { sql, desc, eq } from "drizzle-orm";
+import { sql, desc, eq, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema/orders";
 import { products, productVariants, inventory } from "@/lib/db/schema/catalog";
@@ -32,7 +32,7 @@ async function getDashboardData() {
   const [productCount] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(products)
-    .where(eq(products.isActive, true));
+    .where(and(eq(products.isActive, true), eq(products.isPublished, true)));
 
   const [userCount] = await db
     .select({ count: sql<number>`count(*)::int` })

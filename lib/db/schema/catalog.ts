@@ -42,6 +42,7 @@ export const products = pgTable('products', {
   basePricePkr: numeric('base_price_pkr', { precision: 12, scale: 2 }).notNull(),
   isActive: boolean('is_active').default(true).notNull(),
   isFeatured: boolean('is_featured').default(false).notNull(),
+  isPublished: boolean('is_published').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [
