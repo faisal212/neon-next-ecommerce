@@ -85,4 +85,37 @@ describe('GET /api/v1/products', () => {
     expect(body.data[0].nameEn).toBe('Featured');
     expect(body.data[0].isFeatured).toBe(true);
   });
+
+  it('excludes drafts from the public list', async () => {
+    const cat = await seedCategory();
+    await seedProduct(cat.id, { nameEn: 'PublishedOne' });
+    await seedProduct(cat.id, { nameEn: 'DraftOne', isPublished: false });
+
+    const res = await listProductsHandler(get('/api/v1/products'));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.data).toHaveLength(1);
+    expect(body.meta.total).toBe(1);
+    expect(body.data[0].nameEn).toBe('PublishedOne');
+  });
+
+  it('excludes drafts even when featured=true', async () => {
+    const cat = await seedCategory();
+    await seedProduct(cat.id, { nameEn: 'PubFeat', isFeatured: true });
+    await seedProduct(cat.id, {
+      nameEn: 'DraftFeat',
+      isFeatured: true,
+      isPublished: false,
+    });
+
+    const res = await listProductsHandler(
+      get('/api/v1/products', { searchParams: { featured: 'true' } }),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0].nameEn).toBe('PubFeat');
+  });
 });

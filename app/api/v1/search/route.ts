@@ -1,5 +1,5 @@
 import { type NextRequest } from 'next/server';
-import { ilike, or, eq, sql } from 'drizzle-orm';
+import { and, ilike, or, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { products } from '@/lib/db/schema/catalog';
 import { success } from '@/lib/utils/api-response';
@@ -26,10 +26,14 @@ export async function GET(request: NextRequest) {
       .select()
       .from(products)
       .where(
-        or(
-          ilike(products.nameEn, searchTerm),
-          ilike(products.nameUr, searchTerm),
-          ilike(products.descriptionEn, searchTerm),
+        and(
+          or(
+            ilike(products.nameEn, searchTerm),
+            ilike(products.nameUr, searchTerm),
+            ilike(products.descriptionEn, searchTerm),
+          ),
+          eq(products.isActive, true),
+          eq(products.isPublished, true),
         ),
       )
       .limit(pagination.limit)

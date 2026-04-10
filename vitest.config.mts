@@ -13,5 +13,13 @@ export default defineConfig({
     pool: 'forks',
     fileParallelism: false,
     env: { NODE_ENV: 'test' },
+    // @neondatabase/auth does an unextensioned `import "next/headers"` that
+    // Node's native ESM resolver can't follow. Inlining the package forces it
+    // through vite's transformer, which respects Next's package exports.
+    server: {
+      deps: {
+        inline: ['@neondatabase/auth'],
+      },
+    },
   },
 });

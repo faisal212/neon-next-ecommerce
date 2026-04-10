@@ -14,6 +14,7 @@ interface Product {
   basePricePkr: string;
   isActive: boolean;
   isFeatured: boolean;
+  isPublished: boolean;
   createdAt: string;
   variantCount: number;
   imageCount: number;
@@ -30,7 +31,7 @@ interface ProductsTableProps {
   categories: Category[];
 }
 
-type StatusFilter = "all" | "active" | "inactive" | "featured";
+type StatusFilter = "all" | "draft" | "published" | "active" | "inactive" | "featured";
 
 export function ProductsTable({ data, categories }: ProductsTableProps) {
   const router = useRouter();
@@ -42,8 +43,10 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
   const filtered = useMemo(() => {
     let result = data;
 
-    if (statusFilter === "active") result = result.filter((p) => p.isActive);
-    else if (statusFilter === "inactive") result = result.filter((p) => !p.isActive);
+    if (statusFilter === "draft") result = result.filter((p) => !p.isPublished);
+    else if (statusFilter === "published") result = result.filter((p) => p.isPublished);
+    else if (statusFilter === "active") result = result.filter((p) => p.isPublished && p.isActive);
+    else if (statusFilter === "inactive") result = result.filter((p) => p.isPublished && !p.isActive);
     else if (statusFilter === "featured") result = result.filter((p) => p.isFeatured);
 
     if (categoryFilter) result = result.filter((p) => p.categoryId === categoryFilter);
@@ -54,8 +57,10 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
   // Counts
   const counts = useMemo(() => ({
     all: data.length,
-    active: data.filter((p) => p.isActive).length,
-    inactive: data.filter((p) => !p.isActive).length,
+    draft: data.filter((p) => !p.isPublished).length,
+    published: data.filter((p) => p.isPublished).length,
+    active: data.filter((p) => p.isPublished && p.isActive).length,
+    inactive: data.filter((p) => p.isPublished && !p.isActive).length,
     featured: data.filter((p) => p.isFeatured).length,
   }), [data]);
 
@@ -145,9 +150,12 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
       key: "status",
       label: "Status",
       sortable: true,
-      getValue: (row) => (row.isActive ? "active" : "inactive"),
+      getValue: (row) =>
+        !row.isPublished ? "draft" : row.isActive ? "active" : "inactive",
       render: (row) => (
-        <StatusBadge status={row.isActive ? "active" : "inactive"} />
+        <StatusBadge
+          status={!row.isPublished ? "draft" : row.isActive ? "active" : "inactive"}
+        />
       ),
     },
     {
@@ -178,22 +186,33 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
       key: "actions",
       label: "",
       className: "w-10",
-      render: (row) => (
-        <button
-          type="button"
-          onClick={(e) => handleDelete(e, row)}
-          disabled={deletingId === row.id || !row.isActive}
-          title={row.isActive ? "Deactivate product" : "Already inactive"}
-          className="rounded-md p-1.5 text-zinc-600 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-600"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      ),
+      render: (row) => {
+        const isDraft = !row.isPublished;
+        const disabled = deletingId === row.id || isDraft || !row.isActive;
+        const title = isDraft
+          ? "Drafts can't be deactivated"
+          : row.isActive
+            ? "Deactivate product"
+            : "Already inactive";
+        return (
+          <button
+            type="button"
+            onClick={(e) => handleDelete(e, row)}
+            disabled={disabled}
+            title={title}
+            className="rounded-md p-1.5 text-zinc-600 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-600"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        );
+      },
     },
   ];
 
   const statusTabs: { key: StatusFilter; label: string; count: number }[] = [
     { key: "all", label: "All", count: counts.all },
+    { key: "draft", label: "Drafts", count: counts.draft },
+    { key: "published", label: "Published", count: counts.published },
     { key: "active", label: "Active", count: counts.active },
     { key: "inactive", label: "Inactive", count: counts.inactive },
     { key: "featured", label: "Featured", count: counts.featured },
