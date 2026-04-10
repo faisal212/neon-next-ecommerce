@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { listProducts } from "@/lib/services/product.service";
 import { ProductCard } from "@/components/store/product-card";
 import { ProductCardSkeleton } from "@/components/store/product-card-skeleton";
@@ -30,6 +31,32 @@ export default async function ProductsPage(props: {
     typeof searchParams.maxPrice === "string"
       ? searchParams.maxPrice
       : undefined;
+
+  return (
+    <ProductsContent
+      page={page}
+      q={q}
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+    />
+  );
+}
+
+async function ProductsContent({
+  page,
+  q,
+  minPrice,
+  maxPrice,
+}: {
+  page: number;
+  q: string | undefined;
+  minPrice: string | undefined;
+  maxPrice: string | undefined;
+}) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("collection-all");
+  if (q) cacheTag(`search-${q}`);
 
   const pagination = {
     page,

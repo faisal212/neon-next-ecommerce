@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/auth';
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { productImages } from '@/lib/db/schema/catalog';
+import { invalidateProductById } from '@/lib/cache/revalidate';
 import { success } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 import { NotFoundError } from '@/lib/errors/api-error';
@@ -21,6 +22,7 @@ export async function DELETE(
       .returning();
 
     if (!deleted) throw new NotFoundError('Image not found');
+    await invalidateProductById(id);
     return success({ deleted: true });
   } catch (error) {
     return handleApiError(error);
@@ -57,6 +59,7 @@ export async function PATCH(
       .returning();
 
     if (!image) throw new NotFoundError('Image not found');
+    await invalidateProductById(id);
     return success(image);
   } catch (error) {
     return handleApiError(error);

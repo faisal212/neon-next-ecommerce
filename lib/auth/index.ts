@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+import { connection } from 'next/server';
 import { auth } from './better-auth';
 import { db } from '@/lib/db';
 import { users, adminUsers } from '@/lib/db/schema/users';
@@ -28,6 +29,8 @@ export interface AdminUser {
  * Neon Auth reads the session cookie automatically in Next.js server context.
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
+  // Opt out of prerendering — reads cookies via session.
+  await connection();
   const { data: session } = await auth.getSession();
 
   if (!session?.user) return null;
@@ -59,6 +62,8 @@ export async function requireAuth(): Promise<AuthUser> {
 }
 
 export async function requireAdmin(allowedRoles?: string[]): Promise<AdminUser> {
+  // Opt out of prerendering — reads cookies via session.
+  await connection();
   const { data: session } = await auth.getSession();
 
   if (!session?.user) throw new AuthenticationError();

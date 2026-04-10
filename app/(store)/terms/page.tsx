@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 
 export const metadata: Metadata = {
@@ -7,7 +8,11 @@ export const metadata: Metadata = {
     "Read Cover's terms and conditions. Understand your rights and responsibilities when using our platform and purchasing products.",
 };
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  "use cache";
+  cacheLife("max");
+  cacheTag("static-terms");
+
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-8">
       <Breadcrumbs

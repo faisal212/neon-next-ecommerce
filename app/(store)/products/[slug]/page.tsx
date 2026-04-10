@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import { cacheLife, cacheTag } from 'next/cache';
 import { Cog, Zap } from 'lucide-react';
 import { getProductBySlug } from '@/lib/services/product.service';
 import { NotFoundError } from '@/lib/errors/api-error';
@@ -15,6 +16,13 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  return getProductMetadata(slug);
+}
+
+async function getProductMetadata(slug: string): Promise<Metadata> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(`product-${slug}`);
 
   try {
     const product = await getProductBySlug(slug);
@@ -31,6 +39,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
+  return <ProductDetailContent slug={slug} />;
+}
+
+async function ProductDetailContent({ slug }: { slug: string }) {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(`product-${slug}`);
 
   let product: Awaited<ReturnType<typeof getProductBySlug>>;
   try {

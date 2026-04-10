@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 
 export const metadata: Metadata = {
@@ -7,7 +8,11 @@ export const metadata: Metadata = {
     "Cover's privacy policy. Learn how we collect, use, and protect your personal information when you shop with us.",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  "use cache";
+  cacheLife("max");
+  cacheTag("static-privacy");
+
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-8">
       <Breadcrumbs

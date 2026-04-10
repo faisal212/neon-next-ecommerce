@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { Truck, Package, MapPin, Clock, CreditCard, BadgeCheck } from "lucide-react";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 
@@ -42,7 +43,11 @@ const cities = [
   "Bahawalpur",
 ];
 
-export default function ShippingPage() {
+export default async function ShippingPage() {
+  "use cache";
+  cacheLife("max");
+  cacheTag("static-shipping");
+
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-8">
       <Breadcrumbs

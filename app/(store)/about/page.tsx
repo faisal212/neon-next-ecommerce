@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { Zap, Shield, Truck } from "lucide-react";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 
@@ -29,7 +30,11 @@ const values = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  "use cache";
+  cacheLife("max");
+  cacheTag("static-about");
+
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-8">
       <Breadcrumbs

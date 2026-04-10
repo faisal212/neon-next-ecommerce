@@ -4,6 +4,7 @@ import { createImageSchema } from '@/lib/validators/product.validators';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { productImages } from '@/lib/db/schema/catalog';
+import { invalidateProductById } from '@/lib/cache/revalidate';
 import { success, created } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 
@@ -38,6 +39,7 @@ export async function POST(
       isPrimary: data.isPrimary ?? false,
       sortOrder: data.sortOrder ?? 0,
     }).returning();
+    await invalidateProductById(id);
     return created(image);
   } catch (error) {
     return handleApiError(error);
