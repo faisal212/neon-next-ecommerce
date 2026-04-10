@@ -1,6 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { listFlashSales, createFlashSale } from '@/lib/services/flash-sale.service';
+import { invalidateFlashSales } from '@/lib/cache/revalidate';
 import { success, created } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 import { z } from 'zod';
@@ -34,6 +35,7 @@ export async function POST(request: NextRequest) {
       startsAt: new Date(data.startsAt),
       endsAt: new Date(data.endsAt),
     });
+    invalidateFlashSales();
     return created(sale);
   } catch (error) {
     return handleApiError(error);

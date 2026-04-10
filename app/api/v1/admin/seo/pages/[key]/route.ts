@@ -1,6 +1,7 @@
 import { type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { getStaticPageSeo, upsertStaticPageSeo } from '@/lib/services/seo.service';
+import { invalidateStaticPage } from '@/lib/cache/revalidate';
 import { success } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 
@@ -27,6 +28,7 @@ export async function PUT(
     const { key } = await params;
     const body = await request.json();
     const seo = await upsertStaticPageSeo(key, body);
+    invalidateStaticPage(key);
     return success(seo);
   } catch (error) {
     return handleApiError(error);

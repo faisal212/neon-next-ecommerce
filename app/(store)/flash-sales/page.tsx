@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 import { SectionHeader } from "@/components/store/section-header";
 import { Zap, Clock, Tag } from "lucide-react";
@@ -22,7 +23,11 @@ const placeholderSales = [
   },
 ];
 
-export default function FlashSalesPage() {
+export default async function FlashSalesPage() {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("flash-sales");
+
   return (
     <div className="max-w-[1440px] mx-auto px-8 py-12">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Flash Sales" }]} />

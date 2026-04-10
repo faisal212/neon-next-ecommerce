@@ -5,6 +5,7 @@ import {
   updateNavMenuItem,
   deleteNavMenuItem,
 } from '@/lib/services/nav-menu.service';
+import { invalidateStoreLayout } from '@/lib/cache/revalidate';
 import { success, noContent } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 
@@ -31,6 +32,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
     const item = await updateNavMenuItem(id, body);
+    invalidateStoreLayout();
     return success(item);
   } catch (error) {
     return handleApiError(error);
@@ -45,6 +47,7 @@ export async function DELETE(
     await requireAdmin(['super_admin', 'manager']);
     const { id } = await params;
     await deleteNavMenuItem(id);
+    invalidateStoreLayout();
     return noContent();
   } catch (error) {
     return handleApiError(error);

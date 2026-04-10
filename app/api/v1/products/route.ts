@@ -1,4 +1,4 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, connection } from 'next/server';
 import { listProducts } from '@/lib/services/product.service';
 import { paginated } from '@/lib/utils/api-response';
 import { parsePagination } from '@/lib/utils/pagination';
@@ -6,6 +6,7 @@ import { handleApiError } from '@/lib/errors/handler';
 
 export async function GET(request: NextRequest) {
   try {
+    await connection();
     const searchParams = request.nextUrl.searchParams;
     const pagination = parsePagination(searchParams);
 

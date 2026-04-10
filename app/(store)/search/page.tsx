@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { listProducts } from "@/lib/services/product.service";
 import { ProductCard } from "@/components/store/product-card";
 import { SectionHeader } from "@/components/store/section-header";
@@ -32,6 +33,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
   const page = Math.max(1, Number(sp.page) || 1);
+
+  return <SearchContent q={q} page={page} />;
+}
+
+async function SearchContent({ q, page }: { q: string; page: number }) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("search");
+  if (q) cacheTag(`search-${q}`);
 
   const pagination = {
     page,

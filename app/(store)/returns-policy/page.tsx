@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 
 export const metadata: Metadata = {
@@ -34,7 +35,11 @@ const steps = [
   },
 ];
 
-export default function ReturnsPolicyPage() {
+export default async function ReturnsPolicyPage() {
+  "use cache";
+  cacheLife("max");
+  cacheTag("static-returns-policy");
+
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-8">
       <Breadcrumbs

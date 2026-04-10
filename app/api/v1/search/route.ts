@@ -1,4 +1,4 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, connection } from 'next/server';
 import { and, ilike, or, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { products } from '@/lib/db/schema/catalog';
@@ -9,6 +9,7 @@ import { rateLimit, rateLimitResponse } from '@/lib/utils/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
+    await connection();
     const q = request.nextUrl.searchParams.get('q');
     if (!q || q.trim().length < 2) {
       return success([]);

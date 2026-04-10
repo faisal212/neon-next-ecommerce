@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { createVariantSchema } from '@/lib/validators/product.validators';
 import { listVariants, createVariant } from '@/lib/services/variant.service';
+import { invalidateProductById, invalidateProductList } from '@/lib/cache/revalidate';
 import { success, created } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 
@@ -29,6 +30,8 @@ export async function POST(
     const body = await request.json();
     const data = createVariantSchema.parse(body);
     const variant = await createVariant(id, data);
+    await invalidateProductById(id);
+    invalidateProductList();
     return created(variant);
   } catch (error) {
     return handleApiError(error);
