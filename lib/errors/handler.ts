@@ -1,3 +1,4 @@
+import { unstable_rethrow } from 'next/navigation';
 import { AppError, ValidationError } from './api-error';
 
 // Zod v4 uses ZodError — detect by checking for `issues` array
@@ -10,6 +11,13 @@ function isZodError(error: unknown): error is { issues: { message: string; path:
 }
 
 export function handleApiError(error: unknown): Response {
+  // Let Next.js framework signals (notFound, redirect, and
+  // HANGING_PROMISE_REJECTION from connection()/cookies()/fetch() during
+  // prerender) bubble up past every route handler's try/catch. Without
+  // this, build logs fill with spurious "Unhandled error:" entries when
+  // Next.js prerenders GET handlers with Cache Components enabled.
+  unstable_rethrow(error);
+
   if (isZodError(error)) {
     return Response.json(
       {
