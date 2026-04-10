@@ -14,10 +14,13 @@ export async function listProducts(
     maxPrice?: string;
     q?: string;
     featured?: boolean;
+    includeDrafts?: boolean;
   },
   pagination: PaginationParams,
 ) {
-  const conditions = [eq(products.isActive, true)];
+  const conditions = filters.includeDrafts
+    ? []
+    : [eq(products.isActive, true), eq(products.isPublished, true)];
 
   if (filters.categorySlug) {
     const [cat] = await db
@@ -94,10 +97,13 @@ export async function listProductVariants(
     maxPrice?: string;
     q?: string;
     featured?: boolean;
+    includeDrafts?: boolean;
   },
   pagination: PaginationParams,
 ) {
-  const conditions = [eq(products.isActive, true), eq(productVariants.isActive, true)];
+  const conditions = filters.includeDrafts
+    ? [eq(productVariants.isActive, true)]
+    : [eq(products.isActive, true), eq(products.isPublished, true), eq(productVariants.isActive, true)];
 
   if (filters.categorySlug) {
     const [cat] = await db
@@ -210,6 +216,7 @@ export async function getProductBySlug(slug: string) {
     .limit(1);
 
   if (!product) throw new NotFoundError('Product not found');
+  if (!product.isPublished) throw new NotFoundError('Product not found');
 
   // Fetch related data in parallel
   const [variants, images, tags] = await Promise.all([
@@ -286,6 +293,7 @@ export async function createProduct(input: CreateProductInput) {
       basePricePkr: input.basePricePkr,
       isActive: input.isActive ?? true,
       isFeatured: input.isFeatured ?? false,
+      isPublished: input.isPublished ?? false,
     })
     .returning();
 

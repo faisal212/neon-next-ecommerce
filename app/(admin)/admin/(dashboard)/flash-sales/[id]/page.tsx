@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { flashSales, flashSaleProducts } from "@/lib/db/schema/marketing";
 import { products } from "@/lib/db/schema/catalog";
@@ -48,7 +48,7 @@ export default async function FlashSaleDetailPage({ params }: Props) {
   const allProducts = await db
     .select({ id: products.id, nameEn: products.nameEn })
     .from(products)
-    .where(eq(products.isActive, true))
+    .where(and(eq(products.isActive, true), eq(products.isPublished, true)))
     .orderBy(products.nameEn);
 
   const status = getSaleStatus(sale);

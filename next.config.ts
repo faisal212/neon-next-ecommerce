@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'pub-6faf32fc2deb4ffa8a66595cbfd0abcd.r2.dev',
       },
+      {
+        protocol: 'https',
+        hostname: 'assets.refine.pk',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },

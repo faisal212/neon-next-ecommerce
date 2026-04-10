@@ -24,6 +24,7 @@ export const createProductSchema = z.object({
   basePricePkr: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Must be a valid price'),
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
+  isPublished: z.boolean().optional(),
   tags: z.array(z.string().max(80)).optional(),
 });
 

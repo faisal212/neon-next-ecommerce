@@ -82,6 +82,7 @@ export default async function EditProductPage({ params }: Props) {
           basePricePkr: product.basePricePkr,
           isActive: product.isActive,
           isFeatured: product.isFeatured,
+          isPublished: product.isPublished,
           tags: tags.map((t) => t.tag),
         }}
       />

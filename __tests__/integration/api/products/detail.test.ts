@@ -40,4 +40,34 @@ describe('GET /api/v1/products/[slug]', () => {
     expect(res.status).toBe(404);
     expect(body.success).toBe(false);
   });
+
+  it('returns 404 for a draft product', async () => {
+    const cat = await seedCategory();
+    const draft = await seedProduct(cat.id, { nameEn: 'Draft One', isPublished: false });
+
+    const res = await getProductHandler(
+      get(`/api/v1/products/${draft.slug}`),
+      routeParams({ slug: draft.slug }),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(404);
+    expect(body.success).toBe(false);
+  });
+
+  it('returns 200 for a published product (regression)', async () => {
+    const cat = await seedCategory();
+    const pub = await seedProduct(cat.id, { nameEn: 'Published One' });
+    await seedVariantWithStock(pub.id, 5);
+
+    const res = await getProductHandler(
+      get(`/api/v1/products/${pub.slug}`),
+      routeParams({ slug: pub.slug }),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.data.id).toBe(pub.id);
+  });
 });

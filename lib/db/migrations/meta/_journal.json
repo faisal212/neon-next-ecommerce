@@ -15,6 +15,20 @@
       "when": 1775752310564,
       "tag": "0001_greedy_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775824466448,
+      "tag": "0002_oval_shiver_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775835449268,
+      "tag": "0003_rewrite_r2_dev_to_assets_refine",
+      "breakpoints": true
     }
   ]
 }

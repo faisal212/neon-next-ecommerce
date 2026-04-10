@@ -336,7 +336,7 @@ async function seed() {
     const [prod] = await db.insert(products).values({
       categoryId: p.catId, nameEn: p.nameEn, nameUr: p.nameUr, slug: p.slug,
       descriptionEn: p.descEn, descriptionUr: p.descUr,
-      basePricePkr: p.price, isFeatured: p.featured,
+      basePricePkr: p.price, isFeatured: p.featured, isPublished: true,
     }).returning();
 
     if (p.featured) featuredIds.push(prod.id);
