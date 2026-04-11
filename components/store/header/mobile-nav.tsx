@@ -23,13 +23,13 @@ export function MobileNav({ links }: MobileNavProps) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger
           aria-label="Open menu"
-          className="text-on-surface-variant hover:text-primary transition-colors p-2"
+          className="p-2 text-on-surface-variant transition-colors hover:text-primary"
         >
           <Menu size={20} />
         </SheetTrigger>
-        <SheetContent side="left" className="bg-surface border-outline-variant/10">
+        <SheetContent side="left" className="border-outline-variant/10 bg-surface">
           <SheetHeader>
-            <SheetTitle className="text-white font-black tracking-tighter text-xl">
+            <SheetTitle className="text-xl font-black tracking-tighter text-white">
               Cover
             </SheetTitle>
           </SheetHeader>
@@ -39,7 +39,7 @@ export function MobileNav({ links }: MobileNavProps) {
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="text-on-surface-variant hover:text-white transition-colors text-sm py-3 border-b border-outline-variant/10 last:border-b-0"
+                className="border-b border-outline-variant/10 py-3 text-sm text-on-surface-variant transition-colors last:border-b-0 hover:text-white"
               >
                 {link.label}
               </Link>
