@@ -11,11 +11,11 @@ export function CartTrigger() {
       type="button"
       aria-label={`Cart${itemCount > 0 ? ` (${itemCount} items)` : ''}`}
       onClick={toggleCart}
-      className="text-on-surface-variant hover:text-primary transition-colors relative p-2"
+      className="relative p-2 text-on-surface-variant transition-colors hover:text-primary"
     >
       <ShoppingCart size={20} />
       {itemCount > 0 && (
-        <span className="w-2 h-2 bg-primary rounded-full absolute top-0 right-0 status-glow" />
+        <span className="status-glow absolute right-0 top-0 h-2 w-2 rounded-full bg-primary" />
       )}
     </button>
   );

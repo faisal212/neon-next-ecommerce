@@ -52,3 +52,5 @@ next-env.d.ts
 # HTML prototypes / schema exports that are not app source
 /adminpanelprototype.html
 /pk_ecommerce_full_schema*.html
+
+DESIGN.md

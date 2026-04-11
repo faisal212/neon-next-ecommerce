@@ -29,6 +29,9 @@ export default async function StoreLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // StoreHeader is cached here as part of the layout; edits to the header
+  // component itself only land after the store-layout cache tag is
+  // revalidated or Turbopack picks up the change.
   "use cache";
   cacheLife("hours");
   cacheTag("store-layout");

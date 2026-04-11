@@ -265,6 +265,17 @@ main > * {
   100% { background-position: 200% 0; }
 }
 
+/* ── Command palette scan bar (loading state) ─────────── */
+@keyframes search-scan {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.search-scan-bar {
+  animation: search-scan 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
 /* ── Button Press ──────────────────────────────────────── */
 button:active:not(:disabled) {
   transition: transform 0.1s ease;
