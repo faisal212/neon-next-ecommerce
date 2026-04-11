@@ -21,27 +21,28 @@ describe('User Service (integration)', () => {
 
   it('creates a user profile linked to auth user', async () => {
     const authId = await createAuthUser();
-    const user = await createUser(authId, { name: 'Ali Khan', email: 'ali@example.com' });
+    const user = await createUser(authId, { firstName: 'Ali', lastName: 'Khan', email: 'ali@example.com' });
     expect(user.authUserId).toBe(authId);
-    expect(user.name).toBe('Ali Khan');
+    expect(user.firstName).toBe('Ali');
+    expect(user.lastName).toBe('Khan');
     expect(user.email).toBe('ali@example.com');
     expect(user.isActive).toBe(true);
   });
 
   it('rejects duplicate auth_user_id', async () => {
     const authId = await createAuthUser();
-    await createUser(authId, { name: 'Ali', email: 'ali@example.com' });
+    await createUser(authId, { firstName: 'Ali', lastName: 'Khan', email: 'ali@example.com' });
     await expect(
-      createUser(authId, { name: 'Ali2', email: 'ali2@example.com' }),
+      createUser(authId, { firstName: 'Ali', lastName: 'Khan', email: 'ali2@example.com' }),
     ).rejects.toThrow('already exists');
   });
 
   it('rejects duplicate email', async () => {
     const authId1 = await createAuthUser();
     const authId2 = await createAuthUser();
-    await createUser(authId1, { name: 'Ali', email: 'same@example.com' });
+    await createUser(authId1, { firstName: 'Ali', lastName: 'Khan', email: 'same@example.com' });
     await expect(
-      createUser(authId2, { name: 'Ahmed', email: 'same@example.com' }),
+      createUser(authId2, { firstName: 'Ahmed', lastName: 'Raza', email: 'same@example.com' }),
     ).rejects.toThrow('already registered');
   });
 
@@ -63,8 +64,9 @@ describe('User Service (integration)', () => {
 
   it('updates user profile', async () => {
     const user = await seedUser();
-    const updated = await updateUser(user.id, { name: 'New Name' });
-    expect(updated.name).toBe('New Name');
+    const updated = await updateUser(user.id, { firstName: 'New', lastName: 'Name' });
+    expect(updated.firstName).toBe('New');
+    expect(updated.lastName).toBe('Name');
   });
 
   it('deactivates user', async () => {

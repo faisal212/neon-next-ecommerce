@@ -60,7 +60,8 @@ describe('Cart API', () => {
       mockGetCurrentUser.mockResolvedValue({
         id: userId,
         authUserId: crypto.randomUUID(),
-        name: 'Test User',
+        firstName: 'Test',
+        lastName: 'User',
         email: 'test@example.com',
         phonePk: null,
         isPhoneVerified: false,
@@ -82,7 +83,8 @@ describe('Cart API', () => {
       mockGetCurrentUser.mockResolvedValue({
         id: userId,
         authUserId: crypto.randomUUID(),
-        name: 'Test User',
+        firstName: 'Test',
+        lastName: 'User',
         email: 'test@example.com',
         phonePk: null,
         isPhoneVerified: false,
@@ -103,7 +105,8 @@ describe('Cart API', () => {
       mockGetCurrentUser.mockResolvedValue({
         id: userId,
         authUserId: crypto.randomUUID(),
-        name: 'Test User',
+        firstName: 'Test',
+        lastName: 'User',
         email: 'test@example.com',
         phonePk: null,
         isPhoneVerified: false,

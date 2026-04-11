@@ -8,7 +8,8 @@ import { AuthenticationError, ForbiddenError } from '@/lib/errors/api-error';
 export interface AuthUser {
   id: string;
   authUserId: string;
-  name: string | null;
+  firstName: string;
+  lastName: string;
   email: string;
   phonePk: string | null;
   isPhoneVerified: boolean;
@@ -46,7 +47,8 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   return {
     id: user.id,
     authUserId: user.authUserId,
-    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     phonePk: user.phonePk,
     isPhoneVerified: user.isPhoneVerified,
@@ -59,6 +61,20 @@ export async function requireAuth(): Promise<AuthUser> {
   if (!user) throw new AuthenticationError();
   if (!user.isActive) throw new ForbiddenError('Account is deactivated');
   return user;
+}
+
+/**
+ * Returns the Neon Auth user id from the active session cookie, without
+ * joining to the `users` profile table. Used during signup — the moment
+ * Neon Auth has created the auth identity but we haven't yet inserted
+ * the matching row into `public.users`. `getCurrentUser` / `requireAuth`
+ * would return null in that window because they require a joined row.
+ */
+export async function requireAuthUserId(): Promise<string> {
+  await connection();
+  const { data: session } = await auth.getSession();
+  if (!session?.user) throw new AuthenticationError();
+  return session.user.id;
 }
 
 export async function requireAdmin(allowedRoles?: string[]): Promise<AdminUser> {

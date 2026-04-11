@@ -1,10 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { neon } from '@neondatabase/serverless';
+
+vi.mock('@/lib/auth');
+
+import { POST } from '@/app/api/v1/auth/register/route';
+import * as authModule from '@/lib/auth';
+import { AuthenticationError } from '@/lib/errors/api-error';
 import { post } from '../../../helpers/request';
 import { truncateAll } from '../../../helpers/db';
-import { POST } from '@/app/api/v1/auth/register/route';
 
 const sql = neon(process.env.DATABASE_URL!);
+const mockRequireAuthUserId = vi.mocked(authModule.requireAuthUserId);
 
 async function createAuthUser(): Promise<string> {
   const id = crypto.randomUUID();
@@ -16,11 +22,15 @@ async function createAuthUser(): Promise<string> {
 describe('POST /api/v1/auth/register', () => {
   beforeEach(async () => {
     await truncateAll();
+    vi.resetAllMocks();
   });
 
-  it('returns 401 when x-auth-user-id header is missing', async () => {
+  it('returns 401 when no session is present', async () => {
+    mockRequireAuthUserId.mockRejectedValue(new AuthenticationError());
+
     const req = post('/api/v1/auth/register', {
-      name: 'Ali Khan',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'ali@example.com',
     });
 
@@ -32,14 +42,14 @@ describe('POST /api/v1/auth/register', () => {
     expect(body.error.code).toBe('AUTHENTICATION_ERROR');
   });
 
-  it('returns 400 for invalid body (missing name)', async () => {
+  it('returns 400 for invalid body (missing firstName)', async () => {
     const authUserId = await createAuthUser();
+    mockRequireAuthUserId.mockResolvedValue(authUserId);
 
-    const req = post(
-      '/api/v1/auth/register',
-      { email: 'ali@example.com' },
-      { headers: { 'x-auth-user-id': authUserId } },
-    );
+    const req = post('/api/v1/auth/register', {
+      lastName: 'Khan',
+      email: 'ali@example.com',
+    });
 
     const res = await POST(req);
     const body = await res.json();
@@ -49,14 +59,15 @@ describe('POST /api/v1/auth/register', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
-  it('returns 201 with user data for valid registration', async () => {
+  it('returns 201 with user data for valid registration (no phone at signup)', async () => {
     const authUserId = await createAuthUser();
+    mockRequireAuthUserId.mockResolvedValue(authUserId);
 
-    const req = post(
-      '/api/v1/auth/register',
-      { name: 'Ali Khan', email: 'ali@example.com', phonePk: '0312-1234567' },
-      { headers: { 'x-auth-user-id': authUserId } },
-    );
+    const req = post('/api/v1/auth/register', {
+      firstName: 'Ali',
+      lastName: 'Khan',
+      email: 'ali@example.com',
+    });
 
     const res = await POST(req);
     const body = await res.json();
@@ -65,9 +76,10 @@ describe('POST /api/v1/auth/register', () => {
     expect(body.success).toBe(true);
     expect(body.data).toMatchObject({
       authUserId,
-      name: 'Ali Khan',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'ali@example.com',
-      phonePk: '0312-1234567',
+      phonePk: null,
       isActive: true,
     });
     expect(body.data.id).toBeDefined();

@@ -17,7 +17,7 @@ export default async function ReturnsPage() {
       status: returnRequests.status,
       resolution: returnRequests.resolution,
       createdAt: returnRequests.createdAt,
-      customerName: users.name,
+      customerName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('customer_name'),
       customerEmail: users.email,
       orderNumber: orders.orderNumber,
     })

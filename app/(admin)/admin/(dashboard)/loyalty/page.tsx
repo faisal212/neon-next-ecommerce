@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { loyaltyPoints } from "@/lib/db/schema/marketing";
 import { users } from "@/lib/db/schema/users";
@@ -14,7 +14,7 @@ export default async function LoyaltyPage() {
       totalRedeemed: loyaltyPoints.totalRedeemed,
       balance: loyaltyPoints.balance,
       updatedAt: loyaltyPoints.updatedAt,
-      userName: users.name,
+      userName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('user_name'),
       userEmail: users.email,
     })
     .from(loyaltyPoints)

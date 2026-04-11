@@ -32,7 +32,8 @@ export const users = pgTable('users', {
   authUserId: uuid('auth_user_id')
     .notNull()
     .references(() => neonAuthUsersSync.id),
-  name: varchar('name', { length: 120 }),
+  firstName: varchar('first_name', { length: 60 }).notNull(),
+  lastName: varchar('last_name', { length: 60 }).notNull(),
   email: varchar('email', { length: 255 }).notNull(),
   phonePk: varchar('phone_pk', { length: 20 }),
   isPhoneVerified: boolean('is_phone_verified').default(false).notNull(),

@@ -1,14 +1,17 @@
 import { type NextRequest } from 'next/server';
+import { requireAuthUserId } from '@/lib/auth';
 import { registerSchema } from '@/lib/validators/user.validators';
 import { createUser } from '@/lib/services/user.service';
 import { created } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
-import { AuthenticationError } from '@/lib/errors/api-error';
 
 export async function POST(request: NextRequest) {
   try {
-    const authUserId = request.headers.get('x-auth-user-id');
-    if (!authUserId) throw new AuthenticationError();
+    // Read the Neon Auth user id from the session cookie set by
+    // authClient.signUp.email() a moment ago. Works during signup
+    // because it does NOT require a matching `users` profile row —
+    // we're the one about to create that row below.
+    const authUserId = await requireAuthUserId();
 
     const body = await request.json();
     const data = registerSchema.parse(body);

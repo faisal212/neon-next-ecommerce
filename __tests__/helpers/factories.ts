@@ -23,7 +23,8 @@ export async function seedUser(overrides?: Partial<typeof users.$inferInsert>) {
   const authUserId = await seedNeonAuthUser();
   const [user] = await db.insert(users).values({
     authUserId,
-    name: 'Test User',
+    firstName: 'Test',
+    lastName: 'User',
     email: `test-${crypto.randomUUID().slice(0, 8)}@example.com`,
     phonePk: `0312-${Math.floor(1000000 + Math.random() * 9000000)}`,
     ...overrides,

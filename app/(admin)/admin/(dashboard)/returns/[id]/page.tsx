@@ -195,7 +195,7 @@ export default async function ReturnDetailPage({ params }: Props) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Name</span>
                   <span className="text-foreground">
-                    {customer.name || "Unknown"}
+                    {`${customer.firstName} ${customer.lastName}`.trim() || "Unknown"}
                   </span>
                 </div>
                 <div className="flex justify-between">

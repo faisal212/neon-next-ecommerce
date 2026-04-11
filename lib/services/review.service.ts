@@ -96,7 +96,7 @@ export async function listAllReviews(pagination: PaginationParams, publishedFilt
       isPublished: reviews.isPublished,
       createdAt: reviews.createdAt,
       productName: products.nameEn,
-      userName: users.name,
+      userName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('user_name'),
     })
     .from(reviews)
     .leftJoin(products, eq(reviews.productId, products.id))

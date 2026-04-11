@@ -9,7 +9,7 @@ export default async function CustomersPage() {
   const customerList = await db
     .select({
       id: users.id,
-      name: users.name,
+      name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('name'),
       email: users.email,
       phonePk: users.phonePk,
       isActive: users.isActive,
@@ -24,7 +24,6 @@ export default async function CustomersPage() {
 
   const serialized = customerList.map((c) => ({
     ...c,
-    name: c.name || "—",
     phonePk: c.phonePk || "—",
     createdAt: c.createdAt.toISOString(),
   }));

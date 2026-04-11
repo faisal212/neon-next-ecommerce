@@ -9,7 +9,8 @@ import {
 describe('registerSchema', () => {
   it('accepts valid registration data', () => {
     const result = registerSchema.safeParse({
-      name: 'Ali Khan',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'ali@example.com',
       phonePk: '0312-1234567',
     });
@@ -18,15 +19,25 @@ describe('registerSchema', () => {
 
   it('accepts registration without phone', () => {
     const result = registerSchema.safeParse({
-      name: 'Ali Khan',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'ali@example.com',
     });
     expect(result.success).toBe(true);
   });
 
-  it('rejects empty name', () => {
+  it('rejects empty firstName', () => {
     const result = registerSchema.safeParse({
-      name: '',
+      firstName: '',
+      lastName: 'Khan',
+      email: 'ali@example.com',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects missing lastName', () => {
+    const result = registerSchema.safeParse({
+      firstName: 'Ali',
       email: 'ali@example.com',
     });
     expect(result.success).toBe(false);
@@ -34,7 +45,8 @@ describe('registerSchema', () => {
 
   it('rejects invalid email', () => {
     const result = registerSchema.safeParse({
-      name: 'Ali',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'not-an-email',
     });
     expect(result.success).toBe(false);
@@ -42,7 +54,8 @@ describe('registerSchema', () => {
 
   it('rejects invalid Pakistan phone format', () => {
     const result = registerSchema.safeParse({
-      name: 'Ali',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'ali@example.com',
       phonePk: '1234567890',
     });
@@ -51,7 +64,8 @@ describe('registerSchema', () => {
 
   it('accepts phone without dash', () => {
     const result = registerSchema.safeParse({
-      name: 'Ali',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'ali@example.com',
       phonePk: '03121234567',
     });
@@ -60,16 +74,18 @@ describe('registerSchema', () => {
 
   it('accepts phone with dash', () => {
     const result = registerSchema.safeParse({
-      name: 'Ali',
+      firstName: 'Ali',
+      lastName: 'Khan',
       email: 'ali@example.com',
       phonePk: '0312-1234567',
     });
     expect(result.success).toBe(true);
   });
 
-  it('rejects name longer than 120 chars', () => {
+  it('rejects firstName longer than 60 chars', () => {
     const result = registerSchema.safeParse({
-      name: 'A'.repeat(121),
+      firstName: 'A'.repeat(61),
+      lastName: 'Khan',
       email: 'ali@example.com',
     });
     expect(result.success).toBe(false);
@@ -78,7 +94,8 @@ describe('registerSchema', () => {
 
 describe('updateProfileSchema', () => {
   it('accepts partial updates', () => {
-    expect(updateProfileSchema.safeParse({ name: 'New Name' }).success).toBe(true);
+    expect(updateProfileSchema.safeParse({ firstName: 'New' }).success).toBe(true);
+    expect(updateProfileSchema.safeParse({ lastName: 'Name' }).success).toBe(true);
     expect(updateProfileSchema.safeParse({ phonePk: '0300-1234567' }).success).toBe(true);
     expect(updateProfileSchema.safeParse({}).success).toBe(true);
   });

@@ -93,7 +93,10 @@ async function getDashboardData() {
   let userMap: Record<string, string> = {};
   if (userIds.length > 0) {
     const orderUsers = await db
-      .select({ id: users.id, name: users.name })
+      .select({
+        id: users.id,
+        name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('name'),
+      })
       .from(users)
       .where(sql`${users.id} in ${userIds}`);
     userMap = Object.fromEntries(

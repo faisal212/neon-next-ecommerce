@@ -28,7 +28,8 @@ describe('GET /api/v1/auth/me', () => {
     const mockUser = {
       id: crypto.randomUUID(),
       authUserId: crypto.randomUUID(),
-      name: 'Test User',
+      firstName: 'Test',
+      lastName: 'User',
       email: 'test@example.com',
       phonePk: null,
       isPhoneVerified: false,
@@ -45,7 +46,8 @@ describe('GET /api/v1/auth/me', () => {
     expect(body.data).toMatchObject({
       id: mockUser.id,
       authUserId: mockUser.authUserId,
-      name: 'Test User',
+      firstName: 'Test',
+      lastName: 'User',
       email: 'test@example.com',
       phonePk: null,
       isPhoneVerified: false,

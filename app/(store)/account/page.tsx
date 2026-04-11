@@ -93,7 +93,8 @@ export default async function AccountDashboardPage() {
     }
   }
 
-  const displayName = user?.name ?? "there";
+  // Greet by first name only — friendlier than full name.
+  const displayName = user?.firstName ?? "there";
 
   return (
     <div>

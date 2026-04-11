@@ -83,7 +83,7 @@ export default async function OrderDetailPage({ params }: Props) {
       .where(eq(users.id, order.userId))
       .limit(1);
     if (user) {
-      customerName = user.name || "Unknown";
+      customerName = `${user.firstName} ${user.lastName}`.trim() || "Unknown";
       customerEmail = user.email;
       customerPhone = user.phonePk || "";
     }

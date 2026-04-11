@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { referrals } from "@/lib/db/schema/marketing";
 import { users } from "@/lib/db/schema/users";
@@ -18,7 +18,7 @@ export default async function ReferralsPage() {
       rewardGiven: referrals.rewardGiven,
       rewardPoints: referrals.rewardPoints,
       createdAt: referrals.createdAt,
-      referrerName: referrerUser.name,
+      referrerName: sql<string>`${referrerUser.firstName} || ' ' || ${referrerUser.lastName}`.as('referrer_name'),
       referrerEmail: referrerUser.email,
     })
     .from(referrals)
@@ -31,7 +31,10 @@ export default async function ReferralsPage() {
   const referredUsers =
     referredUserIds.length > 0
       ? await db
-          .select({ id: users.id, name: users.name })
+          .select({
+            id: users.id,
+            name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('name'),
+          })
           .from(users)
       : [];
 
