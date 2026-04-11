@@ -130,7 +130,7 @@ export default async function PrivacyPage() {
             </ul>
             <p>
               To exercise any of these rights, please contact us at{" "}
-              <span className="text-primary">support@cover.pk</span>.
+              <span className="text-primary">contact@refine.pk</span>.
             </p>
           </div>
         </div>
@@ -158,7 +158,7 @@ export default async function PrivacyPage() {
             <ul className="ml-6 list-disc space-y-2">
               <li>
                 Email:{" "}
-                <span className="text-primary">support@cover.pk</span>
+                <span className="text-primary">contact@refine.pk</span>
               </li>
               <li>Phone: +92 (42) 111-COVER</li>
               <li>Address: Lahore, Punjab, Pakistan</li>

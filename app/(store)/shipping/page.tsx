@@ -170,7 +170,7 @@ export default async function ShippingPage() {
 
         <p className="mt-6 text-sm text-on-surface-variant">
           Don&apos;t see your city? We likely deliver there too. Contact us at{" "}
-          <span className="text-primary">support@cover.pk</span> to confirm
+          <span className="text-primary">contact@refine.pk</span> to confirm
           delivery availability for your area.
         </p>
       </div>

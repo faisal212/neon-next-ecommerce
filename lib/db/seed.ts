@@ -502,7 +502,7 @@ async function seed() {
     { key: 'max_return_days', value: 7, description: 'Days allowed for returns' },
     { key: 'store_name', value: 'Cover', description: 'Store display name' },
     { key: 'store_phone', value: '+92-300-1234567', description: 'Customer service phone' },
-    { key: 'store_email', value: 'support@cover.pk', description: 'Customer service email' },
+    { key: 'store_email', value: 'contact@refine.pk', description: 'Customer service email' },
   ]);
   console.log('  ✓ 10 app settings');
 
