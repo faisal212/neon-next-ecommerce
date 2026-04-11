@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { LogOut, Loader2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth/client";
 
 export function SignOutButton() {
-  const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 
   async function handleSignOut() {
@@ -15,11 +13,12 @@ export function SignOutButton() {
     setSigningOut(true);
     try {
       await authClient.signOut();
-      // Storefront doesn't gate the homepage behind auth, so bounce there.
-      // router.refresh() ensures the layout re-runs with no session and any
-      // server-rendered "Welcome back, Name" strings are dropped.
-      router.push("/");
-      router.refresh();
+      // Hard redirect instead of router.push() + router.refresh().
+      // A soft navigation leaves the Next.js router cache and the Neon Auth
+      // session cookie in a transitional state, causing the very next signIn
+      // call to fail on first attempt. window.location.replace() forces a full
+      // page reload which flushes all cookie writes and clears client state.
+      window.location.replace("/");
     } catch {
       setSigningOut(false);
     }
