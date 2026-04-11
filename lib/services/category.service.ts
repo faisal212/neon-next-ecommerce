@@ -1,10 +1,10 @@
 import { cache } from 'react';
-import { eq, and, isNull, sql, desc } from 'drizzle-orm';
+import { eq, ne, and, isNull, sql, desc } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { categories } from '@/lib/db/schema/catalog';
 import { products } from '@/lib/db/schema/catalog';
 import { navMenuItems } from '@/lib/db/schema/marketing';
-import { NotFoundError } from '@/lib/errors/api-error';
+import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { slugify } from '@/lib/utils/slugify';
 import type { CreateCategoryInput } from '@/lib/validators/product.validators';
 
@@ -129,16 +129,18 @@ export async function getCategoryById(id: string) {
   return category;
 }
 
-async function generateUniqueSlug(base: string): Promise<string> {
+async function generateUniqueSlug(base: string, excludeId?: string): Promise<string> {
   let slug = slugify(base);
   let suffix = 1;
 
   while (true) {
     const candidate = suffix === 1 ? slug : `${slug}-${suffix}`;
+    const conditions = [eq(categories.slug, candidate)];
+    if (excludeId) conditions.push(ne(categories.id, excludeId));
     const [existing] = await db
       .select({ id: categories.id })
       .from(categories)
-      .where(eq(categories.slug, candidate))
+      .where(and(...conditions))
       .limit(1);
 
     if (!existing) return candidate;
@@ -146,8 +148,31 @@ async function generateUniqueSlug(base: string): Promise<string> {
   }
 }
 
+/**
+ * Throws ValidationError if `slug` is already taken by another category.
+ * Used when the admin provides an explicit slug on create or update.
+ */
+async function assertSlugAvailable(slug: string, excludeId?: string): Promise<void> {
+  const conditions = [eq(categories.slug, slug)];
+  if (excludeId) conditions.push(ne(categories.id, excludeId));
+  const [taken] = await db
+    .select({ id: categories.id })
+    .from(categories)
+    .where(and(...conditions))
+    .limit(1);
+  if (taken) {
+    throw new ValidationError(`Slug "${slug}" is already in use by another category`);
+  }
+}
+
 export async function createCategory(input: CreateCategoryInput) {
-  const slug = await generateUniqueSlug(input.nameEn);
+  let slug: string;
+  if (input.slug) {
+    await assertSlugAvailable(input.slug);
+    slug = input.slug;
+  } else {
+    slug = await generateUniqueSlug(input.nameEn);
+  }
 
   const [category] = await db
     .insert(categories)
@@ -170,9 +195,24 @@ export async function createCategory(input: CreateCategoryInput) {
 export async function updateCategory(id: string, input: Partial<CreateCategoryInput>) {
   const updates: Record<string, unknown> = { ...input };
 
-  // Regenerate slug if name changed
-  if (input.nameEn) {
-    updates.slug = await generateUniqueSlug(input.nameEn);
+  // Slug is a user-managed field. Only touch it when the admin explicitly
+  // sent a new slug AND it differs from the current value. Renaming the
+  // category does NOT change the slug — admins must edit it directly.
+  if (input.slug !== undefined) {
+    const [current] = await db
+      .select({ slug: categories.slug })
+      .from(categories)
+      .where(eq(categories.id, id))
+      .limit(1);
+    if (!current) throw new NotFoundError('Category not found');
+    if (input.slug !== current.slug) {
+      await assertSlugAvailable(input.slug, id);
+      updates.slug = input.slug;
+    } else {
+      delete updates.slug;
+    }
+  } else {
+    delete updates.slug;
   }
 
   const [category] = await db

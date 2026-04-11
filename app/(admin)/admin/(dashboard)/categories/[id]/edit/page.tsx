@@ -37,6 +37,7 @@ export default async function EditCategoryPage({ params }: Props) {
           id: category.id,
           nameEn: category.nameEn,
           nameUr: category.nameUr || "",
+          slug: category.slug,
           parentId: category.parentId || "",
           imageUrl: category.imageUrl || "",
           isActive: category.isActive,

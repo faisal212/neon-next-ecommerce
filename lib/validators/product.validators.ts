@@ -1,9 +1,21 @@
 import { z } from 'zod';
 
+// Slug is user-managed: lowercase letters, digits, and single hyphens only.
+// No leading/trailing/consecutive hyphens. Used by both products and categories.
+const slugSchema = z
+  .string()
+  .min(1)
+  .max(120)
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Slug must be lowercase letters, numbers, and hyphens (no leading/trailing/consecutive hyphens)',
+  );
+
 // ── Category ─────────────────────────────────────────────────────
 export const createCategorySchema = z.object({
   nameEn: z.string().min(1).max(120),
   nameUr: z.string().max(120).optional(),
+  slug: slugSchema.optional(),
   parentId: z.string().uuid().optional(),
   imageUrl: z.string().url().optional(),
   isActive: z.boolean().optional(),
@@ -19,6 +31,7 @@ export const createProductSchema = z.object({
   categoryId: z.string().uuid(),
   nameEn: z.string().min(1).max(200),
   nameUr: z.string().max(200).optional(),
+  slug: slugSchema.optional(),
   descriptionEn: z.string().optional(),
   descriptionUr: z.string().optional(),
   basePricePkr: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Must be a valid price'),
