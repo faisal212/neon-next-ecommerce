@@ -34,7 +34,9 @@ export default async function ProfilePage() {
     }
   }
 
-  const name = fullUser?.name ?? authUser?.name ?? "Unknown";
+  const firstName = fullUser?.firstName ?? authUser?.firstName ?? "";
+  const lastName = fullUser?.lastName ?? authUser?.lastName ?? "";
+  const name = `${firstName} ${lastName}`.trim() || "Unknown";
   const email = fullUser?.email ?? authUser?.email ?? "Not available";
   const phone = fullUser?.phonePk ?? authUser?.phonePk ?? null;
   const isPhoneVerified =

@@ -114,7 +114,10 @@ export async function placeOrder(
         orderNumber,
         userId: userId ?? null,
         guestPhone: !userId ? addr.phone : null,
-        guestEmail: input.guestEmail ?? null,
+        // Logged-in users have user.email as the source of truth — no
+        // need to denormalize. guestEmail captures contact info only
+        // for guests.
+        guestEmail: !userId ? input.guestEmail : null,
         addressId: address.id,
         couponId,
         status: 'pending',

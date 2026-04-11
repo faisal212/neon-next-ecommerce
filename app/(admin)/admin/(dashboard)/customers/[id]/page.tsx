@@ -69,7 +69,7 @@ export default async function CustomerDetailPage({ params }: Props) {
       {/* Customer header */}
       <div className="mb-6 flex items-center gap-3">
         <h1 className="text-2xl font-bold tracking-tight">
-          {customer.name || "Unnamed Customer"}
+          {`${customer.firstName} ${customer.lastName}`.trim() || "Unnamed Customer"}
         </h1>
         <StatusBadge status={customer.isActive ? "active" : "inactive"} />
       </div>
@@ -86,7 +86,7 @@ export default async function CustomerDetailPage({ params }: Props) {
                   Full Name
                 </div>
                 <div className="mt-0.5 text-[13px]">
-                  {customer.name || "—"}
+                  {`${customer.firstName} ${customer.lastName}`.trim() || "—"}
                 </div>
               </div>
               <div>

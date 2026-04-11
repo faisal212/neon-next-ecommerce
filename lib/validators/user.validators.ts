@@ -20,7 +20,8 @@ export const ADMIN_ROLES = [
 const phonePkRegex = /^03\d{2}-?\d{7}$/;
 
 export const registerSchema = z.object({
-  name: z.string().min(1).max(120),
+  firstName: z.string().min(1).max(60),
+  lastName: z.string().min(1).max(60),
   email: z.string().email().max(255),
   phonePk: z
     .string()
@@ -29,7 +30,8 @@ export const registerSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
-  name: z.string().min(1).max(120).optional(),
+  firstName: z.string().min(1).max(60).optional(),
+  lastName: z.string().min(1).max(60).optional(),
   phonePk: z
     .string()
     .regex(phonePkRegex, 'Invalid Pakistan phone number (format: 03XX-XXXXXXX)')

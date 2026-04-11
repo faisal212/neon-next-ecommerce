@@ -11,6 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
+import { SignOutButton } from "./_components/sign-out-button";
 
 const navLinks = [
   { href: "/account", label: "Dashboard", icon: User },
@@ -61,6 +62,10 @@ export default async function AccountLayout({
               ))}
             </ul>
           </nav>
+
+          <div className="mt-6 border-t border-outline-variant/10 pt-4">
+            <SignOutButton />
+          </div>
         </aside>
 
         {/* Main content */}

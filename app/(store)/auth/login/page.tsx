@@ -1,10 +1,31 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { LogIn } from "lucide-react";
 
+import { LoginForm } from "./_components/login-form";
+
 export const metadata: Metadata = {
   title: "Sign In",
 };
+
+// Skeleton matches the form dimensions (2 inputs + button) so the static
+// shell prerenders without layout shift while LoginForm streams in.
+function LoginFormFallback() {
+  return (
+    <div className="space-y-6" aria-hidden="true">
+      <div className="space-y-2">
+        <div className="h-3 w-12 rounded-sm bg-surface-container-highest/60" />
+        <div className="h-11 w-full rounded-sm bg-surface-container-highest/40" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-3 w-16 rounded-sm bg-surface-container-highest/60" />
+        <div className="h-11 w-full rounded-sm bg-surface-container-highest/40" />
+      </div>
+      <div className="h-14 w-full rounded-lg bg-surface-container-highest/40" />
+    </div>
+  );
+}
 
 export default function LoginPage() {
   return (
@@ -23,31 +44,15 @@ export default function LoginPage() {
         </div>
 
         <div className="glass-panel p-8 rounded-xl border border-outline-variant/10 space-y-6">
-          <div className="input-indicator">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              placeholder="03XX-XXXXXXX"
-              className="w-full bg-surface-container-highest border-none text-on-surface px-4 py-3 text-sm rounded-sm focus:ring-0 focus:outline-none"
-            />
-          </div>
-
-          <div className="input-indicator">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="w-full bg-surface-container-highest border-none text-on-surface px-4 py-3 text-sm rounded-sm focus:ring-0 focus:outline-none"
-            />
-          </div>
-
-          <button className="gradient-button w-full py-4 text-on-primary-fixed font-black uppercase tracking-[0.15em] text-sm rounded-lg">
-            Sign In
-          </button>
+          {/*
+            LoginForm reads `?redirect=…` via useSearchParams(). With
+            cacheComponents enabled (next.config.ts), any client component
+            that touches search params MUST be wrapped in <Suspense> or it
+            opts the entire route out of static prerendering.
+          */}
+          <Suspense fallback={<LoginFormFallback />}>
+            <LoginForm />
+          </Suspense>
 
           <p className="text-center text-sm text-on-surface-variant">
             Don&apos;t have an account?{" "}

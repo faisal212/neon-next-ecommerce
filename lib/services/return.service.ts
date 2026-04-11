@@ -81,7 +81,7 @@ export async function listAllReturns(pagination: PaginationParams, statusFilter?
       handledBy: returnRequests.handledBy,
       createdAt: returnRequests.createdAt,
       resolvedAt: returnRequests.resolvedAt,
-      customerName: users.name,
+      customerName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('customer_name'),
       customerEmail: users.email,
       orderNumber: orders.orderNumber,
     })
