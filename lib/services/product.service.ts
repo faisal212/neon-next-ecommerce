@@ -1,8 +1,13 @@
 import { eq, ne, and, ilike, gte, lte, sql, desc, inArray } from 'drizzle-orm';
-import { db } from '@/lib/db';
-import { products, productTags, productVariants, productImages, inventory } from '@/lib/db/schema/catalog';
+import { db, dbPool } from '@/lib/db';
+import { products, productTags, productVariants, productImages, inventory, reviews } from '@/lib/db/schema/catalog';
 import { categories } from '@/lib/db/schema/catalog';
-import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
+import { orderItems } from '@/lib/db/schema/orders';
+import { cartItems } from '@/lib/db/schema/cart';
+import { cartEvents, productViews, dailyProductStats, siteSearches } from '@/lib/db/schema/analytics';
+import { wishlistItems, flashSaleProducts, recentlyViewed } from '@/lib/db/schema/marketing';
+import { productSeo } from '@/lib/db/schema/seo';
+import { ConflictError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { slugify } from '@/lib/utils/slugify';
 import type { CreateProductInput } from '@/lib/validators/product.validators';
 import type { PaginationParams } from '@/lib/utils/pagination';
@@ -330,6 +335,80 @@ export async function createProduct(input: CreateProductInput) {
   }
 
   return product;
+}
+
+/**
+ * Permanently delete a product and every dependent row.
+ *
+ * Refuses if any `order_items` reference one of the product's variants —
+ * order history must never be corrupted by a hard delete. In that case,
+ * the admin should deactivate the product (`isActive = false`) instead.
+ *
+ * Runs inside a single transaction on the pool driver (the http driver
+ * does not support transactions). Returns the deleted product's slug so
+ * the caller can flush cache tags after the row is gone.
+ */
+export async function deleteProduct(id: string): Promise<{ slug: string }> {
+  return dbPool.transaction(async (tx) => {
+    const [product] = await tx
+      .select({ id: products.id, slug: products.slug })
+      .from(products)
+      .where(eq(products.id, id))
+      .limit(1);
+    if (!product) throw new NotFoundError('Product not found');
+
+    const variants = await tx
+      .select({ id: productVariants.id })
+      .from(productVariants)
+      .where(eq(productVariants.productId, id));
+    const variantIds = variants.map((v) => v.id);
+
+    // Guardrail: refuse if order history references this product.
+    if (variantIds.length > 0) {
+      const [orderRef] = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(orderItems)
+        .where(inArray(orderItems.variantId, variantIds));
+      if ((orderRef?.count ?? 0) > 0) {
+        throw new ConflictError(
+          'Cannot permanently delete: product has order history. Deactivate it instead.',
+        );
+      }
+    }
+
+    // Variant-scoped children — must go before productVariants.
+    if (variantIds.length > 0) {
+      await tx.delete(inventory).where(inArray(inventory.variantId, variantIds));
+      await tx.delete(cartItems).where(inArray(cartItems.variantId, variantIds));
+      await tx.delete(cartEvents).where(inArray(cartEvents.variantId, variantIds));
+      await tx.delete(wishlistItems).where(inArray(wishlistItems.variantId, variantIds));
+    }
+
+    // Product-scoped children. productImages and productViews carry both
+    // a productId (NOT NULL) and an optional variantId, so deleting by
+    // productId is sufficient and avoids needing the variantIds list.
+    await tx.delete(productImages).where(eq(productImages.productId, id));
+    await tx.delete(productViews).where(eq(productViews.productId, id));
+    await tx.delete(productTags).where(eq(productTags.productId, id));
+    await tx.delete(reviews).where(eq(reviews.productId, id));
+    await tx.delete(productSeo).where(eq(productSeo.productId, id));
+    await tx.delete(dailyProductStats).where(eq(dailyProductStats.productId, id));
+    await tx.delete(flashSaleProducts).where(eq(flashSaleProducts.productId, id));
+    await tx.delete(recentlyViewed).where(eq(recentlyViewed.productId, id));
+
+    // siteSearches.clicked_product_id is nullable — preserve search
+    // analytics by detaching the reference instead of deleting rows.
+    await tx
+      .update(siteSearches)
+      .set({ clickedProductId: null })
+      .where(eq(siteSearches.clickedProductId, id));
+
+    // Now safe to drop variants and the product itself.
+    await tx.delete(productVariants).where(eq(productVariants.productId, id));
+    await tx.delete(products).where(eq(products.id, id));
+
+    return { slug: product.slug };
+  });
 }
 
 export async function updateProduct(id: string, input: Partial<CreateProductInput>) {
