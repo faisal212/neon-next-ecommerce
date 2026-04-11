@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { eq } from 'drizzle-orm';
 import { connection } from 'next/server';
 import { auth } from './better-auth';
@@ -27,9 +28,17 @@ export interface AdminUser {
 
 /**
  * Get current user from Neon Auth session.
+ *
+ * Wrapped in React `cache()` so multiple server components in the same render
+ * pass (e.g. several Suspense islands on one page) share a single session read
+ * + DB lookup. This is the Data Access Layer (DAL) pattern from the Next.js 16
+ * authentication guide — called inside any component that needs user data,
+ * deduped per request, and is the real security check (proxy.ts only does an
+ * optimistic cookie-existence check).
+ *
  * Neon Auth reads the session cookie automatically in Next.js server context.
  */
-export async function getCurrentUser(): Promise<AuthUser | null> {
+export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   // Opt out of prerendering — reads cookies via session.
   await connection();
   const { data: session } = await auth.getSession();
@@ -54,7 +63,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     isPhoneVerified: user.isPhoneVerified,
     isActive: user.isActive,
   };
-}
+});
 
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getCurrentUser();
