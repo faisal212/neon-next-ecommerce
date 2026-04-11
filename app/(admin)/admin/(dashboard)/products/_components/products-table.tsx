@@ -4,7 +4,16 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { DataTable, type Column } from "../../../_components/data-table";
 import { StatusBadge } from "../../../_components/status-badge";
-import { Image, Layers, Trash2 } from "lucide-react";
+import { Image, Layers, Trash, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface Product {
   id: string;
@@ -38,6 +47,9 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [purgeTarget, setPurgeTarget] = useState<Product | null>(null);
+  const [purgeError, setPurgeError] = useState<string | null>(null);
+  const [purging, setPurging] = useState(false);
 
   // Filter data
   const filtered = useMemo(() => {
@@ -80,6 +92,41 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
       // silent
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  function openPurgeDialog(e: React.MouseEvent, product: Product) {
+    e.stopPropagation();
+    setPurgeError(null);
+    setPurgeTarget(product);
+  }
+
+  async function handlePermanentDelete() {
+    if (!purgeTarget || purging) return;
+    setPurging(true);
+    setPurgeError(null);
+    try {
+      const res = await fetch(`/api/v1/admin/products/${purgeTarget.id}`, {
+        method: "DELETE",
+      });
+      if (res.status === 204) {
+        setPurgeTarget(null);
+        router.refresh();
+        return;
+      }
+      // Try to surface the server's error message (handleApiError shape).
+      let message = "Failed to delete product.";
+      try {
+        const json = (await res.json()) as { error?: { message?: string } };
+        if (json?.error?.message) message = json.error.message;
+      } catch {
+        // ignore parse errors
+      }
+      setPurgeError(message);
+    } catch {
+      setPurgeError("Network error. Please try again.");
+    } finally {
+      setPurging(false);
     }
   }
 
@@ -185,25 +232,35 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
     {
       key: "actions",
       label: "",
-      className: "w-10",
+      className: "w-20",
       render: (row) => {
         const isDraft = !row.isPublished;
-        const disabled = deletingId === row.id || isDraft || !row.isActive;
-        const title = isDraft
+        const deactivateDisabled = deletingId === row.id || isDraft || !row.isActive;
+        const deactivateTitle = isDraft
           ? "Drafts can't be deactivated"
           : row.isActive
             ? "Deactivate product"
             : "Already inactive";
         return (
-          <button
-            type="button"
-            onClick={(e) => handleDelete(e, row)}
-            disabled={disabled}
-            title={title}
-            className="rounded-md p-1.5 text-zinc-600 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-600"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-0.5">
+            <button
+              type="button"
+              onClick={(e) => handleDelete(e, row)}
+              disabled={deactivateDisabled}
+              title={deactivateTitle}
+              className="rounded-md p-1.5 text-zinc-600 transition-colors hover:bg-amber-500/10 hover:text-amber-400 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-600"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => openPurgeDialog(e, row)}
+              title="Delete permanently"
+              className="rounded-md p-1.5 text-zinc-600 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            >
+              <Trash className="h-3.5 w-3.5" />
+            </button>
+          </div>
         );
       },
     },
@@ -219,6 +276,7 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
   ];
 
   return (
+    <>
     <div>
       {/* Filter Bar */}
       <div className="mb-4 flex items-center gap-3">
@@ -277,5 +335,55 @@ export function ProductsTable({ data, categories }: ProductsTableProps) {
         onRowClick={(row) => router.push(`/admin/products/${row.id}/edit`)}
       />
     </div>
+
+    <Dialog
+      open={purgeTarget !== null}
+      onOpenChange={(open) => {
+        if (!open && !purging) {
+          setPurgeTarget(null);
+          setPurgeError(null);
+        }
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Permanently delete product?</DialogTitle>
+          <DialogDescription>
+            {purgeTarget?.nameEn}
+          </DialogDescription>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          This cannot be undone. All variants, images, tags, reviews, and
+          analytics for this product will be deleted.
+        </p>
+        {purgeError && (
+          <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12px] text-red-400">
+            {purgeError}
+          </p>
+        )}
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={purging}
+            onClick={() => {
+              setPurgeTarget(null);
+              setPurgeError(null);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            disabled={purging}
+            onClick={handlePermanentDelete}
+            className="bg-red-500 text-white hover:bg-red-500/90 focus-visible:ring-red-500/40"
+          >
+            {purging ? "Deleting..." : "Delete forever"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
