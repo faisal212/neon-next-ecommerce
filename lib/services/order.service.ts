@@ -4,6 +4,9 @@ import { orders, orderItems, orderStatusHistory, codCollections, courierAssignme
 import { carts, cartItems } from '@/lib/db/schema/cart';
 import { productVariants, inventory, products } from '@/lib/db/schema/catalog';
 import { addresses } from '@/lib/db/schema/users';
+import { returnRequests, supportTickets } from '@/lib/db/schema/support';
+import { pointsTransactions } from '@/lib/db/schema/marketing';
+import { checkoutFunnel } from '@/lib/db/schema/analytics';
 import { NotFoundError, ConflictError, ValidationError } from '@/lib/errors/api-error';
 import { generateOrderNumber } from '@/lib/utils/order-number';
 import { validateCoupon, incrementCouponUsage } from '@/lib/services/coupon.service';
@@ -243,6 +246,83 @@ export async function assignCourier(orderId: string, input: AssignCourierInput) 
     .returning();
 
   return assignment;
+}
+
+/**
+ * Permanently delete an order and every dependent row.
+ *
+ * Refuses if any `return_requests` reference this order — refund/return
+ * paperwork must not be orphaned. Releases reserved inventory for any
+ * order that wasn't already cancelled (cancel transition already
+ * decrements reservations). Detaches nullable references on
+ * `support_tickets`, `points_transactions`, and `checkout_funnel` so
+ * those analytics/support rows stay queryable after the order is gone.
+ *
+ * Runs inside a single pool transaction. Returns the order number for
+ * caller-side messaging/logging.
+ */
+export async function deleteOrder(id: string): Promise<{ orderNumber: string }> {
+  return dbPool.transaction(async (tx) => {
+    const [order] = await tx
+      .select({ id: orders.id, orderNumber: orders.orderNumber, status: orders.status })
+      .from(orders)
+      .where(eq(orders.id, id))
+      .limit(1);
+    if (!order) throw new NotFoundError('Order not found');
+
+    // Guardrail: refuse if any return requests reference this order.
+    const [returnRef] = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(returnRequests)
+      .where(eq(returnRequests.orderId, id));
+    if ((returnRef?.count ?? 0) > 0) {
+      throw new ConflictError(
+        'Cannot delete order: it has return requests. Resolve the returns first.',
+      );
+    }
+
+    // Release reserved inventory unless the order was already cancelled
+    // (the cancel transition in updateOrderStatus already released them).
+    if (order.status !== 'cancelled') {
+      const items = await tx
+        .select({ variantId: orderItems.variantId, quantity: orderItems.quantity })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, id));
+      for (const item of items) {
+        await tx
+          .update(inventory)
+          .set({
+            quantityReserved: sql`GREATEST(${inventory.quantityReserved} - ${item.quantity}, 0)`,
+            updatedAt: new Date(),
+          })
+          .where(eq(inventory.variantId, item.variantId));
+      }
+    }
+
+    // Detach nullable FKs (preserve analytics + support history).
+    await tx
+      .update(supportTickets)
+      .set({ orderId: null })
+      .where(eq(supportTickets.orderId, id));
+    await tx
+      .update(pointsTransactions)
+      .set({ orderId: null })
+      .where(eq(pointsTransactions.orderId, id));
+    await tx
+      .update(checkoutFunnel)
+      .set({ orderId: null })
+      .where(eq(checkoutFunnel.orderId, id));
+
+    // Children with NOT NULL FKs — must go before the parent row.
+    await tx.delete(courierAssignments).where(eq(courierAssignments.orderId, id));
+    await tx.delete(codCollections).where(eq(codCollections.orderId, id));
+    await tx.delete(orderStatusHistory).where(eq(orderStatusHistory.orderId, id));
+    await tx.delete(orderItems).where(eq(orderItems.orderId, id));
+
+    await tx.delete(orders).where(eq(orders.id, id));
+
+    return { orderNumber: order.orderNumber };
+  });
 }
 
 export async function recordCodCollection(orderId: string, adminId: string, input: RecordCodInput) {

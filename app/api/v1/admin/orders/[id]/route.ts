@@ -3,8 +3,8 @@ import { requireAdmin } from '@/lib/auth';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { orders } from '@/lib/db/schema/orders';
-import { getOrderByNumber } from '@/lib/services/order.service';
-import { success } from '@/lib/utils/api-response';
+import { getOrderByNumber, deleteOrder } from '@/lib/services/order.service';
+import { success, noContent } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 import { NotFoundError } from '@/lib/errors/api-error';
 
@@ -21,6 +21,24 @@ export async function GET(
 
     const full = await getOrderByNumber(order.orderNumber);
     return success(full);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    // Permanent order deletion is super_admin only — managers cannot
+    // delete financial records.
+    await requireAdmin(['super_admin']);
+    const { id } = await params;
+
+    await deleteOrder(id);
+
+    return noContent();
   } catch (error) {
     return handleApiError(error);
   }
