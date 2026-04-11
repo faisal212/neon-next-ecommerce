@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { slugify } from "@/lib/utils/slugify";
 import { SingleImageUpload } from "../../../_components/image-upload";
 
 interface Category {
@@ -15,6 +16,7 @@ interface CategoryData {
   id?: string;
   nameEn: string;
   nameUr: string;
+  slug: string;
   parentId: string;
   imageUrl: string;
   isActive: boolean;
@@ -36,6 +38,7 @@ export function CategoryForm({ categories, initialData }: CategoryFormProps) {
     initialData || {
       nameEn: "",
       nameUr: "",
+      slug: "",
       parentId: "",
       imageUrl: "",
       isActive: true,
@@ -46,9 +49,25 @@ export function CategoryForm({ categories, initialData }: CategoryFormProps) {
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // While the slug is untouched in create mode, typing the name auto-fills it.
+  // Once the user edits the slug directly, we stop overwriting it.
+  const [slugTouched, setSlugTouched] = useState(isEditing);
 
   function updateField<K extends keyof CategoryData>(key: K, value: CategoryData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function updateName(value: string) {
+    setForm((prev) => ({
+      ...prev,
+      nameEn: value,
+      slug: !slugTouched ? slugify(value) : prev.slug,
+    }));
+  }
+
+  function updateSlug(value: string) {
+    setSlugTouched(true);
+    setForm((prev) => ({ ...prev, slug: slugify(value) }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -67,6 +86,10 @@ export function CategoryForm({ categories, initialData }: CategoryFormProps) {
         body: JSON.stringify({
           nameEn: form.nameEn,
           nameUr: form.nameUr || undefined,
+          // Only send slug when non-empty. On create with empty slug, the
+          // service auto-generates from the name. On update, omitting slug
+          // leaves the existing one untouched.
+          slug: form.slug.trim() ? form.slug.trim() : undefined,
           parentId: form.parentId || undefined,
           imageUrl: form.imageUrl || undefined,
           isActive: form.isActive,
@@ -111,7 +134,7 @@ export function CategoryForm({ categories, initialData }: CategoryFormProps) {
             <input
               type="text"
               value={form.nameEn}
-              onChange={(e) => updateField("nameEn", e.target.value)}
+              onChange={(e) => updateName(e.target.value)}
               placeholder="e.g. Women's Clothing"
               required
               className={inputClass}
@@ -130,6 +153,26 @@ export function CategoryForm({ categories, initialData }: CategoryFormProps) {
               className={inputClass}
             />
           </div>
+        </div>
+
+        {/* URL Slug */}
+        <div className="mb-4">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            URL Slug
+          </label>
+          <input
+            type="text"
+            value={form.slug}
+            onChange={(e) => updateSlug(e.target.value)}
+            placeholder="auto-generated from name"
+            className={inputClass}
+          />
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            Lowercase letters, numbers, and hyphens only.{" "}
+            <span className="text-foreground/70">
+              Preview: /categories/{form.slug || "<slug>"}
+            </span>
+          </p>
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-4">

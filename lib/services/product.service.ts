@@ -1,8 +1,8 @@
-import { eq, and, ilike, gte, lte, sql, desc, inArray } from 'drizzle-orm';
+import { eq, ne, and, ilike, gte, lte, sql, desc, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { products, productTags, productVariants, productImages, inventory } from '@/lib/db/schema/catalog';
 import { categories } from '@/lib/db/schema/catalog';
-import { NotFoundError } from '@/lib/errors/api-error';
+import { NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { slugify } from '@/lib/utils/slugify';
 import type { CreateProductInput } from '@/lib/validators/product.validators';
 import type { PaginationParams } from '@/lib/utils/pagination';
@@ -261,16 +261,18 @@ export async function getProductById(id: string) {
   return product;
 }
 
-async function generateUniqueSlug(base: string): Promise<string> {
+async function generateUniqueSlug(base: string, excludeId?: string): Promise<string> {
   let slug = slugify(base);
   let suffix = 1;
 
   while (true) {
     const candidate = suffix === 1 ? slug : `${slug}-${suffix}`;
+    const conditions = [eq(products.slug, candidate)];
+    if (excludeId) conditions.push(ne(products.id, excludeId));
     const [existing] = await db
       .select({ id: products.id })
       .from(products)
-      .where(eq(products.slug, candidate))
+      .where(and(...conditions))
       .limit(1);
 
     if (!existing) return candidate;
@@ -278,8 +280,31 @@ async function generateUniqueSlug(base: string): Promise<string> {
   }
 }
 
+/**
+ * Throws ValidationError if `slug` is already taken by another product.
+ * Used when the admin provides an explicit slug on create or update.
+ */
+async function assertSlugAvailable(slug: string, excludeId?: string): Promise<void> {
+  const conditions = [eq(products.slug, slug)];
+  if (excludeId) conditions.push(ne(products.id, excludeId));
+  const [taken] = await db
+    .select({ id: products.id })
+    .from(products)
+    .where(and(...conditions))
+    .limit(1);
+  if (taken) {
+    throw new ValidationError(`Slug "${slug}" is already in use by another product`);
+  }
+}
+
 export async function createProduct(input: CreateProductInput) {
-  const slug = await generateUniqueSlug(input.nameEn);
+  let slug: string;
+  if (input.slug) {
+    await assertSlugAvailable(input.slug);
+    slug = input.slug;
+  } else {
+    slug = await generateUniqueSlug(input.nameEn);
+  }
 
   const [product] = await db
     .insert(products)
@@ -311,8 +336,25 @@ export async function updateProduct(id: string, input: Partial<CreateProductInpu
   const updates: Record<string, unknown> = { ...input };
   delete updates.tags;
 
-  if (input.nameEn) {
-    updates.slug = await generateUniqueSlug(input.nameEn);
+  // Slug is a user-managed field. Only touch it when the admin explicitly
+  // sent a new slug AND it differs from the current value. Renaming the
+  // product (changing nameEn) does NOT change the slug — admins must
+  // edit it from the slug input directly.
+  if (input.slug !== undefined) {
+    const [current] = await db
+      .select({ slug: products.slug })
+      .from(products)
+      .where(eq(products.id, id))
+      .limit(1);
+    if (!current) throw new NotFoundError('Product not found');
+    if (input.slug !== current.slug) {
+      await assertSlugAvailable(input.slug, id);
+      updates.slug = input.slug;
+    } else {
+      delete updates.slug;
+    }
+  } else {
+    delete updates.slug;
   }
 
   updates.updatedAt = new Date();
