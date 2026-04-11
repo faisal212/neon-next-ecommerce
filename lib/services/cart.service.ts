@@ -14,23 +14,52 @@ function userExpiresAt() {
 }
 
 export async function getOrCreateCart(userId: string | null, sessionToken: string) {
-  // Try to find existing active cart
+  // ── Fast path: existing active cart for this user/session ────────
   const condition = userId
     ? and(eq(carts.userId, userId), eq(carts.status, 'active'))
     : and(eq(carts.sessionToken, sessionToken), eq(carts.status, 'active'));
 
-  const [existing] = await db.select().from(carts).where(condition).limit(1);
+  const [active] = await db.select().from(carts).where(condition).limit(1);
 
-  if (existing) {
-    // Check expiry
-    if (existing.expiresAt && new Date(existing.expiresAt) < new Date()) {
-      await db.update(carts).set({ status: 'abandoned' }).where(eq(carts.id, existing.id));
-    } else {
-      return existing;
+  if (active) {
+    if (!active.expiresAt || new Date(active.expiresAt) >= new Date()) {
+      return active;
     }
+    // Active row exists but is past its expiry. Mark it abandoned and
+    // fall through to the reactivate-or-insert path below.
+    await db
+      .update(carts)
+      .set({ status: 'abandoned' })
+      .where(eq(carts.id, active.id));
   }
 
-  // Create new cart
+  // ── Reactivate path ─────────────────────────────────────────────
+  // A row with this session_token may already exist in a non-active
+  // status (merged after login, abandoned, or the expired one we just
+  // marked). The unique index `carts_session_token_idx` is on
+  // session_token alone with no status filter, so we cannot INSERT a
+  // duplicate — instead we reactivate the existing row in place.
+  const [conflicting] = await db
+    .select()
+    .from(carts)
+    .where(eq(carts.sessionToken, sessionToken))
+    .limit(1);
+
+  if (conflicting) {
+    const [reactivated] = await db
+      .update(carts)
+      .set({
+        status: 'active',
+        userId: userId ?? null,
+        expiresAt: userId ? userExpiresAt() : guestExpiresAt(),
+        updatedAt: new Date(),
+      })
+      .where(eq(carts.id, conflicting.id))
+      .returning();
+    return reactivated;
+  }
+
+  // ── New cart ─────────────────────────────────────────────────────
   const [cart] = await db
     .insert(carts)
     .values({
