@@ -15,7 +15,7 @@ const legalLinks = [
   { label: "Shipping", href: "/shipping" },
 ];
 
-const paymentMethods = ["COD", "JazzCash", "EasyPaisa"];
+const paymentMethods = ["COD"];
 
 export async function StoreFooter() {
   const productLinks = (await getNavCategories()).slice(0, 4);
@@ -31,8 +31,9 @@ export async function StoreFooter() {
               COVER
             </span>
             <p className="text-on-surface-variant text-sm leading-relaxed">
-              Pakistan&apos;s premium technology store. Quality products
-              delivered nationwide with cash on delivery.
+              We&rsquo;ve got you covered. Menswear, watches, and the
+              essentials that finish a look &mdash; shipped across Pakistan,
+              pay on delivery.
             </p>
             <div className="flex items-center gap-4">
               <Globe
@@ -122,7 +123,7 @@ export async function StoreFooter() {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-outline-variant/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-on-surface-variant text-xs">
-            &copy; 2025 Cover. All rights reserved.
+            &copy; 2026 Cover. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             {legalLinks.map((link) => (

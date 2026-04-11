@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { cacheLife, cacheTag } from 'next/cache';
-import { Cog, Zap } from 'lucide-react';
+import { BadgeCheck, Package } from 'lucide-react';
 import { getProductBySlug } from '@/lib/services/product.service';
 import { NotFoundError } from '@/lib/errors/api-error';
 import { ProductConfigurator } from '@/components/store/product/product-configurator';
@@ -30,7 +30,7 @@ async function getProductMetadata(slug: string): Promise<Metadata> {
       title: product.nameEn,
       description: product.descriptionEn
         ? product.descriptionEn.slice(0, 160)
-        : `Shop ${product.nameEn} at Cover - Pakistan's premium tech store.`,
+        : `Shop ${product.nameEn} at Cover — menswear, watches, and accessories shipped across Pakistan.`,
     };
   } catch {
     return { title: 'Product Not Found' };
@@ -87,7 +87,7 @@ async function ProductDetailContent({ slug }: { slug: string }) {
           <div className="flex items-center gap-3 mb-8">
             <span className="w-2 h-2 rounded-full bg-primary status-glow" />
             <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium">
-              {product.isFeatured ? 'New Release' : 'Cover Store'}
+              {product.isFeatured ? 'New Arrival' : 'Cover Collection'}
             </span>
           </div>
 
@@ -100,7 +100,7 @@ async function ProductDetailContent({ slug }: { slug: string }) {
           <p className="text-on-surface-variant text-lg max-w-md mb-12 leading-relaxed">
             {product.descriptionEn
               ? product.descriptionEn.slice(0, 200)
-              : 'Premium quality, engineered for the modern lifestyle.'}
+              : 'Made with care. Priced without the markup. Delivered anywhere in Pakistan.'}
           </p>
 
           {/* Quick specs grid */}
@@ -108,8 +108,8 @@ async function ProductDetailContent({ slug }: { slug: string }) {
             <div className="grid grid-cols-3 gap-8 border-l border-outline-variant/20 pl-8 mb-12">
               {specTags.map((tag, i) => (
                 <div key={i}>
-                  <span className="text-[10px] uppercase text-on-surface-variant tracking-widest block mb-1">
-                    {i === 0 ? 'Spec' : i === 1 ? 'Feature' : 'Detail'}
+                  <span className="font-mono text-[10px] uppercase text-on-surface-variant tracking-widest block mb-1">
+                    {`0${i + 1}`}
                   </span>
                   <span className="font-bold text-lg text-on-surface">{tag}</span>
                 </div>
@@ -117,10 +117,10 @@ async function ProductDetailContent({ slug }: { slug: string }) {
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-8 border-l border-outline-variant/20 pl-8 mb-12">
-              {['Premium Build', 'Fast Delivery', '2yr Warranty'].map((item, i) => (
+              {['Nationwide', 'Pay on Delivery', 'Easy Returns'].map((item, i) => (
                 <div key={i}>
-                  <span className="text-[10px] uppercase text-on-surface-variant tracking-widest block mb-1">
-                    {i === 0 ? 'Quality' : i === 1 ? 'Shipping' : 'Coverage'}
+                  <span className="font-mono text-[10px] uppercase text-on-surface-variant tracking-widest block mb-1">
+                    {`0${i + 1}`}
                   </span>
                   <span className="font-bold text-lg text-on-surface">{item}</span>
                 </div>
@@ -185,23 +185,23 @@ async function ProductDetailContent({ slug }: { slug: string }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-surface-container-highest p-8 rounded-lg">
               <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center mb-6">
-                <Cog className="w-6 h-6 text-primary" />
+                <BadgeCheck className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-on-surface">Precision Engineered</h3>
+              <h3 className="text-xl font-bold mb-3 text-on-surface">Made to Last</h3>
               <p className="text-on-surface-variant leading-relaxed">
-                Every detail is meticulously crafted with premium materials and rigorous quality
-                control, ensuring a product that performs flawlessly day after day.
+                Real materials, careful stitching, and the kind of fit and finish you notice on the
+                wrist, in the pocket, and on the hanger.
               </p>
             </div>
 
             <div className="bg-surface-container-highest p-8 rounded-lg">
               <div className="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6 text-primary" />
+                <Package className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-on-surface">Built for Performance</h3>
+              <h3 className="text-xl font-bold mb-3 text-on-surface">Delivered With Care</h3>
               <p className="text-on-surface-variant leading-relaxed">
-                Optimized internals and cutting-edge technology deliver lightning-fast responsiveness
-                and efficiency that keeps pace with your demanding lifestyle.
+                Packed properly, shipped across Pakistan, and paid on delivery. No surprises at the
+                door — just the piece you ordered, wrapped to arrive how it should.
               </p>
             </div>
           </div>

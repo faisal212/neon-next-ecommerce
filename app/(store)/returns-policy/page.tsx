@@ -13,7 +13,7 @@ const steps = [
     number: "01",
     title: "Contact Support",
     description:
-      "Reach out to our support team via email at support@cover.pk or call +92 (42) 111-COVER. Provide your order number and reason for return.",
+      "Reach out to our support team via email at contact@refine.pk or call +92 (42) 111-COVER. Provide your order number and reason for return.",
   },
   {
     number: "02",
@@ -169,7 +169,7 @@ export default async function ReturnsPolicyPage() {
           COD refunds are processed via bank transfer. Please provide your bank
           account details when initiating the return. For questions about your
           refund status, contact{" "}
-          <span className="text-primary">support@cover.pk</span>.
+          <span className="text-primary">contact@refine.pk</span>.
         </p>
       </div>
     </section>
