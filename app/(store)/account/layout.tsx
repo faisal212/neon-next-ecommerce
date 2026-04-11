@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import {
   User,
   Package,
@@ -10,7 +10,6 @@ import {
   MessageSquare,
   Settings,
 } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
 import { SignOutButton } from "./_components/sign-out-button";
 
 const navLinks = [
@@ -24,22 +23,24 @@ const navLinks = [
   { href: "/account/profile", label: "Profile", icon: Settings },
 ];
 
+/**
+ * Account layout — fully static, cached chrome.
+ *
+ * Auth is gated upstream by `proxy.ts` (optimistic cookie check) and re-verified
+ * inside each page's Suspense island via the DAL (`getCurrentUser`, wrapped in
+ * React `cache()`). The layout itself has no user data and no runtime APIs, so
+ * it can be cached indefinitely across requests — invalidate via
+ * `revalidateTag('account-shell', 'max')` only if the sidebar structure
+ * changes (Next.js 16 requires the cacheLife-profile second argument).
+ */
 export default async function AccountLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let user = null;
-
-  try {
-    user = await getCurrentUser();
-  } catch {
-    // DB not connected — allow through with null user for graceful fallback
-  }
-
-  if (!user) {
-    redirect("/auth/login");
-  }
+  "use cache";
+  cacheLife("max");
+  cacheTag("account-shell");
 
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-12 md:px-8">
