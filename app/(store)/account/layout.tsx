@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import {
   User,
   Package,
@@ -10,7 +10,8 @@ import {
   MessageSquare,
   Settings,
 } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
+import { SignOutButton } from "./_components/sign-out-button";
+import { AccountMobileNav } from "./_components/account-mobile-nav";
 
 const navLinks = [
   { href: "/account", label: "Dashboard", icon: User },
@@ -23,22 +24,24 @@ const navLinks = [
   { href: "/account/profile", label: "Profile", icon: Settings },
 ];
 
+/**
+ * Account layout — fully static, cached chrome.
+ *
+ * Auth is gated upstream by `proxy.ts` (optimistic cookie check) and re-verified
+ * inside each page's Suspense island via the DAL (`getCurrentUser`, wrapped in
+ * React `cache()`). The layout itself has no user data and no runtime APIs, so
+ * it can be cached indefinitely across requests — invalidate via
+ * `revalidateTag('account-shell', 'max')` only if the sidebar structure
+ * changes (Next.js 16 requires the cacheLife-profile second argument).
+ */
 export default async function AccountLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let user = null;
-
-  try {
-    user = await getCurrentUser();
-  } catch {
-    // DB not connected — allow through with null user for graceful fallback
-  }
-
-  if (!user) {
-    redirect("/auth/login");
-  }
+  "use cache";
+  cacheLife("max");
+  cacheTag("account-shell-v2");
 
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-12 md:px-8">
@@ -52,7 +55,8 @@ export default async function AccountLayout({
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container hover:text-white"
+                    data-href={link.href}
+                    className="account-tab flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container hover:text-white"
                   >
                     <link.icon size={18} />
                     {link.label}
@@ -61,10 +65,17 @@ export default async function AccountLayout({
               ))}
             </ul>
           </nav>
+
+          <div className="mt-6 border-t border-outline-variant/10 pt-4">
+            <SignOutButton />
+          </div>
         </aside>
 
         {/* Main content */}
-        <main className="lg:col-span-9">{children}</main>
+        <main className="lg:col-span-9">
+          <AccountMobileNav />
+          {children}
+        </main>
       </div>
     </section>
   );

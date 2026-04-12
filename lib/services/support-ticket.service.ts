@@ -91,7 +91,7 @@ export async function listAllTickets(pagination: PaginationParams, statusFilter?
       assignedTo: supportTickets.assignedTo,
       createdAt: supportTickets.createdAt,
       resolvedAt: supportTickets.resolvedAt,
-      customerName: users.name,
+      customerName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('customer_name'),
       customerEmail: users.email,
     })
     .from(supportTickets)

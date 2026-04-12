@@ -29,6 +29,13 @@
       "when": 1775835449268,
       "tag": "0003_rewrite_r2_dev_to_assets_refine",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775908479008,
+      "tag": "0004_split_users_name",
+      "breakpoints": true
     }
   ]
 }

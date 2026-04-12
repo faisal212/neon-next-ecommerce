@@ -20,6 +20,7 @@ import { useCart } from '@/lib/store/cart-context';
 import { storeFetch } from '@/lib/store/api';
 import { formatPKR } from '@/lib/store/format';
 import { GradientButton } from '@/components/store/gradient-button';
+import { authClient } from '@/lib/auth/client';
 import type { CartItemData } from '@/lib/store/types';
 
 /* ── Types ────────────────────────────────────────────────── */
@@ -75,6 +76,7 @@ function getVariantLabel(item: CartItemData): string | null {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, itemCount } = useCart();
+  const { data: session } = authClient.useSession();
 
   /* Step management */
   const [step, setStep] = useState(0);
@@ -82,6 +84,7 @@ export default function CheckoutPage() {
   /* Shipping form */
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [streetAddress, setStreetAddress] = useState('');
   const [city, setCity] = useState('');
@@ -112,6 +115,16 @@ export default function CheckoutPage() {
   );
 
   /* ── Fetch delivery zones ────────────────────────────── */
+
+  // Pre-fill email from active session (logged-in users only).
+  // We don't pre-fill name/phone — checkout addresses are per-order
+  // and the user may want a different recipient than their profile.
+  useEffect(() => {
+    if (session?.user?.email && !email) {
+      setEmail(session.user.email);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.email]);
 
   useEffect(() => {
     storeFetch<{ data: { zones: DeliveryZone[] } }>('/checkout/delivery-zones')
@@ -159,6 +172,9 @@ export default function CheckoutPage() {
 
     if (!firstName.trim()) errors.firstName = 'First name is required';
     if (!lastName.trim()) errors.lastName = 'Last name is required';
+    if (!email.trim()) errors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      errors.email = 'Enter a valid email address';
     if (!phone.trim()) errors.phone = 'Phone number is required';
     else if (!/^03\d{2}-?\d{7}$/.test(phone.replace(/\s/g, '')))
       errors.phone = 'Format: 03XX-XXXXXXX';
@@ -169,7 +185,7 @@ export default function CheckoutPage() {
 
     setShippingErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [firstName, lastName, phone, streetAddress, city, province, postalCode]);
+  }, [firstName, lastName, email, phone, streetAddress, city, province, postalCode]);
 
   /* ── Coupon ──────────────────────────────────────────── */
 
@@ -224,6 +240,7 @@ export default function CheckoutPage() {
             deliveryZoneId: selectedZoneId,
             paymentMethod,
             couponCode: appliedCoupon?.code ?? undefined,
+            guestEmail: email,
           },
         }
       );
@@ -242,6 +259,7 @@ export default function CheckoutPage() {
   }, [
     firstName,
     lastName,
+    email,
     phone,
     streetAddress,
     city,
@@ -350,6 +368,15 @@ export default function CheckoutPage() {
                   onChange={setLastName}
                   error={shippingErrors.lastName}
                   placeholder="Ali"
+                />
+                <InputField
+                  label="Email"
+                  value={email}
+                  onChange={setEmail}
+                  error={shippingErrors.email}
+                  placeholder="you@example.com"
+                  type="email"
+                  colSpan="full"
                 />
                 <InputField
                   label="Phone Number"

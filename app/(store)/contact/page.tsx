@@ -19,7 +19,7 @@ const contactInfo = [
   {
     icon: Mail,
     label: "Email",
-    value: "support@cover.pk",
+    value: "contact@refine.pk",
   },
   {
     icon: Phone,

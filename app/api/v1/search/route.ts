@@ -1,11 +1,9 @@
 import { type NextRequest, connection } from 'next/server';
-import { and, ilike, or, eq, sql } from 'drizzle-orm';
-import { db } from '@/lib/db';
-import { products } from '@/lib/db/schema/catalog';
 import { success } from '@/lib/utils/api-response';
 import { parsePagination } from '@/lib/utils/pagination';
 import { handleApiError } from '@/lib/errors/handler';
 import { rateLimit, rateLimitResponse } from '@/lib/utils/rate-limit';
+import { listProducts } from '@/lib/services/product.service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,27 +18,13 @@ export async function GET(request: NextRequest) {
     const rl = rateLimit(`search:${ip}`, 30, 60 * 1000);
     if (!rl.allowed) return rateLimitResponse(rl);
 
+    // Delegate to listProducts so results include enriched category + images
+    // — same source of truth as the /search page. The ILIKE filtering and
+    // isActive/isPublished guards live inside listProducts.
     const pagination = parsePagination(request.nextUrl.searchParams);
-    const searchTerm = `%${q.trim()}%`;
+    const { data } = await listProducts({ q: q.trim() }, pagination);
 
-    const results = await db
-      .select()
-      .from(products)
-      .where(
-        and(
-          or(
-            ilike(products.nameEn, searchTerm),
-            ilike(products.nameUr, searchTerm),
-            ilike(products.descriptionEn, searchTerm),
-          ),
-          eq(products.isActive, true),
-          eq(products.isPublished, true),
-        ),
-      )
-      .limit(pagination.limit)
-      .offset(pagination.offset);
-
-    return success(results);
+    return success(data);
   } catch (error) {
     return handleApiError(error);
   }

@@ -17,7 +17,7 @@ export default async function TicketsPage() {
       status: supportTickets.status,
       priority: supportTickets.priority,
       createdAt: supportTickets.createdAt,
-      customerName: users.name,
+      customerName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('customer_name'),
       customerEmail: users.email,
     })
     .from(supportTickets)

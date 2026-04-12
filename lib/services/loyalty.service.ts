@@ -77,7 +77,7 @@ export async function listAllPointsBalances(pagination: PaginationParams) {
       totalRedeemed: loyaltyPoints.totalRedeemed,
       balance: loyaltyPoints.balance,
       updatedAt: loyaltyPoints.updatedAt,
-      userName: users.name,
+      userName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('user_name'),
       userEmail: users.email,
     })
     .from(loyaltyPoints)

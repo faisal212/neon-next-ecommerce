@@ -33,7 +33,8 @@ describe('GET /api/v1/users/[id]', () => {
     mockRequireAuth.mockResolvedValue({
       id: user.id,
       authUserId: user.authUserId,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       phonePk: user.phonePk,
       isPhoneVerified: user.isPhoneVerified,
@@ -51,11 +52,12 @@ describe('GET /api/v1/users/[id]', () => {
   });
 
   it('returns 200 with user data for own profile', async () => {
-    const user = await seedUser({ name: 'Ali Khan' });
+    const user = await seedUser({ firstName: 'Ali', lastName: 'Khan' });
     mockRequireAuth.mockResolvedValue({
       id: user.id,
       authUserId: user.authUserId,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       phonePk: user.phonePk,
       isPhoneVerified: user.isPhoneVerified,
@@ -68,7 +70,8 @@ describe('GET /api/v1/users/[id]', () => {
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.data.id).toBe(user.id);
-    expect(body.data.name).toBe('Ali Khan');
+    expect(body.data.firstName).toBe('Ali');
+    expect(body.data.lastName).toBe('Khan');
   });
 });
 
@@ -82,7 +85,7 @@ describe('PATCH /api/v1/users/[id]', () => {
     mockRequireAuth.mockRejectedValue(new AuthenticationError());
 
     const res = await PATCH(
-      patch('/api/v1/users/xxx', { name: 'New Name' }),
+      patch('/api/v1/users/xxx', { firstName: 'New', lastName: 'Name' }),
       routeParams({ id: 'xxx' }),
     );
     const body = await res.json();
@@ -97,7 +100,8 @@ describe('PATCH /api/v1/users/[id]', () => {
     mockRequireAuth.mockResolvedValue({
       id: user.id,
       authUserId: user.authUserId,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       phonePk: user.phonePk,
       isPhoneVerified: user.isPhoneVerified,
@@ -120,7 +124,8 @@ describe('PATCH /api/v1/users/[id]', () => {
     mockRequireAuth.mockResolvedValue({
       id: user.id,
       authUserId: user.authUserId,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       phonePk: user.phonePk,
       isPhoneVerified: user.isPhoneVerified,
@@ -128,14 +133,15 @@ describe('PATCH /api/v1/users/[id]', () => {
     });
 
     const res = await PATCH(
-      patch(`/api/v1/users/${user.id}`, { name: 'Updated Name', phonePk: '0312-9876543' }),
+      patch(`/api/v1/users/${user.id}`, { firstName: 'Updated', lastName: 'Name', phonePk: '0312-9876543' }),
       routeParams({ id: user.id }),
     );
     const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(body.data.name).toBe('Updated Name');
+    expect(body.data.firstName).toBe('Updated');
+    expect(body.data.lastName).toBe('Name');
     expect(body.data.phonePk).toBe('0312-9876543');
   });
 });

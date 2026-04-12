@@ -1,12 +1,14 @@
 import type { LucideIcon } from "lucide-react";
 
-type ColorVariant = "emerald" | "blue" | "purple" | "cyan";
+type ColorVariant = "emerald" | "blue" | "purple" | "cyan" | "amber" | "red";
 
 const iconBg: Record<ColorVariant, string> = {
   emerald: "bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/15 group-hover:shadow-emerald-500/10",
   blue: "bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/15 group-hover:shadow-blue-500/10",
   purple: "bg-purple-500/10 text-purple-400 group-hover:bg-purple-500/15 group-hover:shadow-purple-500/10",
   cyan: "bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/15 group-hover:shadow-cyan-500/10",
+  amber: "bg-amber-500/10 text-amber-400 group-hover:bg-amber-500/15 group-hover:shadow-amber-500/10",
+  red: "bg-red-500/10 text-red-400 group-hover:bg-red-500/15 group-hover:shadow-red-500/10",
 };
 
 const glowColor: Record<ColorVariant, string> = {
@@ -14,6 +16,8 @@ const glowColor: Record<ColorVariant, string> = {
   blue: "group-hover:shadow-[0_0_30px_rgba(59,130,246,0.06)]",
   purple: "group-hover:shadow-[0_0_30px_rgba(168,85,247,0.06)]",
   cyan: "group-hover:shadow-[0_0_30px_rgba(6,182,212,0.06)]",
+  amber: "group-hover:shadow-[0_0_30px_rgba(245,158,11,0.06)]",
+  red: "group-hover:shadow-[0_0_30px_rgba(239,68,68,0.06)]",
 };
 
 interface StatCardProps {

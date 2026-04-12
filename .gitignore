@@ -45,6 +45,11 @@ next-env.d.ts
 .playwright-cli/
 .playwright-mcp/
 
+# playwright-test output
+/test-results/
+/playwright-report/
+/mobile-audit-output/
+
 # one-off dev probe scripts at repo root
 /measure-cards.*
 /_*.ts
@@ -52,3 +57,5 @@ next-env.d.ts
 # HTML prototypes / schema exports that are not app source
 /adminpanelprototype.html
 /pk_ecommerce_full_schema*.html
+
+DESIGN.md

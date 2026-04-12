@@ -38,20 +38,20 @@ export function ProductCard({ product, variantLabel, variantId, displayPrice, im
             alt={displayImage.altText ?? product.nameEn}
             fill
             className="object-cover opacity-90 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="absolute inset-0 bg-surface-container-highest" />
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex flex-1 flex-col p-4 sm:p-6">
         {product.category && (
           <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary">
             {product.category.nameEn}
           </span>
         )}
-        <h3 className="mb-1 text-lg font-bold text-white">
+        <h3 className="mb-1 text-sm font-bold text-white sm:text-lg">
           {product.nameEn}
         </h3>
         {variantLabel && (

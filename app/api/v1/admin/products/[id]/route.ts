@@ -1,9 +1,9 @@
 import { type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { updateProductSchema } from '@/lib/validators/product.validators';
-import { getProductById, updateProduct } from '@/lib/services/product.service';
+import { getProductById, updateProduct, deleteProduct } from '@/lib/services/product.service';
 import { invalidateProductBySlug, invalidateHomepage } from '@/lib/cache/revalidate';
-import { success } from '@/lib/utils/api-response';
+import { success, noContent } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 
 export async function GET(
@@ -43,6 +43,27 @@ export async function PATCH(
     invalidateHomepage();
 
     return success(product);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    await requireAdmin(['super_admin', 'manager']);
+    const { id } = await params;
+
+    // The product row is gone after `deleteProduct` returns, so the
+    // service hands back the slug for cache-tag invalidation.
+    const { slug } = await deleteProduct(id);
+
+    invalidateProductBySlug(slug);
+    invalidateHomepage();
+
+    return noContent();
   } catch (error) {
     return handleApiError(error);
   }

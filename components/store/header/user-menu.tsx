@@ -8,7 +8,7 @@ export function UserMenu() {
     <Link
       href="/account"
       aria-label="Account"
-      className="text-on-surface-variant hover:text-primary transition-colors p-2"
+      className="p-2 text-on-surface-variant transition-colors hover:text-primary"
     >
       <User size={20} />
     </Link>

@@ -18,10 +18,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     template: "%s | Cover",
-    default: "Cover - Premium Tech Store Pakistan",
+    default: "Cover — Menswear, Watches & Accessories in Pakistan",
   },
   description:
-    "Pakistan's premium tech store. Shop smartphones, wearables, smart home, audio & lifestyle products with free delivery and cash on delivery.",
+    "Modern menswear, watches, kurtas, wallets, and the essentials that finish a look. Shipped across Pakistan with cash on delivery.",
 };
 
 export default async function StoreLayout({
@@ -29,6 +29,9 @@ export default async function StoreLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // StoreHeader is cached here as part of the layout; edits to the header
+  // component itself only land after the store-layout cache tag is
+  // revalidated or Turbopack picks up the change.
   "use cache";
   cacheLife("hours");
   cacheTag("store-layout");

@@ -33,7 +33,8 @@ export async function createUser(authUserId: string, input: RegisterInput) {
     .insert(users)
     .values({
       authUserId,
-      name: input.name,
+      firstName: input.firstName,
+      lastName: input.lastName,
       email: input.email,
       phonePk: input.phonePk ?? null,
     })
@@ -95,7 +96,9 @@ export async function listUsers(pagination: PaginationParams, search?: string) {
   if (search) {
     conditions.push(
       or(
-        ilike(users.name, `%${search}%`),
+        // Match against "first last" concatenation so a single search
+        // box works for either half of the name or the whole thing.
+        sql`${users.firstName} || ' ' || ${users.lastName} ILIKE ${'%' + search + '%'}`,
         ilike(users.email, `%${search}%`),
         ilike(users.phonePk, `%${search}%`),
       ),
@@ -113,7 +116,10 @@ export async function listUsers(pagination: PaginationParams, search?: string) {
     .select({
       id: users.id,
       authUserId: users.authUserId,
-      name: users.name,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      // Computed column so existing callers consuming `row.name` keep working.
+      name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('name'),
       email: users.email,
       phonePk: users.phonePk,
       isPhoneVerified: users.isPhoneVerified,

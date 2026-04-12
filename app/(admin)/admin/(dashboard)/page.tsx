@@ -1,6 +1,6 @@
-import { sql, desc, eq, and } from "drizzle-orm";
+import { sql, desc, eq, and, ne, or, isNull, notInArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { orders } from "@/lib/db/schema/orders";
+import { orders, codCollections } from "@/lib/db/schema/orders";
 import { products, productVariants, inventory } from "@/lib/db/schema/catalog";
 import { users } from "@/lib/db/schema/users";
 import { PageHeader } from "../_components/page-header";
@@ -9,6 +9,7 @@ import { StatusBadge } from "../_components/status-badge";
 import {
   ShoppingBag,
   Banknote,
+  Hourglass,
   Package,
   Users,
 } from "lucide-react";
@@ -22,12 +23,43 @@ import {
 } from "@/components/ui/table";
 
 async function getDashboardData() {
+  // Total order volume — just a count, includes everything ever placed.
   const [orderStats] = await db
     .select({
       count: sql<number>`count(*)::int`,
-      revenue: sql<string>`coalesce(sum(${orders.totalPkr}), 0)`,
     })
     .from(orders);
+
+  // Revenue is cash-basis: only money that's actually been collected on
+  // delivery. Order status `delivered` is not enough — an admin can mark
+  // an order delivered before recording the COD payment, so we anchor on
+  // cod_collections.status = 'collected'.
+  const [revenueStats] = await db
+    .select({
+      revenue: sql<string>`coalesce(sum(${codCollections.amountCollectedPkr}), 0)`,
+    })
+    .from(codCollections)
+    .where(eq(codCollections.status, 'collected'));
+
+  // Pipeline = orders still in flight, including delivered-but-not-yet-
+  // collected. Excludes cancelled/returned (no money owed) and orders
+  // whose COD has already been collected (counted as Revenue above).
+  const [pipelineStats] = await db
+    .select({
+      count: sql<number>`count(*)::int`,
+      pipeline: sql<string>`coalesce(sum(${orders.totalPkr}), 0)`,
+    })
+    .from(orders)
+    .leftJoin(codCollections, eq(codCollections.orderId, orders.id))
+    .where(
+      and(
+        notInArray(orders.status, ['cancelled', 'returned']),
+        or(
+          isNull(codCollections.status),
+          ne(codCollections.status, 'collected'),
+        ),
+      ),
+    );
 
   const [productCount] = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -61,7 +93,10 @@ async function getDashboardData() {
   let userMap: Record<string, string> = {};
   if (userIds.length > 0) {
     const orderUsers = await db
-      .select({ id: users.id, name: users.name })
+      .select({
+        id: users.id,
+        name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`.as('name'),
+      })
       .from(users)
       .where(sql`${users.id} in ${userIds}`);
     userMap = Object.fromEntries(
@@ -92,7 +127,9 @@ async function getDashboardData() {
 
   return {
     totalOrders: orderStats?.count ?? 0,
-    revenue: Number(orderStats?.revenue ?? 0),
+    revenue: Number(revenueStats?.revenue ?? 0),
+    pipeline: Number(pipelineStats?.pipeline ?? 0),
+    pipelineCount: pipelineStats?.count ?? 0,
     totalProducts: productCount?.count ?? 0,
     activeUsers: userCount?.count ?? 0,
     recentOrders: recentOrders.map((o) => ({
@@ -128,18 +165,24 @@ export default async function AdminDashboardPage() {
       <PageHeader title="Dashboard" />
 
       {/* Stats Grid */}
-      <div className="mb-6 grid grid-cols-4 gap-4">
+      <div className="mb-6 grid grid-cols-5 gap-4">
+        <StatCard
+          icon={Banknote}
+          color="blue"
+          value={formatPkr(data.revenue)}
+          label="Revenue (collected)"
+        />
+        <StatCard
+          icon={Hourglass}
+          color="amber"
+          value={formatPkr(data.pipeline)}
+          label={`Pipeline · ${data.pipelineCount} in flight`}
+        />
         <StatCard
           icon={ShoppingBag}
           color="emerald"
           value={data.totalOrders.toLocaleString()}
           label="Total Orders"
-        />
-        <StatCard
-          icon={Banknote}
-          color="blue"
-          value={formatPkr(data.revenue)}
-          label="Revenue"
         />
         <StatCard
           icon={Package}

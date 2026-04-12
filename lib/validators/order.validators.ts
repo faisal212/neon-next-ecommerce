@@ -29,7 +29,7 @@ export const placeOrderSchema = z.object({
   paymentMethod: z.enum(['cod']),
   couponCode: z.string().max(40).optional(),
   customerNotes: z.string().max(500).optional(),
-  guestEmail: z.string().email().optional(),
+  guestEmail: z.string().email().max(255),
 });
 
 export const updateOrderStatusSchema = z.object({

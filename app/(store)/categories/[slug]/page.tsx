@@ -8,6 +8,7 @@ import { SectionHeader } from "@/components/store/section-header";
 import { Breadcrumbs } from "@/components/store/breadcrumbs";
 import { PaginationControls } from "@/components/store/pagination-controls";
 import { Package } from "lucide-react";
+import { CategoryMobileFilters } from "./_components/category-mobile-filters";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -128,7 +129,7 @@ async function CategoryContent({
   if (maxPrice) paginationParams.maxPrice = maxPrice;
 
   return (
-    <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-8">
+    <section className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 md:px-8">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -141,6 +142,19 @@ async function CategoryContent({
         <SectionHeader
           label="Category"
           title={categoryName}
+        />
+      </div>
+
+      {/* ── Mobile Filters (bottom sheet) ─────────────── */}
+      <div className="mb-6 flex items-center justify-between lg:hidden">
+        <p className="text-sm text-on-surface-variant">
+          {total} product{total !== 1 ? "s" : ""} found
+        </p>
+        <CategoryMobileFilters
+          categories={allCategories}
+          currentSlug={slug}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
         />
       </div>
 
@@ -226,11 +240,11 @@ async function CategoryContent({
         <div className="flex-1">
           {hasProducts ? (
             <>
-              <p className="mb-6 text-sm text-on-surface-variant">
+              <p className="mb-6 hidden text-sm text-on-surface-variant lg:block">
                 {total} product{total !== 1 ? "s" : ""} found
               </p>
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 xl:grid-cols-3">
                 {products.map((item) => (
                   <ProductCard
                     key={item.variantId}
