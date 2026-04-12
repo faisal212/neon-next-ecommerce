@@ -245,7 +245,7 @@ export default function CheckoutPage() {
         }
       );
       router.push(
-        `/checkout/confirmation?order=${encodeURIComponent(res.data.orderNumber)}`
+        `/checkout/confirmation?order=${encodeURIComponent(res.data.orderNumber)}&shipping=${shippingCost}`
       );
     } catch (err) {
       setOrderError(
@@ -645,6 +645,21 @@ export default function CheckoutPage() {
                   <span className="text-xl font-black">{formatPKR(total)}</span>
                 </div>
               </div>
+
+              {/* EasyPaisa shipping notice */}
+              {shippingCost > 0 && (
+                <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                  <AlertCircle size={18} className="mt-0.5 flex-shrink-0 text-primary" />
+                  <div>
+                    <p className="font-bold text-primary">Shipping fee via EasyPaisa</p>
+                    <p className="mt-1 text-on-surface-variant">
+                      After placing your order, send <strong className="text-on-surface">{formatPKR(shippingCost)}</strong> to{' '}
+                      <strong className="text-on-surface">0315 4267454</strong> (Ahmed Bilal) via EasyPaisa,
+                      then share the screenshot on WhatsApp to the same number. Your order ships after confirmation.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Order error */}
               {orderError && (
