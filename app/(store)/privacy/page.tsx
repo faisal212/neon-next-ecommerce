@@ -160,7 +160,7 @@ export default async function PrivacyPage() {
                 Email:{" "}
                 <span className="text-primary">contact@refine.pk</span>
               </li>
-              <li>Phone: +92 (42) 111-REFINE</li>
+              <li>Phone: +92 315 4267454</li>
               <li>Address: Lahore, Punjab, Pakistan</li>
             </ul>
           </div>
