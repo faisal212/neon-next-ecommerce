@@ -25,14 +25,14 @@ export function HeroSection({ banner }: HeroSectionProps) {
   const ctaHref = banner?.linkUrl || "/products";
 
   return (
-    <section className="relative min-h-[700px] lg:min-h-[870px] flex items-center overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-8 w-full z-10 grid grid-cols-12 gap-8">
-        {/* Left column */}
-        <div className="col-span-12 lg:col-span-6 flex flex-col justify-center py-20">
-          <span className="text-xs font-bold uppercase tracking-[0.3em] text-primary mb-4 block">
+    <section className="relative flex items-center overflow-hidden lg:min-h-[870px]">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 grid grid-cols-12 gap-6 lg:gap-8 py-12 sm:py-16 lg:py-20">
+        {/* Left column - copy */}
+        <div className="col-span-12 lg:col-span-6 flex flex-col justify-center order-2 lg:order-1">
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.3em] text-primary mb-3 sm:mb-4 block">
             {subtitle}
           </span>
-          <h1 className="text-6xl lg:text-8xl font-black text-on-surface tracking-tighter leading-none mb-6">
+          <h1 className="text-[2.75rem] sm:text-6xl lg:text-8xl font-black text-on-surface tracking-tighter leading-[0.95] mb-5 sm:mb-6">
             {titleLine1}
             {titleLine2 && (
               <>
@@ -41,19 +41,19 @@ export function HeroSection({ banner }: HeroSectionProps) {
               </>
             )}
           </h1>
-          <p className="text-lg text-on-surface-variant max-w-md mb-10 leading-relaxed">
+          <p className="text-base sm:text-lg text-on-surface-variant max-w-md mb-8 sm:mb-10 leading-relaxed">
             {description}
           </p>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <Link
               href={ctaHref}
-              className="gradient-button inline-flex items-center justify-center text-on-primary-fixed px-10 py-4 font-bold rounded-lg transition-all"
+              className="gradient-button inline-flex items-center justify-center text-on-primary-fixed px-8 sm:px-10 py-4 font-bold rounded-lg transition-all"
             >
               Shop Now
             </Link>
             <Link
               href="/categories"
-              className="border border-outline-variant/30 text-on-surface px-10 py-4 font-bold rounded-lg hover:bg-white/5 transition-all"
+              className="inline-flex items-center justify-center border border-outline-variant/30 text-on-surface px-8 sm:px-10 py-4 font-bold rounded-lg hover:bg-white/5 transition-all"
             >
               Explore Categories
             </Link>
@@ -61,22 +61,23 @@ export function HeroSection({ banner }: HeroSectionProps) {
         </div>
 
         {/* Right column - hero image */}
-        <div className="hidden lg:flex lg:col-span-6 relative items-center justify-center">
+        <div className="col-span-12 lg:col-span-6 relative flex items-center justify-center order-1 lg:order-2">
           {banner?.imageUrl ? (
-            <div className="relative w-full h-[600px] rounded-xl overflow-hidden">
+            <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[600px] rounded-xl overflow-hidden">
               <Image
                 src={banner.imageUrl}
                 alt={banner.title}
                 fill
                 priority
-                className="object-contain"
-                sizes="(max-width: 1024px) 0vw, 50vw"
+                className="object-cover lg:object-contain"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
           ) : (
-            <div className="relative w-full h-[600px] bg-surface-container rounded-xl flex flex-col items-center justify-center gap-4">
-              <ShoppingBag size={64} className="text-on-surface-variant/30" />
-              <span className="text-on-surface-variant/50 text-sm uppercase tracking-widest font-bold">
+            <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[600px] bg-surface-container rounded-xl flex flex-col items-center justify-center gap-4">
+              <ShoppingBag size={56} className="text-on-surface-variant/30 sm:hidden" />
+              <ShoppingBag size={64} className="hidden sm:block text-on-surface-variant/30" />
+              <span className="text-on-surface-variant/50 text-xs sm:text-sm uppercase tracking-widest font-bold">
                 Featured Product
               </span>
             </div>

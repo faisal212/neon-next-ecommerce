@@ -304,3 +304,11 @@ button:active:not(:disabled) {
 /* Hide scrollbar but keep functionality */
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Account nav — active state set by AccountTabHighlighter client island */
+.account-tab[aria-current="page"] {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 700;
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
