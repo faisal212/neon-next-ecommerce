@@ -22,6 +22,7 @@ export async function StoreHeader() {
               width={140}
               height={36}
               priority
+              fetchPriority="high"
               className="h-7 w-auto sm:h-8"
             />
           </Link>
