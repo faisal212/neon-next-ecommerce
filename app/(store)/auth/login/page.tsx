@@ -39,7 +39,7 @@ export default function LoginPage() {
             Welcome Back
           </h1>
           <p className="text-on-surface-variant">
-            Sign in to your Cover account
+            Sign in to your Refine account
           </p>
         </div>
 

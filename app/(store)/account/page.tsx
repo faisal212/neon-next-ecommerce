@@ -17,7 +17,7 @@ import {
 
 export const metadata: Metadata = {
   title: "My Account",
-  description: "Manage your Cover account, orders, and preferences.",
+  description: "Manage your Refine account, orders, and preferences.",
 };
 
 const quickLinks = [

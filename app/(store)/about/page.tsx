@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/store/breadcrumbs";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Learn about Cover - Pakistan's premium tech store. Our mission is to bring world-class technology to your doorstep with unmatched quality and service.",
+    "Learn about Refine - Pakistan's premium tech store. Our mission is to bring world-class technology to your doorstep with unmatched quality and service.",
 };
 
 const values = [
@@ -47,10 +47,10 @@ export default async function AboutPage() {
           Our Story
         </span>
         <h1 className="text-5xl font-black tracking-tight md:text-7xl">
-          About <span className="text-primary-fixed">Cover</span>
+          About <span className="text-primary-fixed">Refine</span>
         </h1>
         <p className="mt-6 text-lg leading-relaxed text-on-surface-variant">
-          Cover is Pakistan&apos;s premium destination for technology and
+          Refine is Pakistan&apos;s premium destination for technology and
           lifestyle products. Founded with a singular vision — to bring the
           world&apos;s finest tech to every doorstep in Pakistan — we&apos;ve
           built a curated marketplace that prioritises quality, authenticity, and

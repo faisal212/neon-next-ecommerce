@@ -191,7 +191,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             Search products
           </DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">
-            Type to search the Cover product catalog. Use arrow keys to navigate and Enter to open a result.
+            Type to search the Refine product catalog. Use arrow keys to navigate and Enter to open a result.
           </DialogPrimitive.Description>
 
           {/*
@@ -214,7 +214,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search the Cover catalog…"
+                placeholder="Search the Refine catalog…"
                 autoComplete="off"
                 spellCheck={false}
                 role="combobox"

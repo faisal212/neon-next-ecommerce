@@ -23,8 +23,8 @@ export async function generateMetadata({
   return {
     title: q ? `Search: ${q}` : "Search",
     description: q
-      ? `Search results for "${q}" at Cover. Browse premium tech products.`
-      : "Search the Cover store for premium tech products.",
+      ? `Search results for "${q}" at Refine. Browse premium tech products.`
+      : "Search the Refine store for premium tech products.",
   };
 }
 

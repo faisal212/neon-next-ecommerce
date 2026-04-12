@@ -32,13 +32,10 @@ export function HeroSection({ banner }: HeroSectionProps) {
           <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.3em] text-primary mb-3 sm:mb-4 block">
             {subtitle}
           </span>
-          <h1 className="text-[2.75rem] sm:text-6xl lg:text-8xl font-black text-on-surface tracking-tighter leading-[0.95] mb-5 sm:mb-6">
+          <h1 className="text-[2.75rem] sm:text-6xl lg:text-8xl font-black text-on-surface tracking-tighter leading-[0.85] mb-5 sm:mb-6">
             {titleLine1}
             {titleLine2 && (
-              <>
-                <br />
-                <span className="text-primary-dim">{titleLine2}</span>
-              </>
+              <span className="block text-primary-dim">{titleLine2}</span>
             )}
           </h1>
           <p className="text-base sm:text-lg text-on-surface-variant max-w-md mb-8 sm:mb-10 leading-relaxed">
