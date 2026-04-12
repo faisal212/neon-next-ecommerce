@@ -33,7 +33,7 @@ export default async function StoreLayout({
   // component itself only land after the store-layout cache tag is
   // revalidated or Turbopack picks up the change.
   "use cache";
-  cacheLife("hours");
+  cacheLife("weeks");
   cacheTag("store-layout");
 
   return (

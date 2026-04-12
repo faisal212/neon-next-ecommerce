@@ -39,7 +39,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
 async function SearchContent({ q, page }: { q: string; page: number }) {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("hours");
   cacheTag("search");
   if (q) cacheTag(`search-${q}`);
 

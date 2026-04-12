@@ -312,3 +312,13 @@ button:active:not(:disabled) {
   font-weight: 700;
   background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
+
+/* Category sidebar nav — active state set by CategoryNavHighlighter */
+.category-nav-link {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.category-nav-link[aria-current="page"] {
+  background-color: var(--color-surface-container-high);
+  color: var(--color-primary);
+  font-weight: 700;
+}

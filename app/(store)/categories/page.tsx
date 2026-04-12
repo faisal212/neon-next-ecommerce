@@ -23,7 +23,7 @@ const FALLBACK_CATEGORIES = [
 
 export default async function CategoriesPage() {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("days");
   cacheTag("collection-all");
 
   let categories: { nameEn: string; slug: string }[];
