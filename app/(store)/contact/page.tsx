@@ -7,7 +7,7 @@ import { ContactForm } from "./_components/contact-form";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with Cover. We're here to help with orders, products, and everything tech. Reach us via email, phone, or visit our office in Lahore.",
+    "Get in touch with Refine. We're here to help with orders, products, and everything tech. Reach us via email, phone, or visit our office in Lahore.",
 };
 
 const contactInfo = [
@@ -24,7 +24,7 @@ const contactInfo = [
   {
     icon: Phone,
     label: "Phone",
-    value: "+92 (42) 111-COVER",
+    value: "+92 (42) 111-REFINE",
   },
 ];
 

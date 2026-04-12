@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/store/breadcrumbs";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Cover's privacy policy. Learn how we collect, use, and protect your personal information when you shop with us.",
+    "Refine's privacy policy. Learn how we collect, use, and protect your personal information when you shop with us.",
 };
 
 export default async function PrivacyPage() {
@@ -37,7 +37,7 @@ export default async function PrivacyPage() {
           <h2 className="text-2xl font-black">1. Information We Collect</h2>
           <div className="mt-4 space-y-3 leading-relaxed text-on-surface-variant">
             <p>
-              When you use Cover, we collect information that you provide
+              When you use Refine, we collect information that you provide
               directly, including your name, email address, phone number,
               shipping address, and payment details when placing an order.
             </p>
@@ -160,7 +160,7 @@ export default async function PrivacyPage() {
                 Email:{" "}
                 <span className="text-primary">contact@refine.pk</span>
               </li>
-              <li>Phone: +92 (42) 111-COVER</li>
+              <li>Phone: +92 (42) 111-REFINE</li>
               <li>Address: Lahore, Punjab, Pakistan</li>
             </ul>
           </div>

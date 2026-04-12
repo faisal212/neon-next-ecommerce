@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu } from 'lucide-react';
 import {
   Sheet,
@@ -29,8 +30,8 @@ export function MobileNav({ links }: MobileNavProps) {
         </SheetTrigger>
         <SheetContent side="left" className="border-outline-variant/10 bg-surface">
           <SheetHeader>
-            <SheetTitle className="text-xl font-black tracking-tighter text-white">
-              Cover
+            <SheetTitle>
+              <Image src="/logo.svg" alt="Refine" width={120} height={32} className="h-7 w-auto" />
             </SheetTitle>
           </SheetHeader>
           <nav className="flex flex-col gap-1 px-4">

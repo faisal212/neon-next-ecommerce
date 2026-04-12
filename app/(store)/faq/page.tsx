@@ -18,7 +18,7 @@ const faqCategories = [
       },
       {
         q: "Can I modify or cancel my order after placing it?",
-        a: "You can modify or cancel your order within 1 hour of placement by contacting our support team at contact@refine.pk or calling +92 (42) 111-COVER. Once an order has been dispatched, it cannot be cancelled.",
+        a: "You can modify or cancel your order within 1 hour of placement by contacting our support team at contact@refine.pk or calling +92 (42) 111-REFINE. Once an order has been dispatched, it cannot be cancelled.",
       },
       {
         q: "How can I track my order?",
@@ -56,7 +56,7 @@ const faqCategories = [
       },
       {
         q: "How do I initiate a return?",
-        a: "Contact our support team via email at contact@refine.pk or call +92 (42) 111-COVER with your order number. We will guide you through the return process and arrange a pickup if applicable.",
+        a: "Contact our support team via email at contact@refine.pk or call +92 (42) 111-REFINE with your order number. We will guide you through the return process and arrange a pickup if applicable.",
       },
       {
         q: "How long does it take to receive a refund?",

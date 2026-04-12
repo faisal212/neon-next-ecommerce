@@ -17,11 +17,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Cover",
-    default: "Cover — Menswear, Watches & Accessories in Pakistan",
+    template: "%s | Refine",
+    default: "Refine — Watches & Tech Accessories in Pakistan",
   },
   description:
-    "Modern menswear, watches, kurtas, wallets, and the essentials that finish a look. Shipped across Pakistan with cash on delivery.",
+    "Premium watches, tech accessories, and lifestyle essentials. Shipped across Pakistan with cash on delivery.",
 };
 
 export default async function StoreLayout({

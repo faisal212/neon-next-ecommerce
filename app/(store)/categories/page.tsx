@@ -9,7 +9,7 @@ import { ArrowRight } from "lucide-react";
 export const metadata: Metadata = {
   title: "Categories",
   description:
-    "Browse product categories at Cover. Shop by smartphones, wearables, audio, smart home, and lifestyle accessories.",
+    "Browse product categories at Refine. Shop by smartphones, wearables, audio, smart home, and lifestyle accessories.",
 };
 
 const FALLBACK_CATEGORIES = [

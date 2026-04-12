@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Globe, Mail } from "lucide-react";
 import { getNavCategories } from "@/lib/services/category.service";
 
@@ -27,9 +28,15 @@ export async function StoreFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Column 1 - Brand */}
           <div className="flex flex-col gap-5">
-            <span className="text-primary font-bold uppercase tracking-widest text-sm">
-              COVER
-            </span>
+            <Link href="/" aria-label="Refine home">
+              <Image
+                src="/logo-mark.svg"
+                alt="Refine"
+                width={36}
+                height={36}
+                className="h-9 w-9"
+              />
+            </Link>
             <p className="text-on-surface-variant text-sm leading-relaxed">
               We&rsquo;ve got you covered. Menswear, watches, and the
               essentials that finish a look &mdash; shipped across Pakistan,
@@ -123,7 +130,7 @@ export async function StoreFooter() {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-outline-variant/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-on-surface-variant text-xs">
-            &copy; 2026 Cover. All rights reserved.
+            &copy; 2026 Refine. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             {legalLinks.map((link) => (

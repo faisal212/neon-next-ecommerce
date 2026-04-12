@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/store/breadcrumbs";
 export const metadata: Metadata = {
   title: "Shipping Information",
   description:
-    "Learn about Cover's shipping options, delivery areas, timelines, and free shipping policy. We deliver across all major cities in Pakistan.",
+    "Learn about Refine's shipping options, delivery areas, timelines, and free shipping policy. We deliver across all major cities in Pakistan.",
 };
 
 const shippingOptions = [

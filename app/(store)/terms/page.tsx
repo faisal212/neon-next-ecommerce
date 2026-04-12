@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/store/breadcrumbs";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
-    "Read Cover's terms and conditions. Understand your rights and responsibilities when using our platform and purchasing products.",
+    "Read Refine's terms and conditions. Understand your rights and responsibilities when using our platform and purchasing products.",
 };
 
 export default async function TermsPage() {
@@ -37,13 +37,13 @@ export default async function TermsPage() {
           <h2 className="text-2xl font-black">1. Acceptance of Terms</h2>
           <div className="mt-4 space-y-3 leading-relaxed text-on-surface-variant">
             <p>
-              By accessing and using the Cover website and services, you agree to
+              By accessing and using the Refine website and services, you agree to
               be bound by these Terms and Conditions. If you do not agree to
               these terms, please do not use our platform.
             </p>
             <p>
               These terms apply to all visitors, users, and customers of
-              Cover. We reserve the right to update these terms at any time, and
+              Refine. We reserve the right to update these terms at any time, and
               continued use of the platform constitutes acceptance of any
               changes.
             </p>
@@ -54,7 +54,7 @@ export default async function TermsPage() {
           <h2 className="text-2xl font-black">2. Account Registration</h2>
           <div className="mt-4 space-y-3 leading-relaxed text-on-surface-variant">
             <p>
-              To place orders on Cover, you may be required to create an
+              To place orders on Refine, you may be required to create an
               account. You are responsible for maintaining the confidentiality of
               your account credentials and for all activities that occur under
               your account.
@@ -89,7 +89,7 @@ export default async function TermsPage() {
           <h2 className="text-2xl font-black">4. Orders and Payment</h2>
           <div className="mt-4 space-y-3 leading-relaxed text-on-surface-variant">
             <p>
-              When you place an order on Cover, it constitutes an offer to
+              When you place an order on Refine, it constitutes an offer to
               purchase. We reserve the right to accept or decline any order at
               our discretion.
             </p>
@@ -139,8 +139,8 @@ export default async function TermsPage() {
           <h2 className="text-2xl font-black">7. Intellectual Property</h2>
           <div className="mt-4 space-y-3 leading-relaxed text-on-surface-variant">
             <p>
-              All content on the Cover platform — including logos, text, images,
-              graphics, and software — is the property of Cover or its licensors
+              All content on the Refine platform — including logos, text, images,
+              graphics, and software — is the property of Refine or its licensors
               and is protected by applicable intellectual property laws.
             </p>
             <p>
@@ -156,7 +156,7 @@ export default async function TermsPage() {
           <h2 className="text-2xl font-black">8. Limitation of Liability</h2>
           <div className="mt-4 space-y-3 leading-relaxed text-on-surface-variant">
             <p>
-              Cover shall not be liable for any indirect, incidental, special,
+              Refine shall not be liable for any indirect, incidental, special,
               or consequential damages arising from your use of our platform or
               products purchased through it. Our total liability for any claim
               shall not exceed the amount paid by you for the specific product
@@ -190,7 +190,7 @@ export default async function TermsPage() {
                 Email:{" "}
                 <span className="text-primary">contact@refine.pk</span>
               </li>
-              <li>Phone: +92 (42) 111-COVER</li>
+              <li>Phone: +92 (42) 111-REFINE</li>
               <li>Address: Lahore, Punjab, Pakistan</li>
             </ul>
           </div>
