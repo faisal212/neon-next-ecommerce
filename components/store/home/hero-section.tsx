@@ -60,13 +60,13 @@ export function HeroSection({ banner }: HeroSectionProps) {
         {/* Right column - hero image */}
         <div className="col-span-12 lg:col-span-6 relative flex items-center justify-center order-1 lg:order-2">
           {banner?.imageUrl ? (
-            <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[600px] rounded-xl overflow-hidden">
+            <div className="group/hero relative w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[600px] rounded-xl overflow-hidden">
               <Image
                 src={banner.imageUrl}
                 alt={banner.title}
                 fill
                 priority
-                className="object-cover lg:object-contain"
+                className="object-cover lg:object-contain transition-all duration-700 ease-out group-hover/hero:scale-[1.03] group-hover/hero:-translate-y-2 group-hover/hero:drop-shadow-[0_0_40px_rgba(255,145,92,0.3)]"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
