@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +19,10 @@ interface ImageGalleryProps {
 
 export function ImageGallery({ images }: ImageGalleryProps) {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const prevVariantRef = useRef(selectedVariantId);
 
   // Listen for variant changes from ProductConfigurator
   useEffect(() => {
@@ -46,18 +50,55 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     );
   }, [allSorted, selectedVariantId]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
-  const prevVariantRef = useRef(selectedVariantId);
-
-  // Reset to first image when variant actually changes
+  // Reset to first image when variant changes
   if (prevVariantRef.current !== selectedVariantId) {
     prevVariantRef.current = selectedVariantId;
     if (activeIndex !== 0) setActiveIndex(0);
   }
 
-  // Clamp index if filtered list shrinks
-  const safeIndex = Math.min(activeIndex, Math.max(filteredImages.length - 1, 0));
-  const activeImage = filteredImages[safeIndex];
+  // Scroll main carousel to the first slide when variant changes
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    container.scrollTo({ left: 0, behavior: 'smooth' });
+  }, [selectedVariantId]);
+
+  // IntersectionObserver — detect which slide is currently visible
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const index = Number(entry.target.getAttribute('data-index'));
+            if (!Number.isNaN(index)) setActiveIndex(index);
+          }
+        }
+      },
+      { root: container, threshold: 0.6 },
+    );
+
+    const slides = container.querySelectorAll('[data-index]');
+    slides.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [filteredImages]);
+
+  // Auto-scroll thumbnail strip to keep active thumb visible
+  useEffect(() => {
+    const strip = thumbRef.current;
+    if (!strip) return;
+    const activeThumb = strip.children[activeIndex] as HTMLElement | undefined;
+    if (!activeThumb) return;
+    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [activeIndex]);
+
+  const scrollToSlide = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    container.scrollTo({ left: index * container.clientWidth, behavior: 'smooth' });
+  }, []);
 
   if (filteredImages.length === 0) {
     return (
@@ -69,37 +110,46 @@ export function ImageGallery({ images }: ImageGalleryProps) {
 
   return (
     <div>
-      {/* Main image */}
-      <div className="aspect-square relative rounded-lg overflow-hidden bg-surface-container mb-4">
-        {activeImage && (
-          <Image
-            src={activeImage.url}
-            alt={activeImage.altText ?? 'Product image'}
-            fill
-            sizes="(max-width: 1024px) 100vw, 58vw"
-            className="object-contain p-4"
-            priority={safeIndex === 0}
-          />
-        )}
+      {/* Main image carousel */}
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-lg bg-surface-container mb-4"
+      >
+        {filteredImages.map((img, index) => (
+          <div
+            key={img.id}
+            data-index={index}
+            className="w-full flex-shrink-0 snap-start aspect-square relative"
+          >
+            <Image
+              src={img.url}
+              alt={img.altText ?? 'Product image'}
+              fill
+              sizes="(max-width: 1024px) 100vw, 58vw"
+              className="object-contain p-4"
+              priority={index === 0}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Thumbnail strip */}
       {filteredImages.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto no-scrollbar">
+        <div ref={thumbRef} className="flex gap-3 overflow-x-auto no-scrollbar">
           {filteredImages.map((img, index) => (
             <button
               key={img.id}
               type="button"
-              onClick={() => setActiveIndex(index)}
+              onClick={() => scrollToSlide(index)}
               className={cn(
                 'relative w-16 h-16 rounded overflow-hidden flex-shrink-0 transition-all',
                 'border-2',
-                index === safeIndex
+                index === activeIndex
                   ? 'border-primary'
                   : 'border-transparent hover:border-outline-variant/50',
               )}
               aria-label={`View image ${index + 1}`}
-              aria-current={index === safeIndex ? 'true' : undefined}
+              aria-current={index === activeIndex ? 'true' : undefined}
             >
               <Image
                 src={img.url}
