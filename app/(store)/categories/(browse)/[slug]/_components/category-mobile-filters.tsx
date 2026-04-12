@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 import {
   Sheet,
@@ -20,17 +21,13 @@ interface Category {
 
 interface CategoryMobileFiltersProps {
   categories: Category[];
-  currentSlug: string;
-  minPrice?: string;
-  maxPrice?: string;
 }
 
 export function CategoryMobileFilters({
   categories,
-  currentSlug,
-  minPrice,
-  maxPrice,
 }: CategoryMobileFiltersProps) {
+  const pathname = usePathname();
+  const currentSlug = pathname.split("/").pop() ?? "";
   const [open, setOpen] = useState(false);
 
   if (categories.length === 0) return null;
@@ -90,7 +87,6 @@ export function CategoryMobileFilters({
                 Price Range
               </h4>
               <form
-                action={`/categories/${currentSlug}`}
                 method="GET"
                 className="space-y-3"
                 onSubmit={() => setOpen(false)}
@@ -100,7 +96,6 @@ export function CategoryMobileFilters({
                     type="number"
                     name="minPrice"
                     placeholder="Min"
-                    defaultValue={minPrice ?? ""}
                     min={0}
                     className="w-full rounded bg-surface-container-highest px-3 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary"
                   />
@@ -111,7 +106,6 @@ export function CategoryMobileFilters({
                     type="number"
                     name="maxPrice"
                     placeholder="Max"
-                    defaultValue={maxPrice ?? ""}
                     min={0}
                     className="w-full rounded bg-surface-container-highest px-3 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-1 focus:ring-primary"
                   />
@@ -122,15 +116,6 @@ export function CategoryMobileFilters({
                 >
                   Apply
                 </button>
-                {(minPrice || maxPrice) && (
-                  <Link
-                    href={`/categories/${currentSlug}`}
-                    onClick={() => setOpen(false)}
-                    className="block text-center text-xs text-on-surface-variant hover:text-primary transition-colors"
-                  >
-                    Clear filter
-                  </Link>
-                )}
               </form>
             </div>
           </div>

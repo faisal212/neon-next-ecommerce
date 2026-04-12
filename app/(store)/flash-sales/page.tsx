@@ -25,7 +25,7 @@ const placeholderSales = [
 
 export default async function FlashSalesPage() {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("days");
   cacheTag("flash-sales");
 
   return (
