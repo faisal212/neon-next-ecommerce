@@ -8,6 +8,7 @@ import { QuantitySelector } from '@/components/store/quantity-selector';
 import { GradientButton } from '@/components/store/gradient-button';
 import { StockIndicator } from '@/components/store/stock-indicator';
 import { cn } from '@/lib/utils';
+import { trackAddToCart } from '@/components/store/analytics';
 
 interface VariantData {
   id: string;
@@ -79,6 +80,12 @@ export function AddToCartPanel({
     setIsAdding(true);
     try {
       await addItem(variantId, quantity);
+      trackAddToCart({
+        id: variantId,
+        name: productName,
+        price: totalPrice,
+        quantity,
+      });
     } finally {
       setIsAdding(false);
     }
