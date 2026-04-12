@@ -126,7 +126,7 @@ export function ProductConfigurator({ variants }: ProductConfiguratorProps) {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 lg:space-y-10">
       {/* Color swatches */}
       {hasColors && (
         <div>

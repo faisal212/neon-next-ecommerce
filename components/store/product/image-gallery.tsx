@@ -126,7 +126,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               alt={img.altText ?? 'Product image'}
               fill
               sizes="(max-width: 1024px) 100vw, 58vw"
-              className="object-contain p-4"
+              className="object-contain p-1 sm:p-2"
               priority={index === 0}
             />
           </div>
