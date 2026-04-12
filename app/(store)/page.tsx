@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/store/product-card";
 
 export default async function HomePage() {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("weeks");
   cacheTag("homepage");
 
   const [banners, ecosystemCategories, products] = await Promise.all([

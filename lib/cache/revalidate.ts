@@ -71,7 +71,9 @@ export function invalidateProductList(): void {
  */
 export function invalidateCategoryBySlug(slug: string): void {
   revalidateTag(`collection-${slug}`, IMMEDIATE);
+  revalidateTag(`category-meta-${slug}`, IMMEDIATE);
   revalidateTag("collection-all", IMMEDIATE);
+  revalidateTag("category-nav", IMMEDIATE);
 }
 
 /**
@@ -93,6 +95,22 @@ export async function invalidateCategoryById(id: string): Promise<void> {
 
 export function invalidateCategoryList(): void {
   revalidateTag("collection-all", IMMEDIATE);
+  revalidateTag("category-nav", IMMEDIATE);
+}
+
+/**
+ * Invalidate the category sidebar navigation (all-categories list).
+ * Used when any category is created, renamed, reordered, or deleted.
+ */
+export function invalidateCategoryNav(): void {
+  revalidateTag("category-nav", IMMEDIATE);
+}
+
+/**
+ * Invalidate a single category's metadata (breadcrumbs, section header).
+ */
+export function invalidateCategoryMeta(slug: string): void {
+  revalidateTag(`category-meta-${slug}`, IMMEDIATE);
 }
 
 // ─── Global surfaces ────────────────────────────────────────────────────

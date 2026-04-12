@@ -54,7 +54,7 @@ async function ProductsContent({
   maxPrice: string | undefined;
 }) {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("days");
   cacheTag("collection-all");
   if (q) cacheTag(`search-${q}`);
 

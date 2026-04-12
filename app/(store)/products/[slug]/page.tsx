@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 async function getProductMetadata(slug: string): Promise<Metadata> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('days');
   cacheTag(`product-${slug}`);
 
   try {
@@ -44,7 +44,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
 async function ProductDetailContent({ slug }: { slug: string }) {
   'use cache';
-  cacheLife('hours');
+  cacheLife('days');
   cacheTag(`product-${slug}`);
 
   let product: Awaited<ReturnType<typeof getProductBySlug>>;
