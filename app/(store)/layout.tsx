@@ -7,6 +7,7 @@ import { StoreFooter } from "@/components/store/footer/store-footer";
 import { CartProvider } from "@/lib/store/cart-context";
 import { Toaster } from "@/components/ui/sonner";
 import { CartDrawer } from "@/components/store/cart/cart-drawer";
+import { GoogleAnalytics } from "@/components/store/analytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,6 +56,7 @@ export default async function StoreLayout({
             }}
           />
         </CartProvider>
+        <GoogleAnalytics />
       </body>
     </html>
   );

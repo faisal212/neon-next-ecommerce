@@ -19,6 +19,7 @@ import {
 import { useCart } from '@/lib/store/cart-context';
 import { storeFetch } from '@/lib/store/api';
 import { formatPKR } from '@/lib/store/format';
+import { trackBeginCheckout, trackPurchase } from '@/components/store/analytics';
 import { GradientButton } from '@/components/store/gradient-button';
 import { authClient } from '@/lib/auth/client';
 import type { CartItemData } from '@/lib/store/types';
@@ -244,6 +245,11 @@ export default function CheckoutPage() {
           },
         }
       );
+      trackPurchase({
+        orderNumber: res.data.orderNumber,
+        total,
+        shipping: shippingCost,
+      });
       router.push(
         `/checkout/confirmation?order=${encodeURIComponent(res.data.orderNumber)}&shipping=${shippingCost}`
       );
@@ -270,6 +276,12 @@ export default function CheckoutPage() {
     appliedCoupon,
     router,
   ]);
+
+  /* ── Track checkout start ────────────────────────────── */
+
+  useEffect(() => {
+    if (itemCount > 0) trackBeginCheckout(subtotal, itemCount);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Empty cart guard ────────────────────────────────── */
 
