@@ -20,7 +20,7 @@ export default function RegisterPage() {
             Create Account
           </h1>
           <p className="text-on-surface-variant">
-            Join Cover for the best tech experience in Pakistan
+            Join Refine for the best tech experience in Pakistan
           </p>
         </div>
 

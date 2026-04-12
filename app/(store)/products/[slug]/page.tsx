@@ -30,7 +30,7 @@ async function getProductMetadata(slug: string): Promise<Metadata> {
       title: product.nameEn,
       description: product.descriptionEn
         ? product.descriptionEn.slice(0, 160)
-        : `Shop ${product.nameEn} at Cover — menswear, watches, and accessories shipped across Pakistan.`,
+        : `Shop ${product.nameEn} at Refine — watches & tech accessories shipped across Pakistan.`,
     };
   } catch {
     return { title: 'Product Not Found' };
@@ -87,7 +87,7 @@ async function ProductDetailContent({ slug }: { slug: string }) {
           <div className="flex items-center gap-3 mb-8">
             <span className="w-2 h-2 rounded-full bg-primary status-glow" />
             <span className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium">
-              {product.isFeatured ? 'New Arrival' : 'Cover Collection'}
+              {product.isFeatured ? 'New Arrival' : 'Refine Collection'}
             </span>
           </div>
 

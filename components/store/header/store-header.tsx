@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { SearchTrigger } from './search-trigger';
 import { CartTrigger } from './cart-trigger';
 import { UserMenu } from './user-menu';
@@ -14,11 +15,15 @@ export async function StoreHeader() {
         {/* Left: Brand + Mobile menu */}
         <div className="flex items-center gap-2">
           <MobileNav links={links} />
-          <Link
-            href="/"
-            className="text-2xl font-black tracking-tighter text-white"
-          >
-            Cover
+          <Link href="/" aria-label="Refine home">
+            <Image
+              src="/logo.svg"
+              alt="Refine"
+              width={140}
+              height={36}
+              priority
+              className="h-7 w-auto sm:h-8"
+            />
           </Link>
         </div>
 

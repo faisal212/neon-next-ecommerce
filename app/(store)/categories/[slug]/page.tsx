@@ -33,7 +33,7 @@ async function getCategoryMetadata(slug: string): Promise<Metadata> {
     const category = await getCategoryBySlug(slug);
     return {
       title: category.nameEn,
-      description: `Shop ${category.nameEn} at Cover. Premium tech products with free delivery across Pakistan.`,
+      description: `Shop ${category.nameEn} at Refine. Premium tech products with free delivery across Pakistan.`,
     };
   } catch {
     const formatted = slug
@@ -42,7 +42,7 @@ async function getCategoryMetadata(slug: string): Promise<Metadata> {
       .join(" ");
     return {
       title: formatted,
-      description: `Shop ${formatted} at Cover. Premium tech products with free delivery across Pakistan.`,
+      description: `Shop ${formatted} at Refine. Premium tech products with free delivery across Pakistan.`,
     };
   }
 }

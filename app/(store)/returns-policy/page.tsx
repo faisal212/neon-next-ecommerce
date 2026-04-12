@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/store/breadcrumbs";
 export const metadata: Metadata = {
   title: "Returns Policy",
   description:
-    "Cover's returns and refund policy. Learn about our 7-day return window, eligibility conditions, and step-by-step return process.",
+    "Refine's returns and refund policy. Learn about our 7-day return window, eligibility conditions, and step-by-step return process.",
 };
 
 const steps = [
@@ -13,7 +13,7 @@ const steps = [
     number: "01",
     title: "Contact Support",
     description:
-      "Reach out to our support team via email at contact@refine.pk or call +92 (42) 111-COVER. Provide your order number and reason for return.",
+      "Reach out to our support team via email at contact@refine.pk or call +92 315 4267454. Provide your order number and reason for return.",
   },
   {
     number: "02",
