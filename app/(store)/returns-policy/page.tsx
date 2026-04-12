@@ -13,7 +13,7 @@ const steps = [
     number: "01",
     title: "Contact Support",
     description:
-      "Reach out to our support team via email at contact@refine.pk or call +92 (42) 111-REFINE. Provide your order number and reason for return.",
+      "Reach out to our support team via email at contact@refine.pk or call +92 315 4267454. Provide your order number and reason for return.",
   },
   {
     number: "02",

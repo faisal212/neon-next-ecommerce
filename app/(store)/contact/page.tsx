@@ -24,7 +24,7 @@ const contactInfo = [
   {
     icon: Phone,
     label: "Phone",
-    value: "+92 (42) 111-REFINE",
+    value: "+92 315 4267454",
   },
 ];
 

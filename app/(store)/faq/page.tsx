@@ -14,11 +14,11 @@ const faqCategories = [
     questions: [
       {
         q: "How do I place an order?",
-        a: "Browse our products, add items to your cart, and proceed to checkout. You can pay via card, bank transfer, JazzCash, EasyPaisa, or cash on delivery. You will receive an order confirmation via email and SMS.",
+        a: "Browse our products, add items to your cart, and proceed to checkout. We currently accept Cash on Delivery (COD) — pay in cash when your order arrives. You will receive an order confirmation via email and SMS.",
       },
       {
         q: "Can I modify or cancel my order after placing it?",
-        a: "You can modify or cancel your order within 1 hour of placement by contacting our support team at contact@refine.pk or calling +92 (42) 111-REFINE. Once an order has been dispatched, it cannot be cancelled.",
+        a: "You can modify or cancel your order within 1 hour of placement by contacting our support team at contact@refine.pk or calling +92 315 4267454. Once an order has been dispatched, it cannot be cancelled.",
       },
       {
         q: "How can I track my order?",
@@ -56,7 +56,7 @@ const faqCategories = [
       },
       {
         q: "How do I initiate a return?",
-        a: "Contact our support team via email at contact@refine.pk or call +92 (42) 111-REFINE with your order number. We will guide you through the return process and arrange a pickup if applicable.",
+        a: "Contact our support team via email at contact@refine.pk or call +92 315 4267454 with your order number. We will guide you through the return process and arrange a pickup if applicable.",
       },
       {
         q: "How long does it take to receive a refund?",
@@ -73,15 +73,15 @@ const faqCategories = [
     questions: [
       {
         q: "What payment methods do you accept?",
-        a: "We accept Visa and Mastercard credit/debit cards, bank transfers, JazzCash, EasyPaisa, and Cash on Delivery (COD). All online payments are processed securely with SSL encryption.",
+        a: "We currently accept Cash on Delivery (COD) only. Pay in cash when your order is delivered to your doorstep. Online payment options will be coming soon.",
       },
       {
-        q: "Is Cash on Delivery available?",
-        a: "Yes, COD is available for deliveries across Pakistan. A nominal COD fee of Rs. 50 applies. Payment is collected in cash at the time of delivery.",
+        q: "Is there a COD fee?",
+        a: "A nominal COD fee of Rs. 50 applies to all orders. Payment is collected in cash at the time of delivery.",
       },
       {
-        q: "Are my payment details secure?",
-        a: "Absolutely. We use industry-standard SSL encryption and never store your card details on our servers. All transactions are processed through certified payment gateways.",
+        q: "Will you offer online payment in the future?",
+        a: "Yes, we are working on adding card payments, JazzCash, and EasyPaisa. Follow us for updates on when these options become available.",
       },
     ],
   },
