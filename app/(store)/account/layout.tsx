@@ -11,6 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import { SignOutButton } from "./_components/sign-out-button";
+import { AccountMobileNav } from "./_components/account-mobile-nav";
 
 const navLinks = [
   { href: "/account", label: "Dashboard", icon: User },
@@ -40,7 +41,7 @@ export default async function AccountLayout({
 }) {
   "use cache";
   cacheLife("max");
-  cacheTag("account-shell");
+  cacheTag("account-shell-v2");
 
   return (
     <section className="mx-auto max-w-[1440px] px-6 py-12 md:px-8">
@@ -54,7 +55,8 @@ export default async function AccountLayout({
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container hover:text-white"
+                    data-href={link.href}
+                    className="account-tab flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-on-surface-variant transition-colors hover:bg-surface-container hover:text-white"
                   >
                     <link.icon size={18} />
                     {link.label}
@@ -70,7 +72,10 @@ export default async function AccountLayout({
         </aside>
 
         {/* Main content */}
-        <main className="lg:col-span-9">{children}</main>
+        <main className="lg:col-span-9">
+          <AccountMobileNav />
+          {children}
+        </main>
       </div>
     </section>
   );

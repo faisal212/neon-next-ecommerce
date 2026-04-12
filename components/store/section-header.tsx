@@ -17,7 +17,7 @@ export function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <div className={cn("mb-16 flex items-end justify-between", className)}>
+    <div className={cn("mb-16 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div>
         {label && (
           <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
