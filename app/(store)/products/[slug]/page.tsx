@@ -80,9 +80,9 @@ async function ProductDetailContent({ slug }: { slug: string }) {
   return (
     <>
       {/* ── Section 1: Hero ─────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col lg:flex-row items-center px-8 lg:px-12 overflow-hidden bg-surface max-w-[1920px] mx-auto">
+      <section className="relative lg:min-h-screen flex flex-col lg:flex-row items-center px-4 sm:px-8 lg:px-12 overflow-hidden bg-surface max-w-[1920px] mx-auto">
         {/* Left half */}
-        <div className="lg:w-1/2 flex flex-col justify-center py-20 lg:py-0">
+        <div className="lg:w-1/2 flex flex-col justify-center pt-8 pb-4 sm:py-20 lg:py-0">
           {/* Status label */}
           <div className="flex items-center gap-3 mb-8">
             <span className="w-2 h-2 rounded-full bg-primary status-glow" />
@@ -92,7 +92,7 @@ async function ProductDetailContent({ slug }: { slug: string }) {
           </div>
 
           {/* Product name */}
-          <h1 className="text-5xl lg:text-7xl font-black tracking-tighter leading-none mb-4 text-on-surface">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black tracking-tighter leading-none mb-4 text-on-surface">
             {product.nameEn}
           </h1>
 
@@ -105,43 +105,43 @@ async function ProductDetailContent({ slug }: { slug: string }) {
 
           {/* Quick specs grid */}
           {specTags.length > 0 ? (
-            <div className="grid grid-cols-3 gap-8 border-l border-outline-variant/20 pl-8 mb-12">
+            <div className="grid grid-cols-3 gap-4 sm:gap-8 border-l border-outline-variant/20 pl-4 sm:pl-8 mb-8 sm:mb-12">
               {specTags.map((tag, i) => (
                 <div key={i}>
                   <span className="font-mono text-[10px] uppercase text-on-surface-variant tracking-widest block mb-1">
                     {`0${i + 1}`}
                   </span>
-                  <span className="font-bold text-lg text-on-surface">{tag}</span>
+                  <span className="font-bold text-sm sm:text-lg text-on-surface">{tag}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-8 border-l border-outline-variant/20 pl-8 mb-12">
+            <div className="grid grid-cols-3 gap-4 sm:gap-8 border-l border-outline-variant/20 pl-4 sm:pl-8 mb-8 sm:mb-12">
               {['Nationwide', 'Pay on Delivery', 'Easy Returns'].map((item, i) => (
                 <div key={i}>
                   <span className="font-mono text-[10px] uppercase text-on-surface-variant tracking-widest block mb-1">
                     {`0${i + 1}`}
                   </span>
-                  <span className="font-bold text-lg text-on-surface">{item}</span>
+                  <span className="font-bold text-sm sm:text-lg text-on-surface">{item}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Right half - Hero image */}
-        <div className="lg:w-1/2 flex items-center justify-center">
-          <div className="h-[400px] lg:h-[600px] flex items-center justify-center w-full">
+        {/* Right half - Hero image (desktop only, mobile uses gallery below) */}
+        <div className="hidden lg:flex lg:w-1/2 items-center justify-center">
+          <div className="h-[600px] flex items-center justify-center w-full">
             <HeroImage images={serializableImages} productName={product.nameEn} />
           </div>
         </div>
       </section>
 
       {/* ── Section 2: Configurator + Add to Cart ───────────── */}
-      <section className="bg-surface-container-low py-24 px-8 lg:px-12">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <section className="bg-surface-container-low pt-6 pb-12 sm:py-24 px-4 sm:px-8 lg:px-12">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
           {/* Left: Gallery + Configurator */}
-          <div className="lg:col-span-7 space-y-12">
+          <div className="lg:col-span-7 space-y-8 lg:space-y-12">
             {serializableImages.length > 0 && (
               <ImageGallery images={serializableImages} />
             )}
@@ -161,7 +161,7 @@ async function ProductDetailContent({ slug }: { slug: string }) {
       </section>
 
       {/* ── Section 3: Specs / Editorial ────────────────────── */}
-      <section className="py-32 px-8 lg:px-12 bg-surface">
+      <section className="py-16 sm:py-32 px-4 sm:px-8 lg:px-12 bg-surface">
         <div className="max-w-[1400px] mx-auto">
           {/* Editorial headline */}
           <h2 className="text-4xl lg:text-6xl font-black tracking-tighter leading-none mb-8">

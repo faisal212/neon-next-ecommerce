@@ -87,7 +87,7 @@ export function AddToCartPanel({
   const outOfStock = selectedVariant?.stock?.available === 0;
 
   return (
-    <div className="sticky top-32 glass-panel p-10 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-outline-variant/10">
+    <div className="sticky top-32 glass-panel p-5 sm:p-8 lg:p-10 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-outline-variant/10">
       {/* Label */}
       <p className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium mb-2">
         Selected Configuration
@@ -98,7 +98,7 @@ export function AddToCartPanel({
 
       {/* Price */}
       <div className="mb-8">
-        <span className="text-3xl font-black text-on-surface">{formatPKR(totalPrice)}</span>
+        <span className="text-2xl sm:text-3xl font-black text-on-surface">{formatPKR(totalPrice)}</span>
         {selectedVariant?.extraPricePkr && parseFloat(selectedVariant.extraPricePkr) > 0 && (
           <span className="ml-3 text-sm text-on-surface-variant">
             Base {formatPKR(basePricePkr)} + {formatPKR(selectedVariant.extraPricePkr)}
@@ -181,7 +181,7 @@ export function AddToCartPanel({
       )}
 
       {/* Trust badges */}
-      <div className="flex items-center gap-8 mt-8 pt-8 border-t border-outline-variant/10">
+      <div className="flex items-center gap-4 sm:gap-8 mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-outline-variant/10">
         <div className="flex items-center gap-2.5">
           <Truck className="w-4 h-4 text-primary" />
           <span className="text-xs text-on-surface-variant">Free Express</span>
