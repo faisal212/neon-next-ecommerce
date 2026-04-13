@@ -30,9 +30,24 @@ async function getCategoryMetadata(slug: string): Promise<Metadata> {
 
   try {
     const category = await getCategoryBySlug(slug);
+    const description = `Shop ${category.nameEn} at Refine. Premium tech products with free delivery across Pakistan.`;
     return {
       title: category.nameEn,
-      description: `Shop ${category.nameEn} at Refine. Premium tech products with free delivery across Pakistan.`,
+      description,
+      openGraph: {
+        title: category.nameEn,
+        description,
+        type: "website",
+        ...(category.imageUrl && {
+          images: [{ url: category.imageUrl, alt: category.nameEn }],
+        }),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: category.nameEn,
+        description,
+        ...(category.imageUrl && { images: [category.imageUrl] }),
+      },
     };
   } catch {
     const formatted = slug
