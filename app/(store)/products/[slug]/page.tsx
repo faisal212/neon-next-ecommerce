@@ -79,8 +79,8 @@ async function ProductDetailContent({ slug }: { slug: string }) {
 
   return (
     <>
-      {/* ── Section 1: Hero ─────────────────────────────────── */}
-      <section className="relative lg:min-h-screen flex flex-col lg:flex-row items-center px-4 sm:px-8 lg:px-12 overflow-hidden bg-surface max-w-[1920px] mx-auto">
+      {/* ── Section 1: Hero (desktop only — mobile goes straight to gallery + cart) ─ */}
+      <section className="relative lg:min-h-screen hidden lg:flex lg:flex-row items-center px-4 sm:px-8 lg:px-12 overflow-hidden bg-surface max-w-[1920px] mx-auto">
         {/* Left half */}
         <div className="lg:w-1/2 flex flex-col justify-center pt-8 pb-4 sm:py-20 lg:py-0">
           {/* Status label */}
