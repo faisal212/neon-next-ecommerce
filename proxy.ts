@@ -25,12 +25,11 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Redirect /admin/login to /admin if already authenticated
-  if (pathname === "/admin/login") {
-    if (readSessionCookie(request)) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
-  }
+  // Note: we intentionally do NOT redirect authenticated users away from
+  // /admin/login. The proxy is edge-safe and can't verify admin role — only
+  // cookie existence. A customer (non-admin) with a valid session would get
+  // stuck in a redirect loop. The admin/login page handles "already admin"
+  // itself after role verification.
 
   // Protect all /account routes — optimistic cookie-existence check only.
   // Real session validation lives in the DAL (see lib/auth/getCurrentUser),

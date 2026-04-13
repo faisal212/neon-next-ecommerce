@@ -29,7 +29,6 @@ import {
   FileText,
 } from "lucide-react";
 import { authClient } from "@/lib/auth/client";
-import { useRouter } from "next/navigation";
 
 interface AdminUser {
   name: string;
@@ -104,12 +103,12 @@ function isActive(pathname: string, href: string) {
 
 export function Sidebar({ admin }: { admin: AdminUser }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   async function handleSignOut() {
     await authClient.signOut();
-    router.push("/admin/login");
-    router.refresh();
+    // Hard redirect — avoids the Neon Auth session-cookie race condition
+    // where the next sign-in can fail after a soft navigation.
+    window.location.replace("/admin/login");
   }
 
   const initials = admin.name
@@ -193,8 +192,8 @@ export function Sidebar({ admin }: { admin: AdminUser }) {
       </nav>
 
       {/* User footer */}
-      <div className="border-t border-sidebar-border px-3 py-3">
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[0.03]">
+      <div className="border-t border-sidebar-border px-3 py-3 space-y-2">
+        <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
           <div className="relative">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 text-[12px] font-bold text-white shadow-lg shadow-emerald-500/20">
               {initials}
@@ -212,14 +211,14 @@ export function Sidebar({ admin }: { admin: AdminUser }) {
                 .replace(/\b\w/g, (c) => c.toUpperCase())}
             </div>
           </div>
-          <button
-            onClick={handleSignOut}
-            title="Sign out"
-            className="rounded-md p-1.5 text-zinc-600 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
         </div>
+        <button
+          onClick={handleSignOut}
+          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-zinc-500 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
+        >
+          <LogOut className="h-[17px] w-[17px] shrink-0" />
+          <span>Sign out</span>
+        </button>
       </div>
     </aside>
   );
