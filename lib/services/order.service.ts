@@ -13,6 +13,7 @@ import { validateCoupon, incrementCouponUsage } from '@/lib/services/coupon.serv
 import { STATUS_TRANSITIONS } from '@/lib/validators/order.validators';
 import type { PlaceOrderInput, AssignCourierInput, RecordCodInput } from '@/lib/validators/order.validators';
 import type { PaginationParams } from '@/lib/utils/pagination';
+import { sendOrderConfirmation } from '@/lib/emails/send';
 
 export async function placeOrder(
   userId: string | null,
@@ -159,6 +160,12 @@ export async function placeOrder(
   if (couponId) {
     await incrementCouponUsage(couponId);
   }
+
+  // Fire-and-forget order confirmation email — never block checkout
+  // if email delivery is slow or fails.
+  sendOrderConfirmation(order.orderNumber).catch((err) => {
+    console.error('[order] email send failed:', err);
+  });
 
   return order;
 }
