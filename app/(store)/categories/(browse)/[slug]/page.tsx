@@ -159,6 +159,7 @@ async function CategoryProducts({
             variantLabel={item.variantLabel ?? undefined}
             displayPrice={item.totalPricePkr}
             image={item.image}
+            sizes="(max-width: 1280px) 50vw, (max-width: 1440px) 25vw, 344px"
           />
         ))}
       </div>

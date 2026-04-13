@@ -7,6 +7,7 @@ export function AccountTabHighlighter() {
   const pathname = usePathname();
 
   useEffect(() => {
+  
     const tabs = document.querySelectorAll<HTMLElement>(".account-tab[data-href]");
     tabs.forEach((tab) => {
       const href = tab.getAttribute("data-href")!;

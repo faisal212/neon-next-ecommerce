@@ -55,7 +55,11 @@ export function EcosystemGrid({ categories }: EcosystemGridProps) {
                     fill
                     priority={i === 0}
                     className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-700 ease-out"
-                    sizes={config.span.includes("row-span-2") ? "50vw" : "25vw"}
+                    sizes={
+                      config.span.includes("row-span-2")
+                        ? "(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 680px"
+                        : "(max-width: 768px) 100vw, (max-width: 1440px) 25vw, 332px"
+                    }
                   />
                   {/* Scrim — keeps title/CTA readable regardless of image brightness */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
