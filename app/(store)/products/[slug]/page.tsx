@@ -14,42 +14,38 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  return getProductMetadata(slug);
-}
-
-async function getProductMetadata(slug: string): Promise<Metadata> {
+// Cached only on success. NotFoundError bubbles out uncaught so the 404
+// state is never serialized into the cache entry — see
+// vercel/next.js#79497 and vercel/next.js#73130.
+async function fetchProductCached(slug: string) {
   'use cache';
   cacheLife('days');
   cacheTag(`product-${slug}`);
+  return getProductBySlug(slug);
+}
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
   try {
-    const product = await getProductBySlug(slug);
+    const product = await fetchProductCached(slug);
     return {
       title: product.nameEn,
       description: product.descriptionEn
         ? product.descriptionEn.slice(0, 160)
         : `Shop ${product.nameEn} at Refine — watches & tech accessories shipped across Pakistan.`,
     };
-  } catch {
-    return { title: 'Product Not Found' };
+  } catch (err) {
+    if (err instanceof NotFoundError) return { title: 'Product Not Found' };
+    throw err;
   }
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  return <ProductDetailContent slug={slug} />;
-}
-
-async function ProductDetailContent({ slug }: { slug: string }) {
-  'use cache';
-  cacheLife('days');
-  cacheTag(`product-${slug}`);
 
   let product: Awaited<ReturnType<typeof getProductBySlug>>;
   try {
-    product = await getProductBySlug(slug);
+    product = await fetchProductCached(slug);
   } catch (err) {
     if (err instanceof NotFoundError) notFound();
     throw err;
