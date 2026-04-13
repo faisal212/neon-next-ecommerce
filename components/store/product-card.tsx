@@ -15,9 +15,12 @@ interface ProductCardProps {
   variantId?: string;
   displayPrice?: string;
   image?: { url: string; altText: string | null } | null;
+  /** Must match the actual rendered width at each breakpoint — callers
+   *  render this card in different grids (1-col, 2-col, 3-col, carousel). */
+  sizes?: string;
 }
 
-export function ProductCard({ product, variantLabel, variantId, displayPrice, image }: ProductCardProps) {
+export function ProductCard({ product, variantLabel, variantId, displayPrice, image, sizes = "(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw" }: ProductCardProps) {
   const fallbackImage =
     product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
   const displayImage = image ?? fallbackImage;
@@ -38,7 +41,7 @@ export function ProductCard({ product, variantLabel, variantId, displayPrice, im
             alt={displayImage.altText ?? product.nameEn}
             fill
             className="object-cover opacity-90 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
-            sizes="(max-width: 1200px) 50vw, 33vw"
+            sizes={sizes}
           />
         ) : (
           <div className="absolute inset-0 bg-surface-container-highest" />

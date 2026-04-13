@@ -89,7 +89,11 @@ async function SearchContent({ q, page }: { q: string; page: number }) {
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, (max-width: 1440px) 33vw, 443px"
+              />
             ))}
           </div>
 
