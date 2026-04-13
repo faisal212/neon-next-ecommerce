@@ -28,11 +28,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   try {
     const product = await fetchProductCached(slug);
+    const primary = product.images.find((i) => i.isPrimary) ?? product.images[0];
+    const description = product.descriptionEn
+      ? product.descriptionEn.slice(0, 160)
+      : `Shop ${product.nameEn} at Refine — watches & tech accessories shipped across Pakistan.`;
+
     return {
       title: product.nameEn,
-      description: product.descriptionEn
-        ? product.descriptionEn.slice(0, 160)
-        : `Shop ${product.nameEn} at Refine — watches & tech accessories shipped across Pakistan.`,
+      description,
+      openGraph: {
+        title: product.nameEn,
+        description,
+        type: 'website',
+        ...(primary && {
+          images: [{ url: primary.url, alt: primary.altText ?? product.nameEn }],
+        }),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: product.nameEn,
+        description,
+        ...(primary && { images: [primary.url] }),
+      },
     };
   } catch (err) {
     if (err instanceof NotFoundError) return { title: 'Product Not Found' };
