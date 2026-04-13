@@ -16,13 +16,36 @@ const inter = Inter({
   display: "swap",
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://refine.pk");
+
+const SITE_TITLE = "Refine — Watches & Tech Accessories in Pakistan";
+const SITE_DESCRIPTION =
+  "Premium watches, tech accessories, and lifestyle essentials. Shipped across Pakistan with cash on delivery.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     template: "%s | Refine",
-    default: "Refine — Watches & Tech Accessories in Pakistan",
+    default: SITE_TITLE,
   },
-  description:
-    "Premium watches, tech accessories, and lifestyle essentials. Shipped across Pakistan with cash on delivery.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Refine",
+    locale: "en_PK",
+    url: SITE_URL,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/default.webp", width: 750, height: 750, alt: "Refine" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/default.webp"],
+  },
 };
 
 export default async function StoreLayout({
