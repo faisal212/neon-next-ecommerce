@@ -13,6 +13,9 @@ import {
   OrderConfirmationEmail,
   type OrderConfirmationEmailProps,
 } from "./order-confirmation";
+import { ContactNotificationEmail } from "./contact-notification";
+
+const CONTACT_INBOX = "contact@refine.pk";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM;
@@ -132,5 +135,37 @@ export async function sendOrderConfirmation(orderNumber: string): Promise<void> 
     });
   } catch (err) {
     console.error(`[email] failed to send order confirmation for ${orderNumber}:`, err);
+  }
+}
+
+/**
+ * Send contact form submission to the support inbox.
+ * Returns { ok: boolean, error?: string } so the server action can
+ * surface failure to the user (unlike order confirmation which is
+ * fire-and-forget).
+ */
+export async function sendContactNotification(input: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  if (!resend || !EMAIL_FROM) {
+    console.warn("[email] email not configured — contact form send skipped");
+    return { ok: false, error: "Email service is not configured." };
+  }
+
+  try {
+    await resend.emails.send({
+      from: EMAIL_FROM,
+      to: CONTACT_INBOX,
+      replyTo: `${input.name} <${input.email}>`,
+      subject: `[Refine Contact] ${input.subject}`,
+      react: ContactNotificationEmail(input),
+    });
+    return { ok: true };
+  } catch (err) {
+    console.error("[email] contact notification failed:", err);
+    return { ok: false, error: "Could not send your message. Please try again." };
   }
 }
