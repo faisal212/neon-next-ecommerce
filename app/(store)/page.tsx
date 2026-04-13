@@ -38,6 +38,7 @@ export default async function HomePage() {
             variantId={p.variantId}
             displayPrice={p.totalPricePkr}
             image={p.image}
+            sizes="(max-width: 640px) 45vw, 300px"
           />
         ))}
       </NewArrivalsCarousel>
