@@ -8,6 +8,7 @@ export function UserMenu() {
     <Link
       href="/account"
       aria-label="Account"
+      prefetch={false}
       className="p-2 text-on-surface-variant transition-colors hover:text-primary"
     >
       <User size={20} />
