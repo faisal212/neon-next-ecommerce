@@ -1,7 +1,7 @@
-chrome >= 90
-firefox >= 90
-safari >= 15
-edge >= 90
-ios_saf >= 15
+chrome >= 93
+firefox >= 92
+safari >= 15.4
+edge >= 93
+ios_saf >= 15.4
 op_mob >= 80
-and_chr >= 90
+and_chr >= 93
