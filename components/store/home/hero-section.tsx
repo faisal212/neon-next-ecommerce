@@ -67,7 +67,7 @@ export function HeroSection({ banner }: HeroSectionProps) {
                 fill
                 priority
                 className="object-contain scale-110 lg:scale-100 group-hover/hero:scale-[1.03] group-hover/hero:-translate-y-2 group-hover/hero:drop-shadow-[0_0_40px_rgba(255,145,92,0.3)] group-hover/hero:transition-all group-hover/hero:duration-700 group-hover/hero:ease-out"
-                sizes="(max-width: 1024px) 100vw, (max-width: 1440px) 50vw, 672px"
+                sizes="(max-width: 640px) 75vw, (max-width: 1024px) 62vw, (max-width: 1440px) 42vw, 600px"
               />
             </div>
           ) : (
