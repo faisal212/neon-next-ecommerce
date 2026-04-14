@@ -54,7 +54,7 @@ export function EcosystemGrid({ categories }: EcosystemGridProps) {
                     alt={cat.nameEn}
                     fill
                     priority={i === 0}
-                    className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-[1.03] transition-all duration-700 ease-out"
+                    className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-[1.03] group-hover:transition-all group-hover:duration-700 group-hover:ease-out"
                     sizes={
                       config.span.includes("row-span-2")
                         ? "(max-width: 768px) 100vw, (max-width: 1440px) 50vw, 680px"
