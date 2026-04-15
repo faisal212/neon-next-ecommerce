@@ -64,6 +64,8 @@ export function HeroSection({ banner }: HeroSectionProps) {
               <Image
                 src={banner.imageUrl}
                 alt={banner.title}
+                loading="eager"
+                fetchPriority="high"
                 fill
                 priority
                 className="object-cover lg:object-contain transition-all duration-700 ease-out group-hover/hero:scale-[1.03] group-hover/hero:-translate-y-2 group-hover/hero:drop-shadow-[0_0_40px_rgba(255,145,92,0.3)]"
