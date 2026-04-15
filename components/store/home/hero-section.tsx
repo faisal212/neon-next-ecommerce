@@ -66,7 +66,7 @@ export function HeroSection({ banner }: HeroSectionProps) {
                 alt={banner.title}
                 fill
                 priority
-                className="object-cover lg:object-contain transition-all duration-700 ease-out group-hover/hero:scale-[1.03] group-hover/hero:-translate-y-2 group-hover/hero:drop-shadow-[0_0_40px_rgba(255,145,92,0.3)]"
+                className="object-contain transition-all duration-700 ease-out group-hover/hero:scale-[1.03] group-hover/hero:-translate-y-2 group-hover/hero:drop-shadow-[0_0_40px_rgba(255,145,92,0.3)]"
                 sizes="(max-width: 1024px) 100vw, (max-width: 1440px) 50vw, 672px"
               />
             </div>
