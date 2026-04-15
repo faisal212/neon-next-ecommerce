@@ -21,7 +21,7 @@ export async function StoreHeader() {
               alt="Refine"
               width={140}
               height={36}
-              
+              loading="eager"
               className="h-7 w-auto sm:h-8"
             />
           </Link>
