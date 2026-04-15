@@ -151,7 +151,9 @@ export async function listProductVariants(
       nameEn: products.nameEn,
       slug: products.slug,
       basePricePkr: products.basePricePkr,
-      categoryId: products.categoryId,
+      categoryId: categories.id,
+      categoryNameEn: categories.nameEn,
+      categorySlug: categories.slug,
       variantId: productVariants.id,
       color: productVariants.color,
       size: productVariants.size,
@@ -160,52 +162,59 @@ export async function listProductVariants(
     })
     .from(products)
     .innerJoin(productVariants, eq(productVariants.productId, products.id))
+    .leftJoin(categories, eq(categories.id, products.categoryId))
     .where(where)
     .orderBy(desc(products.createdAt), productVariants.color)
     .limit(pagination.limit)
     .offset(pagination.offset);
 
-  const enriched = await Promise.all(
-    rows.map(async (row) => {
-      // Fetch category, variant-specific image, and product primary image in parallel
-      const [[category], variantImages, productImgs] = await Promise.all([
-        db.select({ id: categories.id, nameEn: categories.nameEn, slug: categories.slug })
-          .from(categories).where(eq(categories.id, row.categoryId)).limit(1),
-        db.select({ url: productImages.url, altText: productImages.altText })
-          .from(productImages)
-          .where(and(eq(productImages.productId, row.productId), eq(productImages.variantId, row.variantId)))
-          .orderBy(productImages.sortOrder).limit(1),
-        db.select({ url: productImages.url, altText: productImages.altText, isPrimary: productImages.isPrimary })
-          .from(productImages)
-          .where(and(eq(productImages.productId, row.productId)))
-          .orderBy(productImages.sortOrder).limit(1),
-      ]);
+  const productIds = Array.from(new Set(rows.map((r) => r.productId)));
+  const allImages = productIds.length
+    ? await db
+        .select({
+          productId: productImages.productId,
+          variantId: productImages.variantId,
+          url: productImages.url,
+          altText: productImages.altText,
+          isPrimary: productImages.isPrimary,
+          sortOrder: productImages.sortOrder,
+        })
+        .from(productImages)
+        .where(inArray(productImages.productId, productIds))
+        .orderBy(productImages.sortOrder)
+    : [];
 
-      const image = variantImages[0]
-        ?? productImgs.find((img) => img.isPrimary)
-        ?? productImgs[0]
-        ?? null;
+  const enriched = rows.map((row) => {
+    const productImgs = allImages.filter((img) => img.productId === row.productId);
+    const image =
+      productImgs.find((img) => img.variantId === row.variantId)
+      ?? productImgs.find((img) => img.isPrimary)
+      ?? productImgs[0]
+      ?? null;
 
-      const base = parseFloat(row.basePricePkr);
-      const extra = parseFloat(row.extraPricePkr ?? '0');
-      const totalPrice = (base + extra).toFixed(2);
+    const base = parseFloat(row.basePricePkr);
+    const extra = parseFloat(row.extraPricePkr ?? '0');
+    const totalPrice = (base + extra).toFixed(2);
 
-      const variantParts = [row.color, row.size].filter(Boolean);
-      const variantLabel = variantParts.length > 0 ? variantParts.join(' / ') : null;
+    const variantParts = [row.color, row.size].filter(Boolean);
+    const variantLabel = variantParts.length > 0 ? variantParts.join(' / ') : null;
 
-      return {
-        productId: row.productId,
-        variantId: row.variantId,
-        nameEn: row.nameEn,
-        slug: row.slug,
-        basePricePkr: row.basePricePkr,
-        totalPricePkr: totalPrice,
-        variantLabel,
-        category: category ?? undefined,
-        image,
-      };
-    }),
-  );
+    return {
+      productId: row.productId,
+      variantId: row.variantId,
+      nameEn: row.nameEn,
+      slug: row.slug,
+      basePricePkr: row.basePricePkr,
+      totalPricePkr: totalPrice,
+      variantLabel,
+      category: row.categoryId
+        ? { id: row.categoryId, nameEn: row.categoryNameEn!, slug: row.categorySlug! }
+        : undefined,
+      image: image
+        ? { url: image.url, altText: image.altText }
+        : null,
+    };
+  });
 
   return {
     data: enriched,

@@ -111,17 +111,40 @@ export function CartProvider({
   const [isPending, startTransition] = useTransition();
 
   const refreshCart = useCallback(async () => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4000);
     try {
-      const data = await storeFetch<{ data: { items: CartItemData[] } }>('/cart');
+      const data = await storeFetch<{ data: { items: CartItemData[] } }>('/cart', {
+        signal: ctrl.signal,
+      });
       dispatch({ type: 'SET_ITEMS', items: data.data?.items ?? [] });
     } catch {
       // silent fail on refresh
+    } finally {
+      clearTimeout(timer);
     }
   }, []);
 
-  // Load cart on mount
   useEffect(() => {
-    refreshCart();
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    let idleHandle = 0;
+    let timeoutHandle = 0;
+    if (typeof win.requestIdleCallback === 'function') {
+      idleHandle = win.requestIdleCallback(() => refreshCart(), { timeout: 2000 });
+    } else {
+      timeoutHandle = window.setTimeout(() => refreshCart(), 1500);
+    }
+    return () => {
+      if (idleHandle && typeof win.cancelIdleCallback === 'function') {
+        win.cancelIdleCallback(idleHandle);
+      }
+      if (timeoutHandle) {
+        window.clearTimeout(timeoutHandle);
+      }
+    };
   }, [refreshCart]);
 
   const addItem = useCallback(
