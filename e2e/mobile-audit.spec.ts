@@ -269,8 +269,8 @@ test.describe("mobile audit — public routes", () => {
 test.describe("mobile audit — auth routes", () => {
   test.use({ viewport: MOBILE_VIEWPORT });
 
-  const EMAIL = "olxnncgepmnlrhfbuk@nespj.com";
-  const PASSWORD = "SEED_ADMIN_PASSWORD_PLACEHOLDER";
+  const EMAIL = process.env.E2E_ADMIN_EMAIL ?? "olxnncgepmnlrhfbuk@nespj.com";
+  const PASSWORD = process.env.E2E_ADMIN_PASSWORD!;
 
   // React 19 controlled inputs require pressSequentially — see auth.spec.ts.
   async function fillInput(page: Page, selector: string, value: string) {

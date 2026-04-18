@@ -10,14 +10,18 @@ const db = drizzle(sql);
 
 const NEON_AUTH_BASE_URL = process.env.NEON_AUTH_BASE_URL!;
 
-const ADMIN_EMAIL = 'SEED_ADMIN_EMAIL_PLACEHOLDER';
-const ADMIN_PASSWORD = 'SEED_ADMIN_PASSWORD_PLACEHOLDER';
-const ADMIN_NAME = 'SEED_ADMIN_NAME_PLACEHOLDER';
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
+const ADMIN_NAME = process.env.SEED_ADMIN_NAME ?? 'Admin';
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('Error: Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD in .env.local');
+  process.exit(1);
+}
 
 async function seedAdmin() {
   console.log('Creating admin user...');
   console.log(`  Email: ${ADMIN_EMAIL}`);
-  console.log(`  Password: ${ADMIN_PASSWORD}`);
 
   // Step 1: Sign up via Neon Auth API
   const signUpRes = await fetch(`${NEON_AUTH_BASE_URL}/sign-up/email`, {
@@ -102,7 +106,6 @@ async function upsertAdmin(authUserId: string) {
   console.log('\nAdmin user ready!');
   console.log(`  Login at: http://localhost:3000/admin/login`);
   console.log(`  Email: ${ADMIN_EMAIL}`);
-  console.log(`  Password: ${ADMIN_PASSWORD}`);
 }
 
 seedAdmin().catch((err) => {

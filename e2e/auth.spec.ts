@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-const EMAIL = "olxnncgepmnlrhfbuk@nespj.com";
-const PASSWORD = "SEED_ADMIN_PASSWORD_PLACEHOLDER";
+const EMAIL = process.env.E2E_ADMIN_EMAIL ?? "olxnncgepmnlrhfbuk@nespj.com";
+const PASSWORD = process.env.E2E_ADMIN_PASSWORD!;
 const WRONG_PASSWORD = "WrongPassword@999";
 
 // React 19 controlled inputs don't respond to fill() — the native value change
