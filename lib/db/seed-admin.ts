@@ -10,8 +10,8 @@ const db = drizzle(sql);
 
 const NEON_AUTH_BASE_URL = process.env.NEON_AUTH_BASE_URL!;
 
-const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL!;
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD!;
 const ADMIN_NAME = process.env.SEED_ADMIN_NAME ?? 'Admin';
 
 if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
