@@ -12,7 +12,7 @@ interface ProductCardProps {
     images?: { url: string; altText: string | null; isPrimary: boolean }[];
   };
   variantLabel?: string;
-  variantId?: string;
+  variantSlug?: string;
   displayPrice?: string;
   image?: { url: string; altText: string | null } | null;
   /** Must match the actual rendered width at each breakpoint — callers
@@ -20,13 +20,13 @@ interface ProductCardProps {
   sizes?: string;
 }
 
-export function ProductCard({ product, variantLabel, variantId, displayPrice, image, sizes = "(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw" }: ProductCardProps) {
+export function ProductCard({ product, variantLabel, variantSlug, displayPrice, image, sizes = "(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw" }: ProductCardProps) {
   const fallbackImage =
     product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
   const displayImage = image ?? fallbackImage;
 
-  const href = variantId
-    ? `/products/${product.slug}#variant=${variantId}`
+  const href = variantSlug
+    ? `/products/${product.slug}?variant=${variantSlug}`
     : `/products/${product.slug}`;
 
   return (

@@ -170,7 +170,7 @@ async function CategoryProducts({
           <ProductCard
             key={item.variantId}
             product={item}
-            variantId={item.variantId}
+            variantSlug={item.variantSlug}
             variantLabel={item.variantLabel ?? undefined}
             displayPrice={item.totalPricePkr}
             image={item.image}

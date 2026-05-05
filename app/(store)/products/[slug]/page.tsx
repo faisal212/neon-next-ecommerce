@@ -4,6 +4,7 @@ import { cacheLife, cacheTag } from 'next/cache';
 import { BadgeCheck, Package } from 'lucide-react';
 import { getProductBySlug } from '@/lib/services/product.service';
 import { NotFoundError } from '@/lib/errors/api-error';
+import { variantSlug, slugifyVariantPart } from '@/lib/store/format';
 import { ProductConfigurator } from '@/components/store/product/product-configurator';
 import { AddToCartPanel } from '@/components/store/product/add-to-cart-panel';
 import { ImageGallery } from '@/components/store/product/image-gallery';
@@ -58,6 +59,37 @@ export async function generateMetadata({ params, searchParams: _searchParams }: 
   }
 }
 
+type ActiveVariant = { id: string; color: string | null; size: string | null };
+
+// Resolves a ?variant= URL param to a variant UUID.
+// Supports the current unambiguous "color--size" format and falls back to the
+// legacy single-separator "color-size" format for backward compat with old URLs.
+function resolveVariantSlug(activeVariants: ActiveVariant[], raw: string): string | null {
+  if (raw.includes('--')) {
+    // New format: split at first '--' to get separate color and size slugs
+    const sep = raw.indexOf('--');
+    const colorPart = raw.slice(0, sep);
+    const sizePart  = raw.slice(sep + 2);
+    return (
+      activeVariants.find((v) => {
+        const vc = v.color ? slugifyVariantPart(v.color) : '';
+        const vs = v.size  ? slugifyVariantPart(v.size)  : '';
+        return vc === colorPart && vs === sizePart;
+      })?.id ?? null
+    );
+  }
+  // No '--': either a color-only slug (no size variant) or old combined slug
+  // Try color-only first (new and old formats are identical for no-size variants)
+  const colorOnly = activeVariants.find(
+    (v) => !v.size && v.color && slugifyVariantPart(v.color) === raw,
+  );
+  if (colorOnly) return colorOnly.id;
+  // Legacy fallback: full slug equality using old join-and-replace logic
+  return (
+    activeVariants.find((v) => variantSlug(v.color, v.size) === raw)?.id ?? null
+  );
+}
+
 export default async function ProductDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
 
@@ -92,15 +124,14 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
   }));
 
   const searchParamsResolved = await searchParams;
-  const rawVariantId =
+  const rawVariantParam =
     typeof searchParamsResolved.variant === 'string'
       ? searchParamsResolved.variant
       : undefined;
-  const activeVariantIds = new Set(
-    serializableVariants.filter((v) => v.isActive).map((v) => v.id),
-  );
-  const initialVariantId =
-    rawVariantId && activeVariantIds.has(rawVariantId) ? rawVariantId : null;
+  const activeVariants = serializableVariants.filter((v) => v.isActive);
+  const initialVariantId = rawVariantParam
+    ? resolveVariantSlug(activeVariants, rawVariantParam)
+    : null;
 
   return (
     <>
@@ -157,7 +188,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         {/* Right half - Hero image (desktop only, mobile uses gallery below) */}
         <div className="hidden lg:flex lg:w-1/2 items-center justify-center">
           <div className="h-[600px] flex items-center justify-center w-full">
-            <HeroImage images={serializableImages} productName={product.nameEn} />
+            <HeroImage key={`${product.id}-hero`} images={serializableImages} productName={product.nameEn} />
           </div>
         </div>
       </section>
@@ -168,14 +199,15 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
           {/* Left: Gallery + Configurator */}
           <div className="lg:col-span-7 space-y-8 lg:space-y-12">
             {serializableImages.length > 0 && (
-              <ImageGallery images={serializableImages} />
+              <ImageGallery key={`${product.id}-gallery`} images={serializableImages} />
             )}
-            <ProductConfigurator variants={serializableVariants} initialVariantId={initialVariantId} />
+            <ProductConfigurator key={`${product.id}-${initialVariantId ?? 'default'}-configurator`} variants={serializableVariants} initialVariantId={initialVariantId} />
           </div>
 
           {/* Right: Add to Cart */}
           <div className="lg:col-span-5">
             <AddToCartPanel
+              key={`${product.id}-${initialVariantId ?? 'default'}-cart`}
               productId={product.id}
               productName={product.nameEn}
               basePricePkr={product.basePricePkr}

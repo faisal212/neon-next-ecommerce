@@ -85,13 +85,19 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     return () => observer.disconnect();
   }, [filteredImages]);
 
-  // Auto-scroll thumbnail strip to keep active thumb visible
+  // Keep the active thumbnail centred in the strip.
+  // Uses strip.scrollTo() rather than scrollIntoView() so only the horizontal
+  // thumbnail container scrolls — never the page.
   useEffect(() => {
     const strip = thumbRef.current;
     if (!strip) return;
     const activeThumb = strip.children[activeIndex] as HTMLElement | undefined;
     if (!activeThumb) return;
-    activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    const centerOffset =
+      (activeThumb as HTMLElement).offsetLeft -
+      strip.clientWidth / 2 +
+      activeThumb.clientWidth / 2;
+    strip.scrollTo({ left: Math.max(0, centerOffset), behavior: 'smooth' });
   }, [activeIndex]);
 
   const scrollToSlide = useCallback((index: number) => {

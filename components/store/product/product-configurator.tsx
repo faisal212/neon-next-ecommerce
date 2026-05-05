@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { formatPKR } from '@/lib/store/format';
+import { formatPKR, variantSlug } from '@/lib/store/format';
 
 interface VariantData {
   id: string;
@@ -67,19 +67,18 @@ export function ProductConfigurator({ variants, initialVariantId }: ProductConfi
     return Array.from(sizes);
   }, [activeVariants]);
 
-  // Seed state from server-provided initialVariantId (eliminates variant flash on SSR)
-  const initialVariant = initialVariantId
-    ? activeVariants.find((v) => v.id === initialVariantId) ?? null
-    : null;
+  // Seed state from server-provided initialVariantId (eliminates variant flash on SSR).
+  // Lazy initializer so the find only runs once at mount, not on every re-render.
+  const [selectedColor, setSelectedColor] = useState<string | null>(() => {
+    const iv = initialVariantId ? activeVariants.find((v) => v.id === initialVariantId) : null;
+    return iv?.color ?? (uniqueColors.length === 1 ? uniqueColors[0] : null);
+  });
+  const [selectedSize, setSelectedSize] = useState<string | null>(() => {
+    const iv = initialVariantId ? activeVariants.find((v) => v.id === initialVariantId) : null;
+    return iv?.size ?? (uniqueSizes.length === 1 ? uniqueSizes[0] : null);
+  });
 
-  const [selectedColor, setSelectedColor] = useState<string | null>(
-    initialVariant?.color ?? (uniqueColors.length === 1 ? uniqueColors[0] : null),
-  );
-  const [selectedSize, setSelectedSize] = useState<string | null>(
-    initialVariant?.size ?? (uniqueSizes.length === 1 ? uniqueSizes[0] : null),
-  );
-
-  // Backward compat: migrate legacy #variant= hash URLs to ?variant= query param via one full reload
+  // Backward compat: migrate legacy #variant=UUID hash URLs to ?variant=slug query param
   useEffect(() => {
     const hashStr = window.location.hash.slice(1);
     if (!hashStr) return;
@@ -87,9 +86,10 @@ export function ProductConfigurator({ variants, initialVariantId }: ProductConfi
     const legacyId = hashParams.get('variant');
     if (!legacyId) return;
     if (new URLSearchParams(window.location.search).has('variant')) return;
-    if (!activeVariants.find((v) => v.id === legacyId)) return;
+    const match = activeVariants.find((v) => v.id === legacyId);
+    if (!match) return;
     const url = new URL(window.location.href);
-    url.searchParams.set('variant', legacyId);
+    url.searchParams.set('variant', variantSlug(match.color, match.size));
     url.hash = '';
     window.location.replace(url.toString());
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -109,10 +109,15 @@ export function ProductConfigurator({ variants, initialVariantId }: ProductConfi
       new CustomEvent('pdp:variant-change', { detail: selectedVariant?.id ?? null }),
     );
     if (selectedVariant) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('variant', selectedVariant.id);
-      url.hash = '';
-      window.history.replaceState(null, '', url.toString());
+      const slug = variantSlug(selectedVariant.color, selectedVariant.size);
+      if (slug) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('variant', slug);
+        url.hash = '';
+        // Pass the current Next.js history state back so its replaceState patch
+        // recognises the __NA flag and skips triggering router navigation + scroll.
+        window.history.replaceState(window.history.state, '', url.toString());
+      }
     }
   }, [selectedVariant?.id]);
 
