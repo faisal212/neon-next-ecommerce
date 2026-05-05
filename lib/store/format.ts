@@ -1,3 +1,30 @@
+/**
+ * Normalises a single color or size value to a URL-safe token.
+ * "Black/White" → "black-white", "One Size" → "one-size"
+ */
+export function slugifyVariantPart(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[\s/]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * Derives an unambiguous URL slug from variant color/size.
+ * Uses '--' as the boundary between color and size so the two
+ * parts can be decoded without ambiguity at lookup time.
+ *
+ * "Black/White" + "One Size" → "black-white--one-size"
+ * "Silver/White" + null      → "silver-white"
+ */
+export function variantSlug(color: string | null, size: string | null): string {
+  const c = color ? slugifyVariantPart(color) : null;
+  const s = size  ? slugifyVariantPart(size)  : null;
+  if (c && s) return `${c}--${s}`;
+  return c ?? s ?? '';
+}
+
 const pkrFormatter = new Intl.NumberFormat('en-PK', {
   style: 'currency',
   currency: 'PKR',

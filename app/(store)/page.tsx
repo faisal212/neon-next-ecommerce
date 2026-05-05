@@ -35,7 +35,7 @@ export default async function HomePage() {
               category: p.category,
             }}
             variantLabel={p.variantLabel ?? undefined}
-            variantId={p.variantId}
+            variantSlug={p.variantSlug}
             displayPrice={p.totalPricePkr}
             image={p.image}
             sizes="(max-width: 640px) 45vw, 300px"

@@ -8,6 +8,7 @@ import { cartEvents, productViews, dailyProductStats, siteSearches } from '@/lib
 import { wishlistItems, flashSaleProducts, recentlyViewed } from '@/lib/db/schema/marketing';
 import { productSeo } from '@/lib/db/schema/seo';
 import { ConflictError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
+import { variantSlug } from '@/lib/store/format';
 import { slugify } from '@/lib/utils/slugify';
 import type { CreateProductInput } from '@/lib/validators/product.validators';
 import type { PaginationParams } from '@/lib/utils/pagination';
@@ -196,6 +197,7 @@ export async function listProductVariants(
       return {
         productId: row.productId,
         variantId: row.variantId,
+        variantSlug: variantSlug(row.color, row.size),
         nameEn: row.nameEn,
         slug: row.slug,
         basePricePkr: row.basePricePkr,
