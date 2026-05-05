@@ -161,6 +161,9 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
         return;
       }
 
+      setSaving(false);
+      setSavingIntent(null);
+
       if (isEditing) {
         router.push("/admin/products");
       } else {
