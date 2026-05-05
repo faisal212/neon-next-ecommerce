@@ -12,6 +12,7 @@ import type { Metadata } from 'next';
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 // Cached only on success. NotFoundError bubbles out uncaught so the 404
@@ -24,7 +25,7 @@ async function fetchProductCached(slug: string) {
   return getProductBySlug(slug);
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams: _searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   try {
     const product = await fetchProductCached(slug);
@@ -57,7 +58,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function ProductDetailPage({ params }: PageProps) {
+export default async function ProductDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
 
   let product: Awaited<ReturnType<typeof getProductBySlug>>;
@@ -89,6 +90,17 @@ export default async function ProductDetailPage({ params }: PageProps) {
     isPrimary: img.isPrimary,
     sortOrder: img.sortOrder,
   }));
+
+  const searchParamsResolved = await searchParams;
+  const rawVariantId =
+    typeof searchParamsResolved.variant === 'string'
+      ? searchParamsResolved.variant
+      : undefined;
+  const activeVariantIds = new Set(
+    serializableVariants.filter((v) => v.isActive).map((v) => v.id),
+  );
+  const initialVariantId =
+    rawVariantId && activeVariantIds.has(rawVariantId) ? rawVariantId : null;
 
   return (
     <>
@@ -158,7 +170,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {serializableImages.length > 0 && (
               <ImageGallery images={serializableImages} />
             )}
-            <ProductConfigurator variants={serializableVariants} />
+            <ProductConfigurator variants={serializableVariants} initialVariantId={initialVariantId} />
           </div>
 
           {/* Right: Add to Cart */}
@@ -168,6 +180,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               productName={product.nameEn}
               basePricePkr={product.basePricePkr}
               variants={serializableVariants}
+              initialVariantId={initialVariantId}
             />
           </div>
         </div>

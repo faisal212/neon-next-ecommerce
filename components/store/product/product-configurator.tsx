@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { formatPKR } from '@/lib/store/format';
 
@@ -16,6 +16,7 @@ interface VariantData {
 
 interface ProductConfiguratorProps {
   variants: VariantData[];
+  initialVariantId?: string | null;
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -47,7 +48,7 @@ function getColorHex(colorName: string): string | null {
   return COLOR_MAP[colorName.toLowerCase()] ?? null;
 }
 
-export function ProductConfigurator({ variants }: ProductConfiguratorProps) {
+export function ProductConfigurator({ variants, initialVariantId }: ProductConfiguratorProps) {
   const activeVariants = useMemo(() => variants.filter((v) => v.isActive), [variants]);
 
   const uniqueColors = useMemo(() => {
@@ -66,26 +67,32 @@ export function ProductConfigurator({ variants }: ProductConfiguratorProps) {
     return Array.from(sizes);
   }, [activeVariants]);
 
+  // Seed state from server-provided initialVariantId (eliminates variant flash on SSR)
+  const initialVariant = initialVariantId
+    ? activeVariants.find((v) => v.id === initialVariantId) ?? null
+    : null;
+
   const [selectedColor, setSelectedColor] = useState<string | null>(
-    uniqueColors.length === 1 ? uniqueColors[0] : null,
+    initialVariant?.color ?? (uniqueColors.length === 1 ? uniqueColors[0] : null),
   );
   const [selectedSize, setSelectedSize] = useState<string | null>(
-    uniqueSizes.length === 1 ? uniqueSizes[0] : null,
+    initialVariant?.size ?? (uniqueSizes.length === 1 ? uniqueSizes[0] : null),
   );
 
-  // Pre-select variant from URL #variant= hash after hydration (mount only)
-  const variantsRef = useRef(activeVariants);
-  variantsRef.current = activeVariants;
+  // Backward compat: migrate legacy #variant= hash URLs to ?variant= query param via one full reload
   useEffect(() => {
-    const hash = window.location.hash.slice(1);
-    const params = new URLSearchParams(hash);
-    const variantId = params.get('variant');
-    if (!variantId) return;
-    const match = variantsRef.current.find((v) => v.id === variantId);
-    if (!match) return;
-    if (match.color) setSelectedColor(match.color);
-    if (match.size) setSelectedSize(match.size);
-  }, []);
+    const hashStr = window.location.hash.slice(1);
+    if (!hashStr) return;
+    const hashParams = new URLSearchParams(hashStr);
+    const legacyId = hashParams.get('variant');
+    if (!legacyId) return;
+    if (new URLSearchParams(window.location.search).has('variant')) return;
+    if (!activeVariants.find((v) => v.id === legacyId)) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('variant', legacyId);
+    url.hash = '';
+    window.location.replace(url.toString());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Find matched variant
   const selectedVariant = useMemo(() => {
@@ -96,13 +103,16 @@ export function ProductConfigurator({ variants }: ProductConfiguratorProps) {
     }) ?? null;
   }, [activeVariants, selectedColor, selectedSize, uniqueColors.length, uniqueSizes.length]);
 
-  // Notify sibling components and update URL hash
+  // Notify sibling components and update URL to ?variant= query param
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent('pdp:variant-change', { detail: selectedVariant?.id ?? null }),
     );
     if (selectedVariant) {
-      window.history.replaceState(null, '', `#variant=${selectedVariant.id}`);
+      const url = new URL(window.location.href);
+      url.searchParams.set('variant', selectedVariant.id);
+      url.hash = '';
+      window.history.replaceState(null, '', url.toString());
     }
   }, [selectedVariant?.id]);
 
