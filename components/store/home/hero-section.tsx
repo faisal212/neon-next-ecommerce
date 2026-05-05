@@ -22,7 +22,7 @@ export function HeroSection({ banner }: HeroSectionProps) {
   const description =
     banner?.description ||
     "Pakistan\u2019s most premium selection of technology. From smartphones to smart home, experience the future delivered to your door.";
-  const ctaHref = banner?.linkUrl || "/products";
+  const ctaHref = banner?.linkUrl || "/categories/watches";
 
   return (
     <section className="relative flex items-center overflow-hidden lg:min-h-[870px]">
