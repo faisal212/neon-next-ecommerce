@@ -25,6 +25,7 @@ interface AddToCartPanelProps {
   productName: string;
   basePricePkr: string;
   variants: VariantData[];
+  initialVariantId?: string | null;
 }
 
 export function AddToCartPanel({
@@ -32,16 +33,19 @@ export function AddToCartPanel({
   productName,
   basePricePkr,
   variants,
+  initialVariantId,
 }: AddToCartPanelProps) {
   const { addItem, isPending } = useCart();
 
   const activeVariants = variants.filter((v) => v.isActive);
   const hasOptions = activeVariants.some((v) => v.color || v.size);
 
-  // Auto-select if only one variant
+  // Auto-select if only one variant; server-provided initialVariantId takes precedence
   const autoSelectedVariantId = activeVariants.length === 1 ? activeVariants[0].id : null;
 
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(autoSelectedVariantId);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    initialVariantId ?? autoSelectedVariantId,
+  );
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
 
