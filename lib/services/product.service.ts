@@ -355,6 +355,9 @@ export async function createProduct(input: CreateProductInput) {
       slug,
       descriptionEn: normalizeDescription(input.descriptionEn) ?? null,
       descriptionUr: input.descriptionUr ?? null,
+      // `|| null` (not `??`) so the editor's empty string is stored as
+      // NULL rather than '' — keeps the "absent" state unambiguous.
+      shortDescriptionEn: input.shortDescriptionEn?.trim() || null,
       basePricePkr: input.basePricePkr,
       isActive: input.isActive ?? true,
       isFeatured: input.isFeatured ?? false,
@@ -454,6 +457,12 @@ export async function updateProduct(id: string, input: Partial<CreateProductInpu
   // don't store noise. Only when the caller explicitly sent the field.
   if ('descriptionEn' in input) {
     updates.descriptionEn = normalizeDescription(input.descriptionEn);
+  }
+
+  // Same idea for shortDescriptionEn: collapse '' to NULL so the
+  // "no short description" state is consistent.
+  if ('shortDescriptionEn' in input) {
+    updates.shortDescriptionEn = input.shortDescriptionEn?.trim() || null;
   }
 
   // Slug is a user-managed field. Only touch it when the admin explicitly

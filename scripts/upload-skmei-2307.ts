@@ -77,12 +77,7 @@ async function main() {
 
   // ── 3. Create product ─────────────────────────────────────
   console.log('\n3. Creating product...');
-  const [prod] = await db.insert(products).values({
-    categoryId: watches.id,
-    nameEn: 'Skmei 2307 – Digital Sports Watch – Silver/Steel',
-    nameUr: 'Skmei 2307 – ڈیجیٹل اسپورٹس واچ – سلور/اسٹیل',
-    slug: 'skmei-2307-digital-sports-watch-silver-steel',
-    descriptionEn: plainTextToDoc(`The SKMEI 2307 is a rugged and reliable timepiece designed for athletes and fitness enthusiasts who need a watch that can keep up with an active lifestyle. It features a bold square face, digital display, and a range of sport-focused functions.
+  const descriptionEnText = `The SKMEI 2307 is a rugged and reliable timepiece designed for athletes and fitness enthusiasts who need a watch that can keep up with an active lifestyle. It features a bold square face, digital display, and a range of sport-focused functions.
 
 Key Features:
 • Dual Time — track two time zones simultaneously
@@ -104,7 +99,14 @@ Specifications:
 • Battery: CR2025
 • Water Resistance: 50 Meters
 
-Built to last with a durable ABS case and precise digital movement. The silver/steel version adds a polished, versatile look for both sport and casual everyday wear. Do not press buttons underwater.`),
+Built to last with a durable ABS case and precise digital movement. The silver/steel version adds a polished, versatile look for both sport and casual everyday wear. Do not press buttons underwater.`;
+  const [prod] = await db.insert(products).values({
+    categoryId: watches.id,
+    nameEn: 'Skmei 2307 – Digital Sports Watch – Silver/Steel',
+    nameUr: 'Skmei 2307 – ڈیجیٹل اسپورٹس واچ – سلور/اسٹیل',
+    slug: 'skmei-2307-digital-sports-watch-silver-steel',
+    descriptionEn: plainTextToDoc(descriptionEnText),
+    shortDescriptionEn: descriptionEnText.slice(0, 250).trim(),
     descriptionUr: `SKMEI 2307 ایک مضبوط اور قابل اعتماد ڈیجیٹل اسپورٹس واچ ہے جو کھلاڑیوں اور فٹنس کے شوقین افراد کے لیے بنائی گئی ہے۔ مربع ڈائل، اسٹینلیس سٹیل بینڈ۔
 
 خصوصیات: دوہرا ٹائم زون، اسٹاپ واچ، کاؤنٹ ڈاؤن ٹائمر، EL بیک لائٹ، 50 میٹر واٹر پروف، الارم، تاریخ، ہفتے کا دن، 12/24 گھنٹے فارمیٹ۔

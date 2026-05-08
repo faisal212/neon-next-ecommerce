@@ -43,6 +43,13 @@
       "when": 1778261920796,
       "tag": "0005_deep_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778267353006,
+      "tag": "0006_massive_silverclaw",
+      "breakpoints": true
     }
   ]
 }

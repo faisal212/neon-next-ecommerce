@@ -39,6 +39,7 @@ export const createProductSchema = z.object({
   // service layer so this schema's inferred input type stays optional.
   descriptionEn: tiptapDocSchema.nullable().optional(),
   descriptionUr: z.string().optional(),
+  shortDescriptionEn: z.string().trim().max(250).optional(),
   basePricePkr: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Must be a valid price'),
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
