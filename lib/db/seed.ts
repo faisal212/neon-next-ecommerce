@@ -8,6 +8,7 @@ import { deliveryZones, coupons } from './schema/orders';
 import { banners, flashSales, flashSaleProducts } from './schema/marketing';
 import { appSettings, notificationTemplates } from './schema/support';
 import { categorySeo } from './schema/seo';
+import { plainTextToDoc } from '@/lib/rich-text/from-plain-text';
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -335,7 +336,7 @@ async function seed() {
   for (const p of catalog) {
     const [prod] = await db.insert(products).values({
       categoryId: p.catId, nameEn: p.nameEn, nameUr: p.nameUr, slug: p.slug,
-      descriptionEn: p.descEn, descriptionUr: p.descUr,
+      descriptionEn: plainTextToDoc(p.descEn), descriptionUr: p.descUr,
       basePricePkr: p.price, isFeatured: p.featured, isPublished: true,
     }).returning();
 

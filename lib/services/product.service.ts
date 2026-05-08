@@ -10,8 +10,26 @@ import { productSeo } from '@/lib/db/schema/seo';
 import { ConflictError, NotFoundError, ValidationError } from '@/lib/errors/api-error';
 import { variantSlug } from '@/lib/store/format';
 import { slugify } from '@/lib/utils/slugify';
+import { isDocEmpty } from '@/lib/rich-text/validate';
+import type { TiptapDoc } from '@/lib/rich-text/schema';
 import type { CreateProductInput } from '@/lib/validators/product.validators';
 import type { PaginationParams } from '@/lib/utils/pagination';
+
+/**
+ * Normalize a Tiptap doc for storage:
+ *   - undefined  → undefined (caller decides whether to apply the update)
+ *   - null       → null (clear the column)
+ *   - empty doc  → null (the editor's default `{doc:[paragraph]}` shell
+ *                  is treated as cleared so the DB doesn't keep noise)
+ *   - non-empty  → as-is
+ */
+function normalizeDescription(
+  doc: TiptapDoc | null | undefined,
+): TiptapDoc | null | undefined {
+  if (doc === undefined) return undefined;
+  if (doc === null || isDocEmpty(doc)) return null;
+  return doc;
+}
 
 export async function listProducts(
   filters: {
@@ -225,11 +243,25 @@ export async function getProductBySlug(slug: string) {
   if (!product) throw new NotFoundError('Product not found');
   if (!product.isPublished) throw new NotFoundError('Product not found');
 
-  // Fetch related data in parallel
-  const [variants, images, tags] = await Promise.all([
+  // Fetch related data in parallel. productSeo is fetched here so the
+  // page's generateMetadata can pick its `metaDescription` /
+  // `ogDescription` over the rich-text fallback without a second query.
+  const [variants, images, tags, [seo]] = await Promise.all([
     db.select().from(productVariants).where(eq(productVariants.productId, product.id)),
     db.select().from(productImages).where(eq(productImages.productId, product.id)).orderBy(productImages.sortOrder),
     db.select().from(productTags).where(eq(productTags.productId, product.id)),
+    db
+      .select({
+        metaTitle: productSeo.metaTitle,
+        metaDescription: productSeo.metaDescription,
+        ogTitle: productSeo.ogTitle,
+        ogDescription: productSeo.ogDescription,
+        ogImageUrl: productSeo.ogImageUrl,
+        canonicalUrl: productSeo.canonicalUrl,
+      })
+      .from(productSeo)
+      .where(eq(productSeo.productId, product.id))
+      .limit(1),
   ]);
 
   // Fetch inventory for all variants in one query
@@ -254,6 +286,7 @@ export async function getProductBySlug(slug: string) {
     variants: variantsWithStock,
     images,
     tags: tags.map((t) => t.tag),
+    seo: seo ?? null,
   };
 }
 
@@ -320,7 +353,7 @@ export async function createProduct(input: CreateProductInput) {
       nameEn: input.nameEn,
       nameUr: input.nameUr ?? null,
       slug,
-      descriptionEn: input.descriptionEn ?? null,
+      descriptionEn: normalizeDescription(input.descriptionEn) ?? null,
       descriptionUr: input.descriptionUr ?? null,
       basePricePkr: input.basePricePkr,
       isActive: input.isActive ?? true,
@@ -416,6 +449,12 @@ export async function deleteProduct(id: string): Promise<{ slug: string }> {
 export async function updateProduct(id: string, input: Partial<CreateProductInput>) {
   const updates: Record<string, unknown> = { ...input };
   delete updates.tags;
+
+  // Normalize a cleared editor (empty Tiptap doc shell) to NULL so we
+  // don't store noise. Only when the caller explicitly sent the field.
+  if ('descriptionEn' in input) {
+    updates.descriptionEn = normalizeDescription(input.descriptionEn);
+  }
 
   // Slug is a user-managed field. Only touch it when the admin explicitly
   // sent a new slug AND it differs from the current value. Renaming the

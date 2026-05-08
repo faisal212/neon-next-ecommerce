@@ -8,9 +8,11 @@ import {
   smallint,
   numeric,
   timestamp,
+  jsonb,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { users } from './users';
+import type { TiptapDoc } from '@/lib/rich-text/schema';
 
 // ── Categories ───────────────────────────────────────────────────
 export const categories = pgTable('categories', {
@@ -37,7 +39,10 @@ export const products = pgTable('products', {
   nameEn: varchar('name_en', { length: 200 }).notNull(),
   nameUr: varchar('name_ur', { length: 200 }),
   slug: varchar('slug', { length: 220 }).notNull(),
-  descriptionEn: text('description_en'),
+  // descriptionEn is a Tiptap doc (JSONB). The allowed shape, validation,
+  // and renderer all live under `lib/rich-text/`. descriptionUr remains
+  // plain text for now — Urdu rich text is deferred until later.
+  descriptionEn: jsonb('description_en').$type<TiptapDoc | null>(),
   descriptionUr: text('description_ur'),
   basePricePkr: numeric('base_price_pkr', { precision: 12, scale: 2 }).notNull(),
   isActive: boolean('is_active').default(true).notNull(),

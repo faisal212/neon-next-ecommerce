@@ -16,6 +16,7 @@ import {
   productImages,
   productTags,
 } from '../lib/db/schema/catalog';
+import { plainTextToDoc } from '../lib/rich-text/from-plain-text';
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -95,7 +96,7 @@ async function main() {
     nameEn: 'Skmei – 2448 – Business Digital Wristwatch',
     nameUr: 'Skmei – 2448 – بزنس ڈیجیٹل رسٹ واچ',
     slug: 'skmei-2448-business-digital-wristwatch',
-    descriptionEn: `The SKMEI 2448 presents a luxurious design with a square zinc alloy case that is just 9mm thick, paired with a polished stainless steel strap. Its striking digital display features a black background with white text, making it easy to read at a glance.
+    descriptionEn: plainTextToDoc(`The SKMEI 2448 presents a luxurious design with a square zinc alloy case that is just 9mm thick, paired with a polished stainless steel strap. Its striking digital display features a black background with white text, making it easy to read at a glance.
 
 Key Features:
 • Dual Time Zones — track two time zones simultaneously
@@ -114,7 +115,7 @@ Specifications:
 • Battery: CR2016
 • Water Resistance: 30 Meters (3 Bar)
 
-The modern digital display presents a striking contrast with its black background and white text, ensuring legibility at a glance. Ideal for both business meetings and casual outings, this watch seamlessly integrates into daily life, providing elegance and utility in every moment.`,
+The modern digital display presents a striking contrast with its black background and white text, ensuring legibility at a glance. Ideal for both business meetings and casual outings, this watch seamlessly integrates into daily life, providing elegance and utility in every moment.`),
     descriptionUr: `SKMEI 2448 ایک خوبصورت بزنس ڈیجیٹل واچ ہے جس میں زنک ایلائے کیس اور پالش شدہ اسٹینلیس سٹیل بینڈ ہے۔ صرف 9mm موٹا کیس، سیاہ پس منظر پر سفید ٹیکسٹ ڈسپلے۔
 
 خصوصیات: دوہرا ٹائم زون، الٹی گنتی ٹائمر، کرونوگراف، LED بیک لائٹ، 30 میٹر واٹر پروف، الارم، تاریخ، ہفتے کا دن، 12/24 گھنٹے کی گھڑی۔

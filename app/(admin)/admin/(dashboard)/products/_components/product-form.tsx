@@ -6,6 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { slugify } from "@/lib/utils/slugify";
 import { ProductImages } from "./product-images";
+import { RichTextEditor } from "./rich-text-editor";
+import type { TiptapDoc } from "@/lib/rich-text/schema";
 
 interface Category {
   id: string;
@@ -25,7 +27,7 @@ interface ProductData {
   nameEn: string;
   nameUr: string;
   slug: string;
-  descriptionEn: string;
+  descriptionEn: TiptapDoc | null;
   descriptionUr: string;
   basePricePkr: string;
   isActive: boolean;
@@ -50,7 +52,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
       nameEn: "",
       nameUr: "",
       slug: "",
-      descriptionEn: "",
+      descriptionEn: null,
       descriptionUr: "",
       basePricePkr: "",
       isActive: true,
@@ -143,7 +145,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
           // service auto-generates from the name. On update, omitting slug
           // leaves the existing one untouched.
           slug: form.slug.trim() ? form.slug.trim() : undefined,
-          descriptionEn: form.descriptionEn || undefined,
+          descriptionEn: form.descriptionEn ?? undefined,
           descriptionUr: form.descriptionUr || undefined,
           basePricePkr: form.basePricePkr,
           isActive: form.isActive,
@@ -242,32 +244,31 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
           </p>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              Description (English)
-            </label>
-            <textarea
-              value={form.descriptionEn}
-              onChange={(e) => updateField("descriptionEn", e.target.value)}
-              placeholder="Product description..."
-              rows={4}
-              className={`${inputClass} resize-vertical`}
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-              Description (Urdu)
-            </label>
-            <textarea
-              value={form.descriptionUr}
-              onChange={(e) => updateField("descriptionUr", e.target.value)}
-              placeholder="تفصیل"
-              dir="rtl"
-              rows={4}
-              className={`${inputClass} resize-vertical`}
-            />
-          </div>
+        <div className="mb-4">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            Description (English)
+          </label>
+          <RichTextEditor
+            initialContent={initialData?.descriptionEn ?? null}
+            onChange={(doc) => updateField("descriptionEn", doc)}
+          />
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            Format with bold, italic, headings, lists, and links. Plain paragraphs are fine too.
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+            Description (Urdu)
+          </label>
+          <textarea
+            value={form.descriptionUr}
+            onChange={(e) => updateField("descriptionUr", e.target.value)}
+            placeholder="تفصیل"
+            dir="rtl"
+            rows={4}
+            className={`${inputClass} resize-vertical`}
+          />
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-4">

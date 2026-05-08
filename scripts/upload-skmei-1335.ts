@@ -16,6 +16,7 @@ import {
   productImages,
   productTags,
 } from '../lib/db/schema/catalog';
+import { plainTextToDoc } from '../lib/rich-text/from-plain-text';
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -95,7 +96,7 @@ async function main() {
     nameEn: 'Skmei – 1335 – Digital Sports Countdown Waterproof Watch – Silver',
     nameUr: 'Skmei – 1335 – ڈیجیٹل اسپورٹس کاؤنٹ ڈاؤن واٹر پروف واچ – سلور',
     slug: 'skmei-1335-digital-sports-watch-silver',
-    descriptionEn: `The SKMEI 1335 is a blend of performance, elegance, and modern design, built to handle an active lifestyle. It features a bold square dial and a sleek stainless steel band, making it ideal for work, casual outings, or gifting.
+    descriptionEn: plainTextToDoc(`The SKMEI 1335 is a blend of performance, elegance, and modern design, built to handle an active lifestyle. It features a bold square dial and a sleek stainless steel band, making it ideal for work, casual outings, or gifting.
 
 Key Features:
 • Dual Time Zones — track two time zones simultaneously
@@ -111,7 +112,7 @@ Build & Materials:
 • Case Cover: Stainless steel waterproof
 • Weight: 85g
 
-Note: Do not press buttons underwater or wear for long-term underwater activities.`,
+Note: Do not press buttons underwater or wear for long-term underwater activities.`),
     descriptionUr: `SKMEI 1335 ایک شاندار ڈیجیٹل اسپورٹس واچ ہے جو کارکردگی اور جدید ڈیزائن کا حسین امتزاج ہے۔ اسٹینلیس سٹیل بینڈ اور مربع ڈائل کے ساتھ یہ گھڑی دفتر، روزمرہ استعمال اور تحفے کے لیے مثالی ہے۔
 
 خصوصیات: دوہرا ٹائم زون، الٹی گنتی ٹائمر، کرونوگراف، EL بیک لائٹ، 50 میٹر واٹر پروف، الارم، کیلنڈر، 12/24 گھنٹے کی گھڑی۔ وزن: 85 گرام۔`,
