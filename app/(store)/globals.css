@@ -322,3 +322,48 @@ button:active:not(:disabled) {
   color: var(--color-primary);
   font-weight: 700;
 }
+
+/* ── Product description (rich text) ─────────────────────
+ * Styles the JSX produced by lib/rich-text/render.tsx for the
+ * editorial section on the product page. The renderer's allow-list
+ * is small (h2/h3/p/ul/ol/li/strong/em/a), so we don't pull in
+ * @tailwindcss/typography — these few rules are enough.
+ */
+.prose-editorial { color: var(--color-on-surface-variant); font-size: 1.125rem; line-height: 1.75; }
+.prose-editorial > * + * { margin-top: 1rem; }
+.prose-editorial h2 {
+  color: var(--color-on-surface);
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+.prose-editorial h3 {
+  color: var(--color-on-surface);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+.prose-editorial p { color: var(--color-on-surface-variant); }
+.prose-editorial strong { color: var(--color-on-surface); font-weight: 700; }
+.prose-editorial em { font-style: italic; }
+.prose-editorial ul,
+.prose-editorial ol { padding-left: 1.5rem; }
+.prose-editorial ul { list-style: disc; }
+.prose-editorial ol { list-style: decimal; }
+.prose-editorial li { margin-top: 0.25rem; }
+.prose-editorial li::marker { color: var(--color-primary); }
+.prose-editorial li > p { margin: 0; }
+.prose-editorial a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: opacity 0.2s ease;
+}
+.prose-editorial a:hover { opacity: 0.85; }

@@ -9,6 +9,8 @@ import { ProductConfigurator } from '@/components/store/product/product-configur
 import { AddToCartPanel } from '@/components/store/product/add-to-cart-panel';
 import { ImageGallery } from '@/components/store/product/image-gallery';
 import { HeroImage } from '@/components/store/product/hero-image';
+import { extractFirstParagraphText } from '@/lib/rich-text/extract';
+import { renderProductDescription } from '@/lib/rich-text/render';
 import type { Metadata } from 'next';
 
 type PageProps = {
@@ -31,27 +33,45 @@ export async function generateMetadata({ params, searchParams: _searchParams }: 
   try {
     const product = await fetchProductCached(slug);
     const primary = product.images.find((i) => i.isPrimary) ?? product.images[0];
-    const description = product.descriptionEn
-      ? product.descriptionEn.slice(0, 160)
-      : `Shop ${product.nameEn} at Refine — watches & tech accessories shipped across Pakistan.`;
+
+    // Resolution order for meta description:
+    //   1. productSeo.metaDescription  — admin-tuned for search snippets
+    //   2. productSeo.ogDescription    — admin-tuned for OG cards
+    //   3. first paragraph of the rich description (≤160 chars)
+    //   4. static fallback
+    const seoMeta = product.seo?.metaDescription?.trim();
+    const seoOg = product.seo?.ogDescription?.trim();
+    const extracted = extractFirstParagraphText(product.descriptionEn, 160);
+    const description =
+      seoMeta ||
+      seoOg ||
+      extracted ||
+      `Shop ${product.nameEn} at Refine — watches & tech accessories shipped across Pakistan.`;
+    const ogDescription = seoOg || seoMeta || description;
 
     return {
-      title: product.nameEn,
+      title: product.seo?.metaTitle || product.nameEn,
       description,
       openGraph: {
-        title: product.nameEn,
-        description,
+        title: product.seo?.ogTitle || product.nameEn,
+        description: ogDescription,
         type: 'website',
         ...(primary && {
-          images: [{ url: primary.url, alt: primary.altText ?? product.nameEn }],
+          images: [{
+            url: product.seo?.ogImageUrl || primary.url,
+            alt: primary.altText ?? product.nameEn,
+          }],
         }),
       },
       twitter: {
         card: 'summary_large_image',
-        title: product.nameEn,
-        description,
-        ...(primary && { images: [primary.url] }),
+        title: product.seo?.ogTitle || product.nameEn,
+        description: ogDescription,
+        ...(primary && { images: [product.seo?.ogImageUrl || primary.url] }),
       },
+      ...(product.seo?.canonicalUrl && {
+        alternates: { canonical: product.seo.canonicalUrl },
+      }),
     };
   } catch (err) {
     if (err instanceof NotFoundError) return { title: 'Product Not Found' };
@@ -154,9 +174,8 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
           {/* Description */}
           <p className="text-on-surface-variant text-lg max-w-md mb-12 leading-relaxed">
-            {product.descriptionEn
-              ? product.descriptionEn.slice(0, 200)
-              : 'Made with care. Priced without the markup. Delivered anywhere in Pakistan.'}
+            {extractFirstParagraphText(product.descriptionEn, 200) ||
+              'Made with care. Priced without the markup. Delivered anywhere in Pakistan.'}
           </p>
 
           {/* Quick specs grid */}
@@ -230,12 +249,8 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
           {/* Description */}
           {product.descriptionEn && (
-            <div className="max-w-2xl mb-20">
-              {product.descriptionEn.split('\n').filter(Boolean).map((para, i) => (
-                <p key={i} className="text-on-surface-variant text-lg leading-relaxed mb-4">
-                  {para}
-                </p>
-              ))}
+            <div className="prose-editorial max-w-2xl mb-20">
+              {renderProductDescription(product.descriptionEn)}
             </div>
           )}
 

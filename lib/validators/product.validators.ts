@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { tiptapDocSchema } from '@/lib/rich-text/validate';
 
 // Slug is user-managed: lowercase letters, digits, and single hyphens only.
 // No leading/trailing/consecutive hyphens. Used by both products and categories.
@@ -32,7 +33,11 @@ export const createProductSchema = z.object({
   nameEn: z.string().min(1).max(200),
   nameUr: z.string().max(200).optional(),
   slug: slugSchema.optional(),
-  descriptionEn: z.string().optional(),
+  // descriptionEn is a structured Tiptap doc — see lib/rich-text/.
+  // null clears the field. Empty-doc normalization (turning the
+  // editor's default `{ doc: [paragraph] }` into null) happens in the
+  // service layer so this schema's inferred input type stays optional.
+  descriptionEn: tiptapDocSchema.nullable().optional(),
   descriptionUr: z.string().optional(),
   basePricePkr: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Must be a valid price'),
   isActive: z.boolean().optional(),

@@ -16,6 +16,7 @@ import {
   productImages,
   productTags,
 } from '../lib/db/schema/catalog';
+import { plainTextToDoc } from '../lib/rich-text/from-plain-text';
 
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
@@ -81,7 +82,7 @@ async function main() {
     nameEn: 'Skmei 2307 – Digital Sports Watch – Silver/Steel',
     nameUr: 'Skmei 2307 – ڈیجیٹل اسپورٹس واچ – سلور/اسٹیل',
     slug: 'skmei-2307-digital-sports-watch-silver-steel',
-    descriptionEn: `The SKMEI 2307 is a rugged and reliable timepiece designed for athletes and fitness enthusiasts who need a watch that can keep up with an active lifestyle. It features a bold square face, digital display, and a range of sport-focused functions.
+    descriptionEn: plainTextToDoc(`The SKMEI 2307 is a rugged and reliable timepiece designed for athletes and fitness enthusiasts who need a watch that can keep up with an active lifestyle. It features a bold square face, digital display, and a range of sport-focused functions.
 
 Key Features:
 • Dual Time — track two time zones simultaneously
@@ -103,7 +104,7 @@ Specifications:
 • Battery: CR2025
 • Water Resistance: 50 Meters
 
-Built to last with a durable ABS case and precise digital movement. The silver/steel version adds a polished, versatile look for both sport and casual everyday wear. Do not press buttons underwater.`,
+Built to last with a durable ABS case and precise digital movement. The silver/steel version adds a polished, versatile look for both sport and casual everyday wear. Do not press buttons underwater.`),
     descriptionUr: `SKMEI 2307 ایک مضبوط اور قابل اعتماد ڈیجیٹل اسپورٹس واچ ہے جو کھلاڑیوں اور فٹنس کے شوقین افراد کے لیے بنائی گئی ہے۔ مربع ڈائل، اسٹینلیس سٹیل بینڈ۔
 
 خصوصیات: دوہرا ٹائم زون، اسٹاپ واچ، کاؤنٹ ڈاؤن ٹائمر، EL بیک لائٹ، 50 میٹر واٹر پروف، الارم، تاریخ، ہفتے کا دن، 12/24 گھنٹے فارمیٹ۔
