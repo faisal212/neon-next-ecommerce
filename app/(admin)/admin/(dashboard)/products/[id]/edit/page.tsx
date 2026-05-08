@@ -80,6 +80,7 @@ export default async function EditProductPage({ params }: Props) {
           slug: product.slug,
           descriptionEn: product.descriptionEn ?? null,
           descriptionUr: product.descriptionUr || "",
+          shortDescriptionEn: product.shortDescriptionEn ?? "",
           basePricePkr: product.basePricePkr,
           isActive: product.isActive,
           isFeatured: product.isFeatured,

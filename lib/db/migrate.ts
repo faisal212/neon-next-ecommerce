@@ -11,7 +11,12 @@
  * drizzle-kit produces under `lib/db/migrations`), then close.
  *
  * Usage:
- *   npm run db:migrate
+ *   npm run db:migrate                   # uses .env.local DATABASE_URL
+ *   npm run db:migrate -- "postgres://…" # explicit URL (e.g. prod branch)
+ *
+ * Resolution order: CLI arg > process.env.DATABASE_URL > .env.local.
+ * The CLI-arg path is meant for one-off migrations against a non-default
+ * branch (typically prod) without having to mutate .env.local.
  */
 import { config } from 'dotenv';
 config({ path: '.env.local' });
@@ -25,11 +30,19 @@ import { migrate } from 'drizzle-orm/neon-serverless/migrator';
 neonConfig.webSocketConstructor = globalThis.WebSocket;
 
 async function main() {
-  if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL is not set — check .env.local');
+  const connectionString = process.argv[2] || process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is not set — pass it as an arg or set it in .env.local');
   }
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  // Echo the target host so a prod migration is unmistakable. The
+  // username/password are stripped — only host[:port] is logged.
+  const host = (() => {
+    try { return new URL(connectionString).host; } catch { return '<unparseable>'; }
+  })();
+  console.log(`target: ${host}`);
+
+  const pool = new Pool({ connectionString });
   const db = drizzle(pool);
 
   console.log('applying migrations from lib/db/migrations ...');

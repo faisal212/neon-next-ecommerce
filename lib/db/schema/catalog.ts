@@ -44,6 +44,11 @@ export const products = pgTable('products', {
   // plain text for now — Urdu rich text is deferred until later.
   descriptionEn: jsonb('description_en').$type<TiptapDoc | null>(),
   descriptionUr: text('description_ur'),
+  // Plain-text 1–2 sentence pitch shown on the storefront hero subtitle
+  // and used as a fallback in the meta/OG description chain. Distinct
+  // from productSeo.metaDescription (180 char SEO meta tag) — this one
+  // is for on-page UI and can be longer.
+  shortDescriptionEn: text('short_description_en'),
   basePricePkr: numeric('base_price_pkr', { precision: 12, scale: 2 }).notNull(),
   isActive: boolean('is_active').default(true).notNull(),
   isFeatured: boolean('is_featured').default(false).notNull(),

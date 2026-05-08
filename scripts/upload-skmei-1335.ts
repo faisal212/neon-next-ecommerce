@@ -91,12 +91,7 @@ async function main() {
 
   // ── 3. Create product ─────────────────────────────────────
   console.log('\n3. Creating product...');
-  const [prod] = await db.insert(products).values({
-    categoryId: watches.id,
-    nameEn: 'Skmei – 1335 – Digital Sports Countdown Waterproof Watch – Silver',
-    nameUr: 'Skmei – 1335 – ڈیجیٹل اسپورٹس کاؤنٹ ڈاؤن واٹر پروف واچ – سلور',
-    slug: 'skmei-1335-digital-sports-watch-silver',
-    descriptionEn: plainTextToDoc(`The SKMEI 1335 is a blend of performance, elegance, and modern design, built to handle an active lifestyle. It features a bold square dial and a sleek stainless steel band, making it ideal for work, casual outings, or gifting.
+  const descriptionEnText = `The SKMEI 1335 is a blend of performance, elegance, and modern design, built to handle an active lifestyle. It features a bold square dial and a sleek stainless steel band, making it ideal for work, casual outings, or gifting.
 
 Key Features:
 • Dual Time Zones — track two time zones simultaneously
@@ -112,7 +107,14 @@ Build & Materials:
 • Case Cover: Stainless steel waterproof
 • Weight: 85g
 
-Note: Do not press buttons underwater or wear for long-term underwater activities.`),
+Note: Do not press buttons underwater or wear for long-term underwater activities.`;
+  const [prod] = await db.insert(products).values({
+    categoryId: watches.id,
+    nameEn: 'Skmei – 1335 – Digital Sports Countdown Waterproof Watch – Silver',
+    nameUr: 'Skmei – 1335 – ڈیجیٹل اسپورٹس کاؤنٹ ڈاؤن واٹر پروف واچ – سلور',
+    slug: 'skmei-1335-digital-sports-watch-silver',
+    descriptionEn: plainTextToDoc(descriptionEnText),
+    shortDescriptionEn: descriptionEnText.slice(0, 250).trim(),
     descriptionUr: `SKMEI 1335 ایک شاندار ڈیجیٹل اسپورٹس واچ ہے جو کارکردگی اور جدید ڈیزائن کا حسین امتزاج ہے۔ اسٹینلیس سٹیل بینڈ اور مربع ڈائل کے ساتھ یہ گھڑی دفتر، روزمرہ استعمال اور تحفے کے لیے مثالی ہے۔
 
 خصوصیات: دوہرا ٹائم زون، الٹی گنتی ٹائمر، کرونوگراف، EL بیک لائٹ، 50 میٹر واٹر پروف، الارم، کیلنڈر، 12/24 گھنٹے کی گھڑی۔ وزن: 85 گرام۔`,

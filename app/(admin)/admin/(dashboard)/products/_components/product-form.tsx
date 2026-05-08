@@ -29,6 +29,7 @@ interface ProductData {
   slug: string;
   descriptionEn: TiptapDoc | null;
   descriptionUr: string;
+  shortDescriptionEn: string;
   basePricePkr: string;
   isActive: boolean;
   isFeatured: boolean;
@@ -54,6 +55,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
       slug: "",
       descriptionEn: null,
       descriptionUr: "",
+      shortDescriptionEn: "",
       basePricePkr: "",
       isActive: true,
       isFeatured: false,
@@ -147,6 +149,9 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
           slug: form.slug.trim() ? form.slug.trim() : undefined,
           descriptionEn: form.descriptionEn ?? undefined,
           descriptionUr: form.descriptionUr || undefined,
+          // Always send the trimmed value (not `|| undefined`) so an
+          // explicit clear in the form propagates to NULL on the server.
+          shortDescriptionEn: form.shortDescriptionEn.trim(),
           basePricePkr: form.basePricePkr,
           isActive: form.isActive,
           isFeatured: form.isFeatured,
@@ -241,6 +246,26 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
             <span className="text-foreground/70">
               Preview: /products/{form.slug || "<slug>"}
             </span>
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-1.5 flex items-baseline justify-between text-xs font-medium text-muted-foreground">
+            <span>Short Description (English)</span>
+            <span className={form.shortDescriptionEn.length > 250 ? "text-destructive" : "text-muted-foreground/60"}>
+              {form.shortDescriptionEn.length}/250
+            </span>
+          </label>
+          <textarea
+            value={form.shortDescriptionEn}
+            onChange={(e) => updateField("shortDescriptionEn", e.target.value)}
+            placeholder="One- or two-sentence pitch shown on the storefront hero."
+            rows={2}
+            maxLength={250}
+            className={`${inputClass} resize-vertical`}
+          />
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            Plain text, max 250 characters. Leave blank to fall back to the first paragraph of the description below.
           </p>
         </div>
 

@@ -37,17 +37,20 @@ export async function generateMetadata({ params, searchParams: _searchParams }: 
     // Resolution order for meta description:
     //   1. productSeo.metaDescription  — admin-tuned for search snippets
     //   2. productSeo.ogDescription    — admin-tuned for OG cards
-    //   3. first paragraph of the rich description (≤160 chars)
-    //   4. static fallback
+    //   3. shortDescriptionEn          — admin-curated hero subtitle
+    //   4. first paragraph of the rich description (≤160 chars)
+    //   5. static fallback
     const seoMeta = product.seo?.metaDescription?.trim();
     const seoOg = product.seo?.ogDescription?.trim();
+    const shortDesc = product.shortDescriptionEn?.trim();
     const extracted = extractFirstParagraphText(product.descriptionEn, 160);
     const description =
       seoMeta ||
       seoOg ||
+      shortDesc ||
       extracted ||
       `Shop ${product.nameEn} at Refine — watches & tech accessories shipped across Pakistan.`;
-    const ogDescription = seoOg || seoMeta || description;
+    const ogDescription = seoOg || seoMeta || shortDesc || description;
 
     return {
       title: product.seo?.metaTitle || product.nameEn,
@@ -174,7 +177,8 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
           {/* Description */}
           <p className="text-on-surface-variant text-lg max-w-md mb-12 leading-relaxed">
-            {extractFirstParagraphText(product.descriptionEn, 200) ||
+            {product.shortDescriptionEn?.trim() ||
+              extractFirstParagraphText(product.descriptionEn, 200) ||
               'Made with care. Priced without the markup. Delivered anywhere in Pakistan.'}
           </p>
 

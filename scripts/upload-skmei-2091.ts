@@ -78,12 +78,7 @@ async function main() {
 
   // ── 3. Create product ─────────────────────────────────────
   console.log('\n3. Creating product...');
-  const [prod] = await db.insert(products).values({
-    categoryId: watches.id,
-    nameEn: 'Skmei – 2091 – Digital Analog – Black/White-White',
-    nameUr: 'Skmei – 2091 – ڈیجیٹل اینالاگ – بلیک/وائٹ',
-    slug: 'skmei-2091-digital-analog-black-white',
-    descriptionEn: plainTextToDoc(`The SKMEI 2091 is a bold, feature-rich analog-digital watch inspired by the iconic G-Shock 2100 Series "Casioak" and the luxurious Patek Philippe Nautilus. It offers a simple yet striking look, perfect for casual or business occasions. A unisex timepiece featuring both analog and digital displays.
+  const descriptionEnText = `The SKMEI 2091 is a bold, feature-rich analog-digital watch inspired by the iconic G-Shock 2100 Series "Casioak" and the luxurious Patek Philippe Nautilus. It offers a simple yet striking look, perfect for casual or business occasions. A unisex timepiece featuring both analog and digital displays.
 
 Key Features:
 • Dual Time Display — Analog + Digital
@@ -103,7 +98,14 @@ Specifications:
 • Weight: 49.7g
 • Battery: CR2016
 
-The unique double keeper strap system prevents loosening during physical activities. The strap material offers a luxurious, velvety feel. Do not press buttons while submerged.`),
+The unique double keeper strap system prevents loosening during physical activities. The strap material offers a luxurious, velvety feel. Do not press buttons while submerged.`;
+  const [prod] = await db.insert(products).values({
+    categoryId: watches.id,
+    nameEn: 'Skmei – 2091 – Digital Analog – Black/White-White',
+    nameUr: 'Skmei – 2091 – ڈیجیٹل اینالاگ – بلیک/وائٹ',
+    slug: 'skmei-2091-digital-analog-black-white',
+    descriptionEn: plainTextToDoc(descriptionEnText),
+    shortDescriptionEn: descriptionEnText.slice(0, 250).trim(),
     descriptionUr: `SKMEI 2091 ایک شاندار اینالاگ-ڈیجیٹل واچ ہے جو مشہور G-Shock Casioak سے متاثر ہے۔ گول ڈائل، دوہرا ڈسپلے، کیژول اور بزنس دونوں مواقع کے لیے مثالی۔
 
 خصوصیات: دوہرا ٹائم ڈسپلے (اینالاگ + ڈیجیٹل)، ورلڈ ٹائم، 5 الارم، اسٹاپ واچ، کاؤنٹ ڈاؤن ٹائمر، LED بیک لائٹ، 50 میٹر واٹر پروف۔
