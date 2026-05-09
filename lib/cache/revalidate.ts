@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { products, categories } from "@/lib/db/schema/catalog";
+import { products, categories, productVariants } from "@/lib/db/schema/catalog";
 
 /**
  * Cache invalidation helpers for admin mutations.
@@ -117,6 +117,53 @@ export function invalidateCategoryMeta(slug: string): void {
 
 export function invalidateHomepage(): void {
   revalidateTag("homepage", IMMEDIATE);
+}
+
+// ─── Inventory / variant stock ──────────────────────────────────────────
+
+/**
+ * Invalidate every storefront surface that filters by variant stock.
+ *
+ * Storefront grids drop variants whose available stock <= 0
+ * (see `listProductVariants` in `lib/services/product.service.ts`), so any
+ * inventory mutation that flips a variant in or out of stock must flush:
+ *   - `homepage` (new arrivals carousel)
+ *   - `collection-all` (/products listing — now per-variant)
+ *   - `collection-${categorySlug}` for each affected category
+ *   - `product-${productSlug}` for each affected product (PDP stock badge)
+ *   - `search` (results may include the variant)
+ *
+ * Joins variantIds → products → categories in one query so callers don't
+ * have to hand the slugs down through service signatures. Pass an empty
+ * array for a no-op (cheap guard for routes that may have empty items).
+ */
+export async function invalidateVariantStock(variantIds: string[]): Promise<void> {
+  if (variantIds.length === 0) return;
+
+  const rows = await db
+    .select({
+      productSlug: products.slug,
+      categorySlug: categories.slug,
+    })
+    .from(productVariants)
+    .innerJoin(products, eq(products.id, productVariants.productId))
+    .innerJoin(categories, eq(categories.id, products.categoryId))
+    .where(inArray(productVariants.id, variantIds));
+
+  // Always flush the global surfaces.
+  revalidateTag("collection-all", IMMEDIATE);
+  revalidateTag("homepage", IMMEDIATE);
+  revalidateTag("search", IMMEDIATE);
+
+  // Per-product + per-category, deduped.
+  const productSlugs = new Set(rows.map((r) => r.productSlug));
+  const categorySlugs = new Set(rows.map((r) => r.categorySlug));
+  for (const slug of productSlugs) {
+    revalidateTag(`product-${slug}`, IMMEDIATE);
+  }
+  for (const slug of categorySlugs) {
+    revalidateTag(`collection-${slug}`, IMMEDIATE);
+  }
 }
 
 export function invalidateStoreLayout(): void {
