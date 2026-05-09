@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
-import { listProducts } from "@/lib/services/product.service";
+import { listProductVariants } from "@/lib/services/product.service";
 import { ProductCard } from "@/components/store/product-card";
 import { ProductCardSkeleton } from "@/components/store/product-card-skeleton";
 import { SectionHeader } from "@/components/store/section-header";
@@ -64,11 +64,11 @@ async function ProductsContent({
     offset: (page - 1) * PRODUCTS_PER_PAGE,
   };
 
-  let products: Awaited<ReturnType<typeof listProducts>>["data"] = [];
+  let products: Awaited<ReturnType<typeof listProductVariants>>["data"] = [];
   let total = 0;
 
   try {
-    const result = await listProducts(
+    const result = await listProductVariants(
       { q, minPrice, maxPrice },
       pagination,
     );
@@ -103,10 +103,14 @@ async function ProductsContent({
       {hasProducts ? (
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
+            {products.map((item) => (
               <ProductCard
-                key={product.id}
-                product={product}
+                key={item.variantId}
+                product={item}
+                variantSlug={item.variantSlug}
+                variantLabel={item.variantLabel ?? undefined}
+                displayPrice={item.totalPricePkr}
+                image={item.image}
                 sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, (max-width: 1440px) 33vw, 443px"
               />
             ))}

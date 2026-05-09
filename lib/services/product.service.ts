@@ -156,12 +156,21 @@ export async function listProductVariants(
     conditions.push(eq(products.isFeatured, true));
   }
 
+  // Storefront callers (`includeDrafts` falsy) only see in-stock variants.
+  // The INNER JOIN on inventory below also drops variants with no row at
+  // all — every variant created through admin gets an inventory row, so
+  // this matches "untracked == hidden" by construction.
+  if (!filters.includeDrafts) {
+    conditions.push(sql`${inventory.quantityOnHand} - ${inventory.quantityReserved} > 0`);
+  }
+
   const where = and(...conditions);
 
   const [countResult] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(products)
     .innerJoin(productVariants, eq(productVariants.productId, products.id))
+    .innerJoin(inventory, eq(inventory.variantId, productVariants.id))
     .where(where);
 
   const rows = await db
@@ -179,6 +188,7 @@ export async function listProductVariants(
     })
     .from(products)
     .innerJoin(productVariants, eq(productVariants.productId, products.id))
+    .innerJoin(inventory, eq(inventory.variantId, productVariants.id))
     .where(where)
     .orderBy(desc(products.createdAt), productVariants.color)
     .limit(pagination.limit)
