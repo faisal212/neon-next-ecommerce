@@ -358,7 +358,14 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7">
           {/* ── Step 1: Shipping ──────────────────────── */}
           {step === 0 && (
-            <div className="space-y-8">
+            <form
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (validateShipping()) setStep(1);
+              }}
+              className="space-y-8"
+            >
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-2 w-2 rounded-full bg-primary pulse-glow" />
                 <h2 className="text-lg font-black uppercase tracking-tight">
@@ -369,6 +376,9 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <InputField
                   label="First Name"
+                  id="checkout-first-name"
+                  name="firstName"
+                  autoComplete="given-name"
                   value={firstName}
                   onChange={setFirstName}
                   error={shippingErrors.firstName}
@@ -376,6 +386,9 @@ export default function CheckoutPage() {
                 />
                 <InputField
                   label="Last Name"
+                  id="checkout-last-name"
+                  name="lastName"
+                  autoComplete="family-name"
                   value={lastName}
                   onChange={setLastName}
                   error={shippingErrors.lastName}
@@ -383,6 +396,10 @@ export default function CheckoutPage() {
                 />
                 <InputField
                   label="Email"
+                  id="checkout-email"
+                  name="email"
+                  autoComplete="email"
+                  inputMode="email"
                   value={email}
                   onChange={setEmail}
                   error={shippingErrors.email}
@@ -392,6 +409,10 @@ export default function CheckoutPage() {
                 />
                 <InputField
                   label="Phone Number"
+                  id="checkout-phone"
+                  name="phone"
+                  autoComplete="tel"
+                  inputMode="tel"
                   value={phone}
                   onChange={setPhone}
                   error={shippingErrors.phone}
@@ -401,6 +422,9 @@ export default function CheckoutPage() {
                 />
                 <InputField
                   label="Street Address"
+                  id="checkout-street-address"
+                  name="streetAddress"
+                  autoComplete="street-address"
                   value={streetAddress}
                   onChange={setStreetAddress}
                   error={shippingErrors.streetAddress}
@@ -409,6 +433,9 @@ export default function CheckoutPage() {
                 />
                 <InputField
                   label="City"
+                  id="checkout-city"
+                  name="city"
+                  autoComplete="address-level2"
                   value={city}
                   onChange={setCity}
                   error={shippingErrors.city}
@@ -416,6 +443,9 @@ export default function CheckoutPage() {
                 />
                 <SelectField
                   label="Province"
+                  id="checkout-province"
+                  name="province"
+                  autoComplete="address-level1"
                   value={province}
                   onChange={setProvince}
                   error={shippingErrors.province}
@@ -424,6 +454,10 @@ export default function CheckoutPage() {
                 />
                 <InputField
                   label="Postal Code"
+                  id="checkout-postal-code"
+                  name="postalCode"
+                  autoComplete="postal-code"
+                  inputMode="numeric"
                   value={postalCode}
                   onChange={setPostalCode}
                   error={shippingErrors.postalCode}
@@ -484,15 +518,11 @@ export default function CheckoutPage() {
                   <ChevronLeft size={16} />
                   Return to Cart
                 </Link>
-                <GradientButton
-                  onClick={() => {
-                    if (validateShipping()) setStep(1);
-                  }}
-                >
+                <GradientButton type="submit">
                   Continue to Payment
                 </GradientButton>
               </div>
-            </div>
+            </form>
           )}
 
           {/* ── Step 2: Payment ───────────────────────── */}
@@ -776,6 +806,10 @@ function InputField({
   placeholder,
   type = 'text',
   colSpan,
+  id,
+  name,
+  autoComplete,
+  inputMode,
 }: {
   label: string;
   value: string;
@@ -784,15 +818,26 @@ function InputField({
   placeholder?: string;
   type?: string;
   colSpan?: 'full';
+  id?: string;
+  name?: string;
+  autoComplete?: string;
+  inputMode?: 'text' | 'email' | 'tel' | 'numeric' | 'decimal' | 'url' | 'search' | 'none';
 }) {
   return (
     <div className={colSpan === 'full' ? 'md:col-span-2' : ''}>
-      <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant"
+      >
         {label}
       </label>
       <div className="input-indicator relative">
         <input
+          id={id}
+          name={name}
           type={type}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -815,6 +860,9 @@ function SelectField({
   error,
   options,
   placeholder,
+  id,
+  name,
+  autoComplete,
 }: {
   label: string;
   value: string;
@@ -822,14 +870,23 @@ function SelectField({
   error?: string;
   options: { value: string; label: string }[];
   placeholder?: string;
+  id?: string;
+  name?: string;
+  autoComplete?: string;
 }) {
   return (
     <div>
-      <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant"
+      >
         {label}
       </label>
       <div className="input-indicator relative">
         <select
+          id={id}
+          name={name}
+          autoComplete={autoComplete}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={`w-full appearance-none bg-surface-container-highest border-none text-on-surface px-4 py-3 text-sm rounded-sm focus:outline-none ${
