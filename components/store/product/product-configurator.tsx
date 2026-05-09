@@ -141,7 +141,7 @@ export function ProductConfigurator({ variants, initialVariantId }: ProductConfi
   }
 
   return (
-    <div className="space-y-6 lg:space-y-10">
+    <div className="space-y-5 lg:space-y-6">
       {/* Color swatches */}
       {hasColors && (
         <div>

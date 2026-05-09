@@ -216,27 +216,38 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
         </div>
       </section>
 
-      {/* ── Section 2: Configurator + Add to Cart ───────────── */}
+      {/* ── Section 2: Gallery + Purchase Column ─────────────
+          Variant selectors (color/size) live inside the right-side
+          purchase column alongside name, price, quantity, and CTA so
+          the entire purchase decision sits in one tight card instead
+          of being split across two grid columns. */}
       <section className="bg-surface-container-low pt-6 pb-12 sm:py-24 px-4 sm:px-8 lg:px-12">
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          {/* Left: Gallery + Configurator */}
-          <div className="lg:col-span-7 space-y-8 lg:space-y-12">
+          {/* Left: Gallery */}
+          <div className="lg:col-span-7">
             {serializableImages.length > 0 && (
               <ImageGallery key={`${product.id}-gallery`} images={serializableImages} />
             )}
-            <ProductConfigurator key={`${product.id}-${initialVariantId ?? 'default'}-configurator`} variants={serializableVariants} initialVariantId={initialVariantId} />
           </div>
 
-          {/* Right: Add to Cart */}
+          {/* Right: Purchase column (name, price, selectors, CTA) */}
           <div className="lg:col-span-5">
-            <AddToCartPanel
-              key={`${product.id}-${initialVariantId ?? 'default'}-cart`}
-              productId={product.id}
-              productName={product.nameEn}
-              basePricePkr={product.basePricePkr}
-              variants={serializableVariants}
-              initialVariantId={initialVariantId}
-            />
+            <div className="sticky top-32 glass-panel p-5 sm:p-8 lg:p-10 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-outline-variant/10">
+              <AddToCartPanel
+                key={`${product.id}-${initialVariantId ?? 'default'}-cart`}
+                productId={product.id}
+                productName={product.nameEn}
+                basePricePkr={product.basePricePkr}
+                variants={serializableVariants}
+                initialVariantId={initialVariantId}
+              >
+                <ProductConfigurator
+                  key={`${product.id}-${initialVariantId ?? 'default'}-configurator`}
+                  variants={serializableVariants}
+                  initialVariantId={initialVariantId}
+                />
+              </AddToCartPanel>
+            </div>
           </div>
         </div>
       </section>

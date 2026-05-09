@@ -85,19 +85,26 @@ export function ImageGallery({ images }: ImageGalleryProps) {
     return () => observer.disconnect();
   }, [filteredImages]);
 
-  // Keep the active thumbnail centred in the strip.
-  // Uses strip.scrollTo() rather than scrollIntoView() so only the horizontal
-  // thumbnail container scrolls — never the page.
+  // Keep the active thumbnail centred in the strip. The strip is horizontal
+  // on mobile (overflow-x-auto) and vertical on desktop (lg:flex-col +
+  // overflow-y-auto). We compute both axes and pass both to scrollTo() —
+  // the browser scrolls along whichever axis the container actually
+  // overflows on. Page scroll is never affected because we call
+  // scrollTo() on the strip element directly.
   useEffect(() => {
     const strip = thumbRef.current;
     if (!strip) return;
     const activeThumb = strip.children[activeIndex] as HTMLElement | undefined;
     if (!activeThumb) return;
-    const centerOffset =
-      (activeThumb as HTMLElement).offsetLeft -
-      strip.clientWidth / 2 +
-      activeThumb.clientWidth / 2;
-    strip.scrollTo({ left: Math.max(0, centerOffset), behavior: 'smooth' });
+    const left =
+      activeThumb.offsetLeft - strip.clientWidth / 2 + activeThumb.clientWidth / 2;
+    const top =
+      activeThumb.offsetTop - strip.clientHeight / 2 + activeThumb.clientHeight / 2;
+    strip.scrollTo({
+      left: Math.max(0, left),
+      top: Math.max(0, top),
+      behavior: 'smooth',
+    });
   }, [activeIndex]);
 
   const scrollToSlide = useCallback((index: number) => {
@@ -115,11 +122,11 @@ export function ImageGallery({ images }: ImageGalleryProps) {
   }
 
   return (
-    <div>
-      {/* Main image carousel */}
+    <div className="lg:flex lg:gap-4 lg:items-start">
+      {/* Main image carousel — right of thumbs on desktop via lg:order-2 */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-lg bg-surface-container mb-4"
+        className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-lg bg-surface-container mb-4 lg:mb-0 lg:order-2 lg:flex-1 lg:min-w-0"
       >
         {filteredImages.map((img, index) => (
           <div
@@ -131,7 +138,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               src={img.url}
               alt={img.altText ?? 'Product image'}
               fill
-              sizes="(max-width: 1024px) 100vw, (max-width: 1440px) 58vw, 790px"
+              sizes="(max-width: 1024px) 100vw, (max-width: 1440px) 45vw, 620px"
               className="object-contain p-1 sm:p-2"
               priority={index === 0}
             />
@@ -139,9 +146,12 @@ export function ImageGallery({ images }: ImageGalleryProps) {
         ))}
       </div>
 
-      {/* Thumbnail strip */}
+      {/* Thumbnail strip — below on mobile, vertical on the left at lg+ */}
       {filteredImages.length > 1 && (
-        <div ref={thumbRef} className="flex gap-3 overflow-x-auto no-scrollbar">
+        <div
+          ref={thumbRef}
+          className="flex gap-3 overflow-x-auto no-scrollbar lg:order-1 lg:flex-shrink-0 lg:flex-col lg:gap-2 lg:w-20 lg:overflow-y-auto lg:overflow-x-visible lg:max-h-[var(--gallery-h,580px)]"
+        >
           {filteredImages.map((img, index) => (
             <button
               key={img.id}
