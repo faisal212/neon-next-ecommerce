@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Drop Next's polyfill-module from client bundles. Aliases the polyfill
+  // path to an empty module so Turbopack inlines `{}` instead of the
+  // ~10–15 KB backfill bundle. Targets modern browsers only — older
+  // Safari/Edge that need `Promise.withResolvers` etc. would break here.
+  turbopack: {
+    resolveAlias: {
+      "next/dist/build/polyfills/polyfill-module": path.resolve(
+        "./lib/empty.js",
+      ),
+    },
+  },
   images: {
     remotePatterns: [
       {

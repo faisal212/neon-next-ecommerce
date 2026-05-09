@@ -2,7 +2,7 @@ import { type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { updateInventorySchema } from '@/lib/validators/product.validators';
 import { getInventory, updateStock } from '@/lib/services/inventory.service';
-import { invalidateProductById } from '@/lib/cache/revalidate';
+import { invalidateVariantStock } from '@/lib/cache/revalidate';
 import { success } from '@/lib/utils/api-response';
 import { handleApiError } from '@/lib/errors/handler';
 
@@ -30,7 +30,9 @@ export async function PATCH(
     const body = await request.json();
     const data = updateInventorySchema.parse(body);
     const inv = await updateStock(id, data);
-    await invalidateProductById(id);
+    // `id` here is the variantId — the route is mounted under
+    // /admin/products/[id]/inventory but the inventory FK is variant-scoped.
+    await invalidateVariantStock([id]);
     return success(inv);
   } catch (error) {
     return handleApiError(error);

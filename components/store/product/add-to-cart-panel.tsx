@@ -26,6 +26,10 @@ interface AddToCartPanelProps {
   basePricePkr: string;
   variants: VariantData[];
   initialVariantId?: string | null;
+  // Variant selectors (color / size). Rendered between price and the
+  // stock indicator so the live selection is visible inside the same
+  // sticky purchase column instead of split across two grid columns.
+  children?: React.ReactNode;
 }
 
 export function AddToCartPanel({
@@ -34,6 +38,7 @@ export function AddToCartPanel({
   basePricePkr,
   variants,
   initialVariantId,
+  children,
 }: AddToCartPanelProps) {
   const { addItem, isPending } = useCart();
 
@@ -98,7 +103,7 @@ export function AddToCartPanel({
   const outOfStock = selectedVariant?.stock?.available === 0;
 
   return (
-    <div className="sticky top-32 glass-panel p-5 sm:p-8 lg:p-10 rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-outline-variant/10">
+    <>
       {/* Label */}
       <p className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium mb-2">
         Selected Configuration
@@ -117,21 +122,10 @@ export function AddToCartPanel({
         )}
       </div>
 
-      {/* Variant info */}
-      {selectedVariant && (
-        <div className="flex flex-wrap gap-3 mb-6 text-sm text-on-surface-variant">
-          {selectedVariant.color && (
-            <span className="px-3 py-1 rounded bg-surface-container-highest text-on-surface">
-              {selectedVariant.color}
-            </span>
-          )}
-          {selectedVariant.size && (
-            <span className="px-3 py-1 rounded bg-surface-container-highest text-on-surface">
-              {selectedVariant.size}
-            </span>
-          )}
-        </div>
-      )}
+      {/* Variant selectors — color swatches, size buttons. Rendered as
+          children rather than a fixed slot so the page can decide
+          which selectors to show without us hardcoding them here. */}
+      {children && <div className="mb-8">{children}</div>}
 
       {/* Stock indicator */}
       {selectedVariant?.stock && (
@@ -202,6 +196,6 @@ export function AddToCartPanel({
           <span className="text-xs text-on-surface-variant">2-Year Warranty</span>
         </div>
       </div>
-    </div>
+    </>
   );
 }
