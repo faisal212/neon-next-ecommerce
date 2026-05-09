@@ -102,6 +102,13 @@
     scrollbar-width: thin;
     scrollbar-color: #27272a #09090b;
   }
+  /* Tailwind v4's Preflight drops the default `cursor: pointer` on
+     <button>. Restore it for clickable elements; disabled buttons keep
+     the default cursor and any explicit `cursor-*` utility still wins. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 /* ── Scrollbar ─────────────────────────────────────────── */
