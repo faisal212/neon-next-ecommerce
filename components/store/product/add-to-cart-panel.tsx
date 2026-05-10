@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Truck, ShieldCheck } from 'lucide-react';
 import { useCart } from '@/lib/store/cart-context';
+import { storeFetch } from '@/lib/store/api';
 import { formatPKR } from '@/lib/store/format';
 import { QuantitySelector } from '@/components/store/quantity-selector';
 import { GradientButton } from '@/components/store/gradient-button';
@@ -17,11 +18,14 @@ interface VariantData {
   size: string | null;
   extraPricePkr: string | null;
   isActive: boolean;
-  stock: { onHand: number; reserved: number; available: number } | null;
 }
+
+type StockEntry = { onHand: number; reserved: number; available: number };
+type StockMap = Record<string, StockEntry>;
 
 interface AddToCartPanelProps {
   productId: string;
+  productSlug: string;
   productName: string;
   basePricePkr: string;
   variants: VariantData[];
@@ -34,13 +38,14 @@ interface AddToCartPanelProps {
 
 export function AddToCartPanel({
   productId,
+  productSlug,
   productName,
   basePricePkr,
   variants,
   initialVariantId,
   children,
 }: AddToCartPanelProps) {
-  const { addItem, isPending } = useCart();
+  const { addItem, isPending, items } = useCart();
 
   const activeVariants = variants.filter((v) => v.isActive);
   const hasOptions = activeVariants.some((v) => v.color || v.size);
@@ -54,6 +59,11 @@ export function AddToCartPanel({
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
 
+  // Live stock map, fetched after hydration so the cached page shell never
+  // carries volatile inventory numbers. Null = not yet loaded.
+  const [stockMap, setStockMap] = useState<StockMap | null>(null);
+  const cancelled = useRef(false);
+
   const selectedVariant = useMemo(
     () => activeVariants.find((v) => v.id === selectedVariantId) ?? null,
     [activeVariants, selectedVariantId],
@@ -66,10 +76,73 @@ export function AddToCartPanel({
     return base + extra;
   }, [basePricePkr, selectedVariant]);
 
-  // Max stock for selected variant
-  const maxStock = selectedVariant?.stock?.available ?? undefined;
-
+  const stockEntry = selectedVariantId ? stockMap?.[selectedVariantId] ?? null : null;
+  const stockLoaded = stockMap !== null;
+  // The user's existing quantity for this variant in their cart eats into
+  // their addable headroom — server-side cart-add validates the same way
+  // (cart.service.addItem: existingItem.quantity + input.quantity > available).
+  const cartQtyForVariant = useMemo(
+    () =>
+      selectedVariantId
+        ? items
+            .filter((i) => i.variantId === selectedVariantId)
+            .reduce((sum, i) => sum + i.quantity, 0)
+        : 0,
+    [items, selectedVariantId],
+  );
+  // userAddable = what server-side cart-add would allow (drives the button
+  //   gate and the QuantitySelector cap).
+  // remainingAfterPick = what would be left if the user committed the current
+  //   selector value (drives only the indicator — a live preview).
+  // We must not collapse these into one number: when the user picks the max
+  //   valid quantity, the indicator should preview "Out of Stock" but the
+  //   button must stay enabled so they can actually buy the last units.
+  const userAddable = stockEntry
+    ? Math.max(0, stockEntry.available - cartQtyForVariant)
+    : null;
+  const maxStock = userAddable ?? undefined;
+  const outOfStock = stockLoaded && stockEntry !== null && userAddable === 0;
   const needsSelection = hasOptions && !selectedVariantId;
+
+  // Clamp the chosen quantity if stock comes in lower than what the user typed.
+  useEffect(() => {
+    if (typeof maxStock === 'number' && maxStock > 0 && quantity > maxStock) {
+      setQuantity(maxStock);
+    }
+  }, [maxStock, quantity]);
+
+  // Fetch live stock after hydration via requestIdleCallback
+  useEffect(() => {
+    cancelled.current = false;
+
+    const run = async () => {
+      try {
+        const res = await storeFetch<{ data: StockMap }>(`/products/${productSlug}/stock`);
+        if (!cancelled.current) setStockMap(res.data ?? {});
+      } catch {
+        if (!cancelled.current) setStockMap({});
+      }
+    };
+
+    const ric = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (typeof ric.requestIdleCallback === 'function') {
+      idleId = ric.requestIdleCallback(run, { timeout: 1500 });
+    } else {
+      timeoutId = setTimeout(run, 200);
+    }
+
+    return () => {
+      cancelled.current = true;
+      if (idleId !== undefined) ric.cancelIdleCallback?.(idleId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+  }, [productSlug]);
 
   // Listen for configurator variant changes via custom event
   useEffect(() => {
@@ -100,8 +173,6 @@ export function AddToCartPanel({
     }
   };
 
-  const outOfStock = selectedVariant?.stock?.available === 0;
-
   return (
     <>
       {/* Label */}
@@ -127,16 +198,26 @@ export function AddToCartPanel({
           which selectors to show without us hardcoding them here. */}
       {children && <div className="mb-8">{children}</div>}
 
-      {/* Stock indicator */}
-      {selectedVariant?.stock && (
-        <div className="mb-6">
+      {/* Stock indicator. Stock is fetched live above; show a skeleton until
+          it lands so the cached page shell never carries inventory numbers. */}
+      <div className="mb-6 min-h-[1.25rem]">
+        {stockEntry ? (
           <StockIndicator
-            quantityOnHand={selectedVariant.stock.onHand}
-            quantityReserved={selectedVariant.stock.reserved}
+            quantityOnHand={stockEntry.onHand}
+            // Treat the user's cart quantity AND their currently-selected
+            // QuantitySelector value as additional reservation so the
+            // indicator previews what would remain after they commit this
+            // pick. The Add to Cart button is gated separately on userAddable.
+            quantityReserved={stockEntry.reserved + cartQtyForVariant + quantity}
             lowStockThreshold={5}
           />
-        </div>
-      )}
+        ) : !stockLoaded ? (
+          <span
+            aria-hidden
+            className="inline-block h-4 w-24 rounded bg-surface-container/60 animate-pulse"
+          />
+        ) : null}
+      </div>
 
       {/* Quantity */}
       <div className="mb-8">
@@ -152,7 +233,9 @@ export function AddToCartPanel({
         />
       </div>
 
-      {/* Add to Cart button */}
+      {/* Add to Cart button. Disabled until live stock has loaded so the user
+          can never queue a quantity that exceeds available inventory. Server
+          validates again in cart.service.addItem as the authoritative gate. */}
       {needsSelection ? (
         <button
           type="button"
@@ -178,10 +261,10 @@ export function AddToCartPanel({
       ) : (
         <GradientButton
           onClick={handleAddToCart}
-          disabled={isPending || isAdding}
+          disabled={isPending || isAdding || !stockLoaded}
           className="w-full"
         >
-          {isAdding || isPending ? 'Adding...' : 'Add to Cart'}
+          {!stockLoaded ? 'Checking stock…' : isAdding || isPending ? 'Adding...' : 'Add to Cart'}
         </GradientButton>
       )}
 

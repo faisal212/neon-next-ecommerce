@@ -41,12 +41,17 @@ export interface OrderConfirmationEmailProps {
   storeUrl?: string;
 }
 
-const EASYPAY_NUMBER = "0315 4267454";
-const EASYPAY_NAME = "Ahmed Bilal";
+const ADVANCE_AMOUNT = 250;
+const ACCOUNT_TITLE = "Ahmed Bilal";
+const EASYPAISA_NUMBER = "03154267454";
+const BANK_NAME = "Meezan Bank";
+const BANK_ACCOUNT = "51680020152431280016";
+const BANK_IBAN = "PK42ABPA0020152431280016";
+const WHATSAPP_DISPLAY = "03154267454";
 const WHATSAPP_URL = "https://wa.me/923154267454";
 
-function fmt(pkr: string): string {
-  const n = parseFloat(pkr);
+function fmt(pkr: string | number): string {
+  const n = typeof pkr === "number" ? pkr : parseFloat(pkr);
   return `Rs. ${n.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
 }
 
@@ -61,17 +66,16 @@ export function OrderConfirmationEmail({
   shippingAddress,
   storeUrl = "https://refine.pk",
 }: OrderConfirmationEmailProps) {
-  const hasShipping = parseFloat(shippingChargePkr) > 0;
+  const totalNum = parseFloat(totalPkr);
+  const codRemaining = Math.max(0, totalNum - ADVANCE_AMOUNT);
   const whatsappMessage = encodeURIComponent(
-    `Hi, I've sent Rs. ${shippingChargePkr} shipping fee for order #${orderNumber} via EasyPaisa. Here's the screenshot:`,
+    `Salam, order #${orderNumber} ke liye Rs. ${ADVANCE_AMOUNT} advance bhej diya hai. Screenshot attached.`,
   );
 
   return (
     <Html>
       <Head />
-      <Preview>
-        Order #{orderNumber} confirmed — complete payment to ship
-      </Preview>
+      <Preview>{`Order #${orderNumber} confirmed — Rs. ${ADVANCE_AMOUNT} advance required`}</Preview>
       <Tailwind>
         <Body className="bg-[#0e0e0e] font-sans">
           <Container className="mx-auto max-w-[600px] bg-[#1a1919] p-8">
@@ -81,10 +85,10 @@ export function OrderConfirmationEmail({
                 Refine
               </Text>
               <Heading className="mt-2 text-3xl font-black tracking-tight text-white">
-                Thank you, {customerName}!
+                Shukriya, {customerName}!
               </Heading>
               <Text className="text-[#adaaaa]">
-                Your order has been placed successfully.
+                Aap ka order place ho gaya hai.
               </Text>
             </Section>
 
@@ -98,60 +102,106 @@ export function OrderConfirmationEmail({
               </Text>
             </Section>
 
-            {/* EasyPaisa Payment Instructions */}
-            {hasShipping && (
-              <Section className="mt-6 rounded-lg border border-[#ff915c]/20 bg-[#0e0e0e] p-6">
-                <Heading className="m-0 text-lg font-black text-white">
-                  Complete Your Order
-                </Heading>
-                <Text className="text-sm text-[#adaaaa]">
-                  Send the shipping fee to confirm your order:
+            {/* Roman Urdu Advance Payment Block */}
+            <Section className="mt-6 rounded-lg border border-[#ff915c]/30 bg-[#0e0e0e] p-6">
+              {/* Warning band */}
+              <Section className="mb-5 rounded-lg border border-[#ff915c]/40 bg-[#ff915c]/10 p-4">
+                <Text className="m-0 text-sm font-bold leading-snug text-[#ff915c]">
+                  ⚠ Rs. {ADVANCE_AMOUNT} advance bhejne tak order ship nahi hoga
                 </Text>
-
-                <Section className="mt-4 rounded bg-[#1a1919] p-4">
-                  <Row>
-                    <Column>
-                      <Text className="m-0 text-xs text-[#adaaaa]">
-                        Send via EasyPaisa
-                      </Text>
-                      <Text className="m-0 mt-1 text-xl font-black text-white">
-                        {fmt(shippingChargePkr)}
-                      </Text>
-                    </Column>
-                  </Row>
-                  <Row className="mt-3">
-                    <Column>
-                      <Text className="m-0 text-xs text-[#adaaaa]">
-                        EasyPaisa Number
-                      </Text>
-                      <Text className="m-0 text-base font-bold text-white">
-                        {EASYPAY_NUMBER}
-                      </Text>
-                    </Column>
-                    <Column>
-                      <Text className="m-0 text-xs text-[#adaaaa]">
-                        Account Name
-                      </Text>
-                      <Text className="m-0 text-base font-bold text-white">
-                        {EASYPAY_NAME}
-                      </Text>
-                    </Column>
-                  </Row>
-                </Section>
-
-                <Text className="mt-4 text-sm text-[#adaaaa]">
-                  After payment, send the screenshot to the same number on
-                  WhatsApp. Your order ships within 24 hours of verification.
-                </Text>
-
-                <Button
-                  href={`${WHATSAPP_URL}?text=${whatsappMessage}`}
-                  className="mt-4 block rounded-lg bg-[#25D366] px-6 py-3 text-center text-sm font-bold uppercase tracking-wider text-white"
-                >
-                  Send Screenshot on WhatsApp
-                </Button>
               </Section>
-            )}
+
+              {/* Big amount card */}
+              <Section className="mb-5 rounded-lg bg-[#1a1919] p-5 text-center">
+                <Text className="m-0 text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
+                  Advance Payment Required
+                </Text>
+                <Text className="mx-0 mt-2 mb-0 text-4xl font-black tracking-tight text-[#ff915c]">
+                  RS {ADVANCE_AMOUNT}
+                </Text>
+                <Text className="mx-0 mt-3 mb-0 text-sm leading-relaxed text-[#adaaaa]">
+                  Yeh amount total bill se minus kar di jayegi ✅
+                </Text>
+                {totalNum > 0 && (
+                  <Text className="m-0 text-sm leading-relaxed text-[#adaaaa]">
+                    Baaki <strong className="text-white">{fmt(codRemaining)}</strong> delivery ke time (COD) pay karna hoga
+                  </Text>
+                )}
+              </Section>
+
+              {/* Easypaisa / NayaPay */}
+              <Section className="mb-3 rounded-lg border border-[#262626] bg-[#1a1919] p-4">
+                <Text className="m-0 text-sm font-bold text-white">
+                  📱 Easypaisa / NayaPay
+                </Text>
+                <Row className="mt-3">
+                  <Column>
+                    <Text className="m-0 text-[10px] uppercase tracking-[0.2em] text-[#adaaaa]">
+                      Account Title
+                    </Text>
+                    <Text className="m-0 text-sm font-bold text-white">
+                      {ACCOUNT_TITLE}
+                    </Text>
+                  </Column>
+                  <Column>
+                    <Text className="m-0 text-[10px] uppercase tracking-[0.2em] text-[#adaaaa]">
+                      Number
+                    </Text>
+                    <Text className="m-0 text-sm font-bold text-white">
+                      {EASYPAISA_NUMBER}
+                    </Text>
+                  </Column>
+                </Row>
+              </Section>
+
+              {/* Meezan Bank */}
+              <Section className="mb-5 rounded-lg border border-[#262626] bg-[#1a1919] p-4">
+                <Text className="m-0 text-sm font-bold text-white">
+                  🏦 {BANK_NAME}
+                </Text>
+                <Row className="mt-3">
+                  <Column>
+                    <Text className="m-0 text-[10px] uppercase tracking-[0.2em] text-[#adaaaa]">
+                      Account Title
+                    </Text>
+                    <Text className="m-0 text-sm font-bold text-white">
+                      {ACCOUNT_TITLE}
+                    </Text>
+                  </Column>
+                  <Column>
+                    <Text className="m-0 text-[10px] uppercase tracking-[0.2em] text-[#adaaaa]">
+                      Account No
+                    </Text>
+                    <Text className="m-0 text-sm font-bold text-white">
+                      {BANK_ACCOUNT}
+                    </Text>
+                  </Column>
+                </Row>
+                <Row className="mt-3">
+                  <Column>
+                    <Text className="m-0 text-[10px] uppercase tracking-[0.2em] text-[#adaaaa]">
+                      IBAN
+                    </Text>
+                    <Text className="m-0 text-sm font-bold text-white">
+                      {BANK_IBAN}
+                    </Text>
+                  </Column>
+                </Row>
+              </Section>
+
+              {/* Screenshot directive */}
+              <Text className="text-sm leading-relaxed text-[#adaaaa]">
+                📸 Payment ke baad screenshot WhatsApp par send kar dein:{" "}
+                <strong className="text-white">{WHATSAPP_DISPLAY}</strong>
+              </Text>
+
+              <Button
+                href={`${WHATSAPP_URL}?text=${whatsappMessage}`}
+                className="mt-2 block rounded-lg bg-[#25D366] px-6 py-3 text-center text-sm font-bold uppercase tracking-wider text-white"
+              >
+                WhatsApp Par Screenshot Bhejein
+              </Button>
+            </Section>
 
             {/* Items */}
             <Section className="mt-6">
@@ -226,12 +276,36 @@ export function OrderConfirmationEmail({
               <Row>
                 <Column>
                   <Text className="m-0 text-base font-black text-white">
-                    Total (Cash on Delivery)
+                    Total
                   </Text>
                 </Column>
                 <Column align="right">
                   <Text className="m-0 text-base font-black text-white">
                     {fmt(totalPkr)}
+                  </Text>
+                </Column>
+              </Row>
+              <Row className="mt-3">
+                <Column>
+                  <Text className="m-0 text-xs font-bold uppercase tracking-[0.2em] text-[#ff915c]">
+                    Advance (abhi)
+                  </Text>
+                </Column>
+                <Column align="right">
+                  <Text className="m-0 text-sm font-bold text-[#ff915c]">
+                    {fmt(ADVANCE_AMOUNT)}
+                  </Text>
+                </Column>
+              </Row>
+              <Row className="mt-2">
+                <Column>
+                  <Text className="m-0 text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
+                    COD (delivery par)
+                  </Text>
+                </Column>
+                <Column align="right">
+                  <Text className="m-0 text-sm font-bold text-[#adaaaa]">
+                    {fmt(codRemaining)}
                   </Text>
                 </Column>
               </Row>
@@ -260,7 +334,7 @@ export function OrderConfirmationEmail({
             <Section>
               <Text className="text-xs text-[#adaaaa]">
                 Questions? Reply to this email or message us on WhatsApp at{" "}
-                {EASYPAY_NUMBER}.
+                {WHATSAPP_DISPLAY}.
               </Text>
               <Text className="text-xs text-[#adaaaa]">
                 <Link href={storeUrl} className="text-[#ff915c] no-underline">

@@ -115,7 +115,7 @@ export async function sendOrderConfirmation(orderNumber: string): Promise<void> 
     await resend.emails.send({
       from: EMAIL_FROM,
       to: customerEmail,
-      subject: `Order #${order.orderNumber} confirmed — complete payment to ship`,
+      subject: `Order #${order.orderNumber} confirmed — Rs. 250 advance required`,
       react: OrderConfirmationEmail({
         customerName: firstName,
         orderNumber: order.orderNumber,

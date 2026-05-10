@@ -252,7 +252,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
         <div className="mb-4">
           <label className="mb-1.5 flex items-baseline justify-between text-xs font-medium text-muted-foreground">
             <span>Short Description (English)</span>
-            <span className={form.shortDescriptionEn.length > 250 ? "text-destructive" : "text-muted-foreground/60"}>
+            <span className={form.shortDescriptionEn.length > 300 ? "text-destructive" : "text-muted-foreground/60"}>
               {form.shortDescriptionEn.length}/250
             </span>
           </label>
@@ -265,7 +265,7 @@ export function ProductForm({ categories, variants = [], initialData }: ProductF
             className={`${inputClass} resize-vertical`}
           />
           <p className="mt-1.5 text-[11px] text-muted-foreground">
-            Plain text, max 250 characters. Leave blank to fall back to the first paragraph of the description below.
+            Plain text, max 300 characters. Leave blank to fall back to the first paragraph of the description below.
           </p>
         </div>
 

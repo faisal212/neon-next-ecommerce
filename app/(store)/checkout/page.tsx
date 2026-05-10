@@ -14,6 +14,10 @@ import {
   ChevronLeft,
   Loader2,
   AlertCircle,
+  AlertTriangle,
+  Smartphone,
+  Building2,
+  Camera,
 } from 'lucide-react';
 
 import { useCart } from '@/lib/store/cart-context';
@@ -22,7 +26,17 @@ import { formatPKR } from '@/lib/store/format';
 import { trackBeginCheckout, trackPurchase } from '@/components/store/analytics';
 import { GradientButton } from '@/components/store/gradient-button';
 import { authClient } from '@/lib/auth/client';
+import { CopyButton } from './confirmation/_components/copy-button';
 import type { CartItemData } from '@/lib/store/types';
+
+/* ── Payment constants ────────────────────────────────────── */
+const ADVANCE_AMOUNT = 250;
+const ACCOUNT_TITLE = 'Ahmed Bilal';
+const EASYPAISA_NUMBER = '03154267454';
+const BANK_NAME = 'Meezan Bank';
+const BANK_ACCOUNT = '51680020152431280016';
+const BANK_IBAN = 'PK42ABPA0020152431280016';
+const WHATSAPP_DISPLAY = '03154267454';
 
 /* ── Types ────────────────────────────────────────────────── */
 
@@ -76,7 +90,7 @@ function getVariantLabel(item: CartItemData): string | null {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, itemCount } = useCart();
+  const { items, subtotal, itemCount, clearCart } = useCart();
   const { data: session } = authClient.useSession();
 
   /* Step management */
@@ -245,13 +259,14 @@ export default function CheckoutPage() {
           },
         }
       );
+      clearCart();
       trackPurchase({
         orderNumber: res.data.orderNumber,
         total,
         shipping: shippingCost,
       });
       router.push(
-        `/checkout/confirmation?order=${encodeURIComponent(res.data.orderNumber)}&shipping=${shippingCost}`
+        `/checkout/confirmation?order=${encodeURIComponent(res.data.orderNumber)}&shipping=${shippingCost}&total=${total}`
       );
     } catch (err) {
       setOrderError(
@@ -275,6 +290,7 @@ export default function CheckoutPage() {
     paymentMethod,
     appliedCoupon,
     router,
+    clearCart,
   ]);
 
   /* ── Track checkout start ────────────────────────────── */
@@ -544,13 +560,13 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <span className="text-sm font-bold">Cash on Delivery</span>
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-widest mt-0.5">
-                        Pay when your order arrives
+                      <p className="text-[11px] text-on-surface-variant mt-0.5">
+                        Rs. {ADVANCE_AMOUNT} advance + baaki delivery par
                       </p>
                     </div>
                   </div>
                   <span className="rounded bg-surface-container-highest px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    Pay on Delivery
+                    Advance + COD
                   </span>
                 </label>
 
@@ -688,20 +704,64 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* EasyPaisa shipping notice */}
-              {shippingCost > 0 && (
-                <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
-                  <AlertCircle size={18} className="mt-0.5 flex-shrink-0 text-primary" />
-                  <div>
-                    <p className="font-bold text-primary">Shipping fee via EasyPaisa</p>
-                    <p className="mt-1 text-on-surface-variant">
-                      After placing your order, send <strong className="text-on-surface">{formatPKR(shippingCost)}</strong> to{' '}
-                      <strong className="text-on-surface">0315 4267454</strong> (Ahmed Bilal) via EasyPaisa,
-                      then share the screenshot on WhatsApp to the same number. Your order ships after confirmation.
-                    </p>
+              {/* ── Roman Urdu Advance Payment Block ─────────── */}
+              <div className="space-y-5 rounded-xl border border-primary/30 bg-surface-container p-5 sm:p-6">
+                {/* Warning band */}
+                <div className="flex items-start gap-3 rounded-lg border-l-4 border-primary bg-surface-container-highest p-4">
+                  <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-primary" />
+                  <p className="text-sm font-semibold text-on-surface leading-snug">
+                    Rs. {ADVANCE_AMOUNT} advance bhejne tak order ship nahi hoga
+                  </p>
+                </div>
+
+                {/* Big amount card */}
+                <div className="rounded-lg bg-surface-container-low p-5 text-center">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+                    Advance Payment Required
+                  </p>
+                  <p className="text-4xl font-black tracking-tighter text-primary">
+                    RS {ADVANCE_AMOUNT}
+                  </p>
+                  <p className="mt-3 text-base text-on-surface/90 leading-relaxed">
+                    Yeh amount total bill se minus kar di jayegi <span aria-hidden>✅</span>
+                    <br />
+                    Baaki <strong className="text-on-surface">{formatPKR(Math.max(0, total - ADVANCE_AMOUNT))}</strong> delivery ke time (COD) pay karna hoga
+                  </p>
+                </div>
+
+                {/* Two payment channels */}
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  {/* Easypaisa / NayaPay */}
+                  <div className="space-y-3 rounded-lg border border-outline-variant/15 bg-surface-container-low p-4">
+                    <div className="flex items-center gap-2">
+                      <Smartphone size={14} className="text-primary" />
+                      <h4 className="text-sm font-bold">Easypaisa / NayaPay</h4>
+                    </div>
+                    <PaymentRow label="Account Title" value={ACCOUNT_TITLE} />
+                    <PaymentRow label="Number" value={EASYPAISA_NUMBER} copyable />
+                  </div>
+
+                  {/* Meezan Bank */}
+                  <div className="space-y-3 rounded-lg border border-outline-variant/15 bg-surface-container-low p-4">
+                    <div className="flex items-center gap-2">
+                      <Building2 size={14} className="text-primary" />
+                      <h4 className="text-sm font-bold">{BANK_NAME}</h4>
+                    </div>
+                    <PaymentRow label="Account Title" value={ACCOUNT_TITLE} />
+                    <PaymentRow label="Account No" value={BANK_ACCOUNT} copyable />
+                    <PaymentRow label="IBAN" value={BANK_IBAN} copyable />
                   </div>
                 </div>
-              )}
+
+                {/* Screenshot directive */}
+                <div className="flex items-start gap-3 rounded-lg border-l-4 border-[#25D366] bg-surface-container-highest p-4">
+                  <Camera size={20} className="mt-0.5 flex-shrink-0 text-[#25D366]" />
+                  <p className="text-base text-on-surface/90 leading-relaxed">
+                    Payment ke baad screenshot WhatsApp par send kar dein:{' '}
+                    <strong className="font-mono text-on-surface">{WHATSAPP_DISPLAY}</strong>
+                  </p>
+                </div>
+              </div>
 
               {/* Order error */}
               {orderError && (
@@ -712,7 +772,7 @@ export default function CheckoutPage() {
               )}
 
               {/* Navigation */}
-              <div className="flex items-center justify-between pt-4">
+              <div className="flex flex-col items-stretch gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
@@ -721,20 +781,25 @@ export default function CheckoutPage() {
                   <ChevronLeft size={16} />
                   Back to Payment
                 </button>
-                <GradientButton
-                  onClick={placeOrder}
-                  disabled={orderLoading}
-                  className={orderLoading ? 'opacity-70 pointer-events-none' : ''}
-                >
-                  {orderLoading ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 size={16} className="animate-spin" />
-                      Placing Order...
-                    </span>
-                  ) : (
-                    'Place Order'
-                  )}
-                </GradientButton>
+                <div className="flex flex-col items-end gap-1.5">
+                  <GradientButton
+                    onClick={placeOrder}
+                    disabled={orderLoading}
+                    className={orderLoading ? 'opacity-70 pointer-events-none' : ''}
+                  >
+                    {orderLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 size={16} className="animate-spin" />
+                        Placing Order...
+                      </span>
+                    ) : (
+                      'Place Order'
+                    )}
+                  </GradientButton>
+                  <p className="text-[10px] text-on-surface-variant text-right">
+                    Order place karne ke baad Rs. {ADVANCE_AMOUNT} advance pay karna hoga
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -780,6 +845,26 @@ export default function CheckoutPage() {
                   Total
                 </span>
                 <span className="text-lg font-black">{formatPKR(total)}</span>
+              </div>
+
+              {/* Roman Urdu advance / COD split */}
+              <div className="space-y-2 border-t border-outline-variant/10 pt-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-primary">
+                    Advance (abhi)
+                  </span>
+                  <span className="text-base font-bold tabular-nums text-primary">
+                    {formatPKR(ADVANCE_AMOUNT)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+                    COD (delivery par)
+                  </span>
+                  <span className="text-base font-bold tabular-nums text-on-surface">
+                    {formatPKR(Math.max(0, total - ADVANCE_AMOUNT))}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1017,6 +1102,34 @@ function PriceLine({
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+function PaymentRow({
+  label,
+  value,
+  copyable,
+}: {
+  label: string;
+  value: string;
+  copyable?: boolean;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-2">
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+          {label}
+        </p>
+        <p className="mt-0.5 break-all font-mono text-base font-bold tracking-tight text-on-surface">
+          {value}
+        </p>
+      </div>
+      {copyable && (
+        <div className="flex-shrink-0">
+          <CopyButton text={value} label="Copy" />
+        </div>
+      )}
     </div>
   );
 }

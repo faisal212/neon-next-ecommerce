@@ -86,8 +86,8 @@ describe('Product Service (integration)', () => {
     const detail = await getProductBySlug(product.slug);
     expect(detail.id).toBe(product.id);
     expect(detail.variants).toHaveLength(1);
-    expect(detail.variants[0].stock).not.toBeNull();
-    expect(detail.variants[0].stock!.available).toBe(10);
+    // Stock is no longer joined into getProductBySlug — it's served by
+    // the dedicated /api/v1/products/[slug]/stock endpoint after hydration.
   });
 
   it('lists products with category filter', async () => {

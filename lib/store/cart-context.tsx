@@ -80,6 +80,7 @@ interface CartContextValue {
   closeCart: () => void;
   toggleCart: () => void;
   refreshCart: () => Promise<void>;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -179,6 +180,7 @@ export function CartProvider({
   const openCart = useCallback(() => dispatch({ type: 'OPEN_CART' }), []);
   const closeCart = useCallback(() => dispatch({ type: 'CLOSE_CART' }), []);
   const toggleCart = useCallback(() => dispatch({ type: 'TOGGLE_CART' }), []);
+  const clearCart = useCallback(() => dispatch({ type: 'SET_ITEMS', items: [] }), []);
 
   const value: CartContextValue = {
     items: state.items,
@@ -193,6 +195,7 @@ export function CartProvider({
     closeCart,
     toggleCart,
     refreshCart,
+    clearCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
