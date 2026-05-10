@@ -10,7 +10,7 @@ export async function StoreHeader() {
   const links = await getNavCategories();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-outline-variant/10 bg-[#0E0E0E]/80 shadow-[0_0_40px_rgba(255,103,0,0.04)] backdrop-blur-xl">
+    <header className="border-b border-outline-variant/10 bg-[#0E0E0E]/80 shadow-[0_0_40px_rgba(255,103,0,0.04)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-3 md:px-6">
         {/* Left: Brand + Mobile menu */}
         <div className="flex items-center gap-2">

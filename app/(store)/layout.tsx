@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { cacheLife, cacheTag } from "next/cache";
 import "./globals.css";
+import { AnnouncementBar } from "@/components/store/header/announcement-bar";
 import { StoreHeader } from "@/components/store/header/store-header";
 import { StoreFooter } from "@/components/store/footer/store-footer";
 import { CartProvider } from "@/lib/store/cart-context";
@@ -64,7 +65,10 @@ export default async function StoreLayout({
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-on-surface font-sans selection:bg-primary selection:text-on-primary-fixed">
         <CartProvider>
-          <StoreHeader />
+          <div className="sticky top-0 z-50">
+            <AnnouncementBar />
+            <StoreHeader />
+          </div>
           <main className="flex-1">{children}</main>
           <StoreFooter />
           <CartDrawer />
