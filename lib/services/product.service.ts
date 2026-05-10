@@ -274,26 +274,13 @@ export async function getProductBySlug(slug: string) {
       .limit(1),
   ]);
 
-  // Fetch inventory for all variants in one query
-  const variantIds = variants.map((v) => v.id);
-  const inventoryRows = variantIds.length > 0
-    ? await db.select().from(inventory).where(inArray(inventory.variantId, variantIds))
-    : [];
-  const inventoryMap = new Map(inventoryRows.map((inv) => [inv.variantId, inv]));
-
-  const variantsWithStock = variants.map((v) => {
-    const inv = inventoryMap.get(v.id);
-    return {
-      ...v,
-      stock: inv
-        ? { onHand: inv.quantityOnHand, reserved: inv.quantityReserved, available: inv.quantityOnHand - inv.quantityReserved }
-        : null,
-    };
-  });
+  // Stock is intentionally NOT joined here — it's volatile and is fetched
+  // separately by the client after hydration via /api/v1/products/[slug]/stock,
+  // so this query (and its `'use cache'` shell on the page) stays cacheable.
 
   return {
     ...product,
-    variants: variantsWithStock,
+    variants,
     images,
     tags: tags.map((t) => t.tag),
     seo: seo ?? null,

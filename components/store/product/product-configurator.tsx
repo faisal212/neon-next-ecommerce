@@ -11,7 +11,6 @@ interface VariantData {
   size: string | null;
   extraPricePkr: string | null;
   isActive: boolean;
-  stock: { onHand: number; reserved: number; available: number } | null;
 }
 
 interface ProductConfiguratorProps {

@@ -126,7 +126,9 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
 
   const specTags = product.tags.slice(0, 3);
 
-  // Serializable variant data for client components
+  // Serializable variant data for client components. Stock is intentionally
+  // omitted — it's fetched live by StockIndicatorClient after hydration so
+  // this cached page shell never carries stale inventory numbers.
   const serializableVariants = product.variants.map((v) => ({
     id: v.id,
     sku: v.sku,
@@ -134,7 +136,6 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
     size: v.size,
     extraPricePkr: v.extraPricePkr,
     isActive: v.isActive,
-    stock: v.stock,
   }));
 
   const serializableImages = product.images.map((img) => ({
@@ -236,6 +237,7 @@ export default async function ProductDetailPage({ params, searchParams }: PagePr
               <AddToCartPanel
                 key={`${product.id}-${initialVariantId ?? 'default'}-cart`}
                 productId={product.id}
+                productSlug={product.slug}
                 productName={product.nameEn}
                 basePricePkr={product.basePricePkr}
                 variants={serializableVariants}
