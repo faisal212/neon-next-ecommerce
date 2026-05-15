@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { render } from "@react-email/components";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
@@ -112,26 +113,33 @@ export async function sendOrderConfirmation(orderNumber: string): Promise<void> 
 
     const firstName = customerFirstName ?? address.firstName ?? "Customer";
 
+    const emailNode = OrderConfirmationEmail({
+      customerName: firstName,
+      orderNumber: order.orderNumber,
+      items,
+      subtotalPkr: order.subtotalPkr,
+      shippingChargePkr: order.shippingChargePkr,
+      discountPkr: order.discountPkr,
+      totalPkr: order.totalPkr,
+      shippingAddress: {
+        line1: address.addressLine1,
+        city: address.city,
+        province: address.province,
+        postalCode: address.postalCode,
+        phone: address.phonePk ?? "",
+      },
+    });
+    const [html, text] = await Promise.all([
+      render(emailNode),
+      render(emailNode, { plainText: true }),
+    ]);
+
     await resend.emails.send({
       from: EMAIL_FROM,
       to: customerEmail,
       subject: `Order #${order.orderNumber} confirmed — Rs. 250 advance required`,
-      react: OrderConfirmationEmail({
-        customerName: firstName,
-        orderNumber: order.orderNumber,
-        items,
-        subtotalPkr: order.subtotalPkr,
-        shippingChargePkr: order.shippingChargePkr,
-        discountPkr: order.discountPkr,
-        totalPkr: order.totalPkr,
-        shippingAddress: {
-          line1: address.addressLine1,
-          city: address.city,
-          province: address.province,
-          postalCode: address.postalCode,
-          phone: address.phonePk ?? "",
-        },
-      }),
+      html,
+      text,
     });
   } catch (err) {
     console.error(`[email] failed to send order confirmation for ${orderNumber}:`, err);
@@ -156,12 +164,18 @@ export async function sendContactNotification(input: {
   }
 
   try {
+    const emailNode = ContactNotificationEmail(input);
+    const [html, text] = await Promise.all([
+      render(emailNode),
+      render(emailNode, { plainText: true }),
+    ]);
     await resend.emails.send({
       from: EMAIL_FROM,
       to: CONTACT_INBOX,
       replyTo: `${input.name} <${input.email}>`,
       subject: `[Refine Contact] ${input.subject}`,
-      react: ContactNotificationEmail(input),
+      html,
+      text,
     });
     return { ok: true };
   } catch (err) {
